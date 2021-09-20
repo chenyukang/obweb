@@ -58,21 +58,21 @@
                 </div>
             </div>
 
-            <div class="form-group row">
-                <div class="col-md-6">
+            <div class="form-group row" style="margin-top: 20px">
+                <div class="col-md-4">
                     <input type="file" id="fileElem" class="visually-hidden" accept="image/*"
                         onchange="fileSelected(this)" />
                     <label for="fileElem" class="noselect">Pic</label>
-                    <img id="upload-pic" hidden="true" src="#" alt="uploaded" style="max-width:500px; max-height:500px;" />
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-success" id="submit-btn" type="submit" disabled>Submit</button>
                 </div>
             </div>
 
-
-
-
-            <div class="form-group submit-btn-container">
-                <button class="btn btn-success" id="submit-btn" type="submit" disabled>Submit</button>
+            <div class="form-group row" style="margin-top: 20px">            
+                <img id="upload-pic" hidden="true" src="#" alt="uploaded" style="max-width:250px; max-height:250px;" />
             </div>
+
         </form><br>
     </div>
     <div class="container">
