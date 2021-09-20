@@ -29,12 +29,13 @@ App.prototype.handleSubmit = function () {
         crossDomain: true,
         type: 'POST',
         datatype: 'json',
-        contentType: "Application/json",        
+        contentType: "Application/json",
         headers: {
             "Access-Control-Allow-Origin": "*",
         },
         data: data,
         success: function (response) {
+            $("#submit-btn").prop('disabled', false);
             console.log("finished ...");
         },
         error: function (err) {
@@ -50,12 +51,12 @@ App.prototype.checkFormValidity = function () {
 
 $(document).ready(function () {
     $('#submit-btn').on('click', function (event) {
+        $("#submit-btn").prop('disabled', true);
         event.preventDefault();
         app.handleSubmit();
     });
 
     $('#submit-btn').on('mouseover', function () {
-        console.log("mouseover");
         if (app.checkFormValidity()) {
             console.log("valid");
             $("#submit-btn").prop('disabled', false);

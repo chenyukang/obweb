@@ -15,6 +15,9 @@
         integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
     <link rel="stylesheet" href="/static/style/app.css">
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
     <script src="/static/js/app.js"></script>
 </head>
 
@@ -60,7 +63,7 @@
                         onchange="fileSelected(this)" />
                     <label for="fileElem" class="noselect">图片</label>
                     <button class="btn btn-warning" id="clear-btn" style="margin-left: 120px;" onclick="clear()">清空</button>
-                    <button class="btn btn-success" id="submit-btn" type="submit" disabled>提交</button>
+                    <button class="btn btn-success" id="submit-btn" type="submit" data-loading-text="<i class='fa fa-spinner fa-spin '></i> Sending" disabled>提交</button>
                 </div>
             </div>
 

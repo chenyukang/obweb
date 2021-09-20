@@ -16,7 +16,15 @@ pub struct Request {
     pub image: String,
 }
 
-pub fn git_commit() {
+pub fn git_sync() {
+    let child = Command::new("git")
+        .current_dir("./ob")
+        .args(&["pull", "--rebase"])
+        .spawn()
+        .expect("failed to execute child");
+    let output = child.wait_with_output().expect("failed to wait on child");
+    println!("{:?}", output);
+
     let child = Command::new("git")
         .current_dir("./ob")
         .args(&["add", "."])
@@ -70,7 +78,7 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
         write_content = format!("{}\n![[{} | #x-small ]]\n", write_content, image_name);
     }
     fs::write(&path, write_content).expect("Unable to write file");
-    git_commit();
+    git_sync();
     Ok(())
 }
 
