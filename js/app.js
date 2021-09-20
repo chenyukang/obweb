@@ -12,17 +12,20 @@ App.prototype.handleSubmit = function(){
     var content = {
       date: null,
       topic: null,
-      text: null
+      text: null,
+      image: null
     };
   
     content.date = new Date().toISOString();
-    console.log("date: ", content.date);
     content.topic = $('#topic').val();
     content.text = $('textarea').val();
-    
-    var data = $("#journal-entry").serialize();
+    var elem = document.getElementById("upload-pic");
+    content.image = elem.src;
+
+    var data = JSON.stringify(content);
+    console.log(data);
     $.ajax({
-      'url': '/entry',
+      'url': this.server,
       'datatype': 'json',
       'type': 'POST',
       'data': data,
@@ -57,6 +60,32 @@ $(document).ready(function () {
         }
     });
 });
+
+var image;
+
+function fileSelected(e) {
+    const file = e.files[0];
+    if (!file) {
+        return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+        alert('Please select a image.');
+        return;
+    }
+
+    const img = document.createElement('img-tag');
+    img.file = file
+    image = img;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        var elem = document.getElementById("upload-pic");
+        elem.src = e.target.result;
+        elem.hidden = false;        
+    }
+    reader.readAsDataURL(file);
+}
 
 console.log("loaded");
 var app = new App('http://127.0.0.1:8081/');
