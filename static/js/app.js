@@ -16,7 +16,11 @@ App.prototype.handleSubmit = function () {
     content.topic = $('#topic').val();
     content.text = $('textarea').val();
     var elem = document.getElementById("upload-pic");
-    content.image = elem.src;
+    if (elem.src.indexOf("data:image") === 0) {
+        content.image = elem.src;
+    } else {
+        content.image = null;
+    }
 
     var data = JSON.stringify(content);
     console.log(data);
