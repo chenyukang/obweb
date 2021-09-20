@@ -1,17 +1,17 @@
 
-var App = function(server){
+var App = function (server) {
     this.server = server;
     this.entries = [];
 };
 
-App.prototype.handleSubmit = function(){
+App.prototype.handleSubmit = function () {
     var content = {
-      date: null,
-      topic: null,
-      text: null,
-      image: null
+        date: null,
+        topic: null,
+        text: null,
+        image: null
     };
-  
+
     content.date = new Date().toISOString();
     content.topic = $('#topic').val();
     content.text = $('textarea').val();
@@ -21,25 +21,30 @@ App.prototype.handleSubmit = function(){
     var data = JSON.stringify(content);
     console.log(data);
     $.ajax({
-      'url': this.server,
-      'datatype': 'json',
-      'type': 'POST',
-      'data': data,
-      'success': function(){
-        app.appendEntry();
-      },
-      'error': function(err){
-        console.log("There was an error saving the entry: ", err);
-      }
+        url: this.server + "api/entry",
+        crossDomain: true,
+        type: 'POST',
+        datatype: 'json',
+        contentType: "Application/json",        
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+        },
+        data: data,
+        success: function (response) {
+            console.log("finished ...");
+        },
+        error: function (err) {
+            console.log("There was an error saving the entry: ", err);
+        }
     });
 };
 
-App.prototype.checkFormValidity = function(){
+App.prototype.checkFormValidity = function () {
     var form = document.getElementById('journal-entry');
     return form.checkValidity();
-  };
-  
-$(document).ready(function () {        
+};
+
+$(document).ready(function () {
     $('#submit-btn').on('click', function (event) {
         event.preventDefault();
         app.handleSubmit();
@@ -78,7 +83,7 @@ function fileSelected(e) {
     reader.onload = function (e) {
         var elem = document.getElementById("upload-pic");
         elem.src = e.target.result;
-        elem.hidden = false;        
+        elem.hidden = false;
     }
     reader.readAsDataURL(file);
 }
@@ -88,7 +93,7 @@ function enableBtn() {
     $("#submit-btn").prop('disabled', false);
 }
 
-function clear() {        
+function clear() {
     var elem = document.getElementById("upload-pic");
     elem.src = "";
     elem.hidden = true;
@@ -103,5 +108,5 @@ function clear() {
 }
 
 console.log("loaded");
-var app = new App('http://127.0.0.1:8081/');
+var app = new App('http://localhost:9004/');
 
