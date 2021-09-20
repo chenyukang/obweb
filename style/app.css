@@ -1,0 +1,11 @@
+.remove-icon {
+    float: right;
+    color: #CC0700;
+    cursor: pointer;
+  }
+  
+  .submit-btn-container {
+    width: 9.2em;
+    height: 4.25em;
+    padding-top: 0.9em;
+  }
