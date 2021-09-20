@@ -39,13 +39,13 @@ App.prototype.checkFormValidity = function(){
     return form.checkValidity();
   };
   
-$(document).ready(function () {    
+$(document).ready(function () {        
     $('#submit-btn').on('click', function (event) {
         event.preventDefault();
         app.handleSubmit();
     });
 
-    $('div.submit-btn-container').on('mouseover', function () {
+    $('#submit-btn').on('mouseover', function () {
         console.log("mouseover");
         if (app.checkFormValidity()) {
             console.log("valid");
@@ -81,6 +81,11 @@ function fileSelected(e) {
         elem.hidden = false;        
     }
     reader.readAsDataURL(file);
+}
+
+function enableBtn() {
+    console.log("enable button...");
+    $("#submit-btn").prop('disabled', false);
 }
 
 function clear() {    
