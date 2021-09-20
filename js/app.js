@@ -88,11 +88,9 @@ function enableBtn() {
     $("#submit-btn").prop('disabled', false);
 }
 
-function clear() {    
-    alert("now");
-    console.log("now");
+function clear() {        
     var elem = document.getElementById("upload-pic");
-    elem.src = "#";
+    elem.src = "";
     elem.hidden = true;
 
     var form = document.getElementById('journal-entry');
