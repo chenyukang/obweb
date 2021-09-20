@@ -1,10 +1,9 @@
-
-var App = function (server) {
+var App = function(server) {
     this.server = server;
     this.entries = [];
 };
 
-App.prototype.handleSubmit = function () {
+App.prototype.handleSubmit = function() {
     var content = {
         date: null,
         topic: null,
@@ -19,7 +18,7 @@ App.prototype.handleSubmit = function () {
     if (elem.src.indexOf("data:image") === 0) {
         content.image = elem.src;
     } else {
-        content.image = null;
+        content.image = "";
     }
 
     var data = JSON.stringify(content);
@@ -34,29 +33,29 @@ App.prototype.handleSubmit = function () {
             "Access-Control-Allow-Origin": "*",
         },
         data: data,
-        success: function (response) {
+        success: function(response) {
             $("#submit-btn").prop('disabled', false);
             console.log("finished ...");
         },
-        error: function (err) {
+        error: function(err) {
             console.log("There was an error saving the entry: ", err);
         }
     });
 };
 
-App.prototype.checkFormValidity = function () {
+App.prototype.checkFormValidity = function() {
     var form = document.getElementById('journal-entry');
     return form.checkValidity();
 };
 
-$(document).ready(function () {
-    $('#submit-btn').on('click', function (event) {
+$(document).ready(function() {
+    $('#submit-btn').on('click', function(event) {
         $("#submit-btn").prop('disabled', true);
         event.preventDefault();
         app.handleSubmit();
     });
 
-    $('#submit-btn').on('mouseover', function () {
+    $('#submit-btn').on('mouseover', function() {
         if (app.checkFormValidity()) {
             console.log("valid");
             $("#submit-btn").prop('disabled', false);
@@ -85,7 +84,7 @@ function fileSelected(e) {
     image = img;
 
     const reader = new FileReader();
-    reader.onload = function (e) {
+    reader.onload = function(e) {
         var elem = document.getElementById("upload-pic");
         elem.src = e.target.result;
         elem.hidden = false;
@@ -114,4 +113,3 @@ function clear() {
 
 console.log("loaded");
 var app = new App('http://23.100.38.125:8005/');
-
