@@ -1,7 +1,3 @@
-console.log("loading....xxx");
-
-console.log("loaded");
-
 
 var App = function(server){
     this.server = server;
@@ -85,6 +81,22 @@ function fileSelected(e) {
         elem.hidden = false;        
     }
     reader.readAsDataURL(file);
+}
+
+function clear() {    
+    alert("now");
+    console.log("now");
+    var elem = document.getElementById("upload-pic");
+    elem.src = "#";
+    elem.hidden = true;
+
+    var form = document.getElementById('journal-entry');
+    form.clear();
+
+    var topic = document.getElementById('topic');
+    console.log(topic.value);
+    topic.value = "";
+    console.log(topic.value);
 }
 
 console.log("loaded");
