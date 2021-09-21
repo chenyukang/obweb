@@ -57,41 +57,45 @@ pub fn git_sync() {
 
 fn process_request(req: &Request) -> Result<(), &'static str> {
     git_pull();
-    let date_str = req.date.to_string();    
+    let date_str = req.date.to_string();
     let parsed_date = DateTime::parse_from_rfc3339(&date_str).unwrap();
-    let parsed_date = parsed_date.with_timezone(&FixedOffset::east(8*3600));    
+    let parsed_date = parsed_date.with_timezone(&FixedOffset::east(8*3600));
     let date = parsed_date.format("%Y-%m-%d").to_string();
-    let time = parsed_date.format("%H:%M:%S").to_string();    
+    let time = parsed_date.format("%H:%M:%S").to_string();
+    println!("date time: {:?}", date);
     let path = format!("./ob/Daily/{}.md", date);
     if !Path::new(&path).exists() {
         File::create(&path).unwrap();
     }
-    let data = fs::read_to_string(&path).expect("Unable to read file");
+    let mut data = fs::read_to_string(&path).expect("Unable to read file");
+    if data.len() == 0 {
+        data = format!("##{}", date);
+    }
     let text = req.text.to_string();
     let mut write_content = data + "\n\n---";
     write_content += format!("\nTime: {}", time).as_str();
-    if req.links.len() > 0 { 
+    if req.links.len() > 0 {
         let links = req.links.to_string();
         let links_vec: Vec<&str> = links.split(",").collect();
         let mut links_text = String::new();
         for link in links_vec {
-            if links_text.len() > 0 { 
+            if links_text.len() > 0 {
                 links_text += " ";
             }
-            links_text += format!("[[{}]]", link).as_str();            
+            links_text += format!("[[{}]]", link).as_str();
         }
         write_content = format!("{}\nLinks: {}", write_content, links_text);
     }
 
-    if req.tags.len() > 0 { 
+    if req.tags.len() > 0 {
         let tags = req.tags.to_string();
         let tags_vec: Vec<&str> = tags.split(",").collect();
         let mut tags_text = String::new();
         for link in tags_vec {
-            if tags_text.len() > 0 { 
+            if tags_text.len() > 0 {
                 tags_text += " ";
             }
-            tags_text += format!("#{}", link).as_str();            
+            tags_text += format!("#{}", link).as_str();
         }
         write_content = format!("{}\nTags: {}", write_content, tags_text);
     }
@@ -108,7 +112,6 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
         //println!("image buf:\n {:?}", image_buf);
         write_content = format!("{}\n![[{} | #x-small]]\n", write_content, image_name);
     }
-   
 
     fs::write(&path, write_content).expect("Unable to write file");
     git_sync();
