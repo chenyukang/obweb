@@ -102,9 +102,7 @@ function clear() {
     elem.src = "";
     elem.hidden = true;
 
-    var form = document.getElementById('journal-entry');
-    form.clear();
-
+    $('textarea').val('');
     var topic = document.getElementById('topic');
     console.log(topic.value);
     topic.value = "";

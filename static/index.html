@@ -11,8 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap-theme.min.css">
     <script src="/static/js/bootstrap-tagsinput.js"></script>
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css"
-        integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
     <link rel="stylesheet" href="/static/style/app.css">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -25,8 +24,7 @@
     <nav class="navbar navbar-inverse">
         <div class="container">
             <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
                     <span class="sr-only">Menu</span>
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
@@ -47,7 +45,7 @@
             <div class="form-group row">
                 <div class="col-md-8">
                     <label for="entrytext"></label><br>
-                    <textarea name="entrytext" rows="8" class="form-control" id="entrytext" required onchange="enableBtn()"></textarea>
+                    <textarea name="entrytext" rows="8" class="form-control" id="entrytext" onchange="enableBtn()"></textarea>
                 </div>
             </div>
             <div class="form-group row">
@@ -59,8 +57,7 @@
 
             <div class="form-group row" style="margin-top: 20px">
                 <div class="col-md-8">
-                    <input type="file" id="fileElem" class="visually-hidden" accept="image/*"
-                        onchange="fileSelected(this)" />
+                    <input type="file" id="fileElem" class="visually-hidden" accept="image/*" onchange="fileSelected(this)" />
                     <label for="fileElem" class="noselect">图片</label>
                     <button class="btn btn-warning" id="clear-btn" style="margin-left: 120px;" onclick="clear()">清空</button>
                     <button class="btn btn-success" id="submit-btn" type="submit" data-loading-text="<i class='fa fa-spinner fa-spin '></i> Sending" disabled>提交</button>
@@ -70,12 +67,13 @@
             <div class="row" style="margin-top: 20px">
                 <div class="col-md-2"></div>
                 <div class="col-md-4">
-                <img id="upload-pic" hidden="true" src="" style="display: block; margin-left: auto; margin-right: auto;max-width:250px; max-height:250px;" />
+                    <img id="upload-pic" hidden="true" src="" style="display: block; margin-left: auto; margin-right: auto;max-width:250px; max-height:250px;" />
                 </div>
                 <div class="col-md-2"></div>
             </div>
 
-        </form><br>
+        </form>
+        <br>
     </div>
     <div class="container">
     </div>
