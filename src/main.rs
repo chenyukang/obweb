@@ -73,7 +73,7 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
     }
     let text = req.text.to_string();
     let mut write_content = data + "\n\n---";
-    write_content += format!("\nTime: {}", time).as_str();
+    write_content += format!("\n### {}", time).as_str();
     if req.links.len() > 0 {
         let links = req.links.to_string();
         let links_vec: Vec<&str> = links.split(",").collect();
