@@ -7,13 +7,15 @@ var App = function (server) {
 App.prototype.handleSubmit = function () {
     var content = {
         date: null,
-        topic: null,
+        tags: null,
+        links: null,
         text: null,
         image: null
     };
 
     content.date = new Date().toISOString();
-    content.topic = $('#topic').val();
+    content.tags = $('#tags').val();
+    content.links = $('#links').val();
     content.text = $('textarea').val();
     var elem = document.getElementById("upload-pic");
     if (elem.src.indexOf("data:image") === 0) {
@@ -106,10 +108,10 @@ function clear() {
     var form = document.getElementById('journal-entry');
     form.clear();
 
-    var topic = document.getElementById('topic');
-    console.log(topic.value);
-    topic.value = "";
-    console.log(topic.value);
+    var tags = document.getElementById('tags');
+    console.log(tags.value);
+    tags.value = "";
+    console.log(tags.value);
 }
 
 console.log("loaded");
