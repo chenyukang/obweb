@@ -111,7 +111,7 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
    
 
     fs::write(&path, write_content).expect("Unable to write file");
-    //git_sync();
+    git_sync();
     Ok(())
 }
 
