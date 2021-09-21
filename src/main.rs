@@ -84,7 +84,7 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
         write_content = format!("{}\n![[{} | #x-small]]\n", write_content, image_name);
     }
     fs::write(&path, write_content).expect("Unable to write file");
-    git_sync();
+    //git_sync();
     Ok(())
 }
 
