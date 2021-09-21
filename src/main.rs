@@ -8,6 +8,8 @@ use std::path::Path;
 use std::fs;
 use std::fs::File;
 use base64::decode;
+use chrono::prelude::*;
+
 #[derive(Deserialize, Debug)]
 pub struct Request {
     pub date: String,
@@ -16,15 +18,17 @@ pub struct Request {
     pub image: String,
 }
 
-pub fn git_sync() {
+fn git_pull() {
     let child = Command::new("git")
-        .current_dir("./ob")
-        .args(&["pull", "--rebase"])
-        .spawn()
-        .expect("failed to execute child");
+    .current_dir("./ob")
+    .args(&["pull", "--rebase"])
+    .spawn()
+    .expect("failed to execute child");
     let output = child.wait_with_output().expect("failed to wait on child");
     println!("{:?}", output);
+}
 
+pub fn git_sync() {
     let child = Command::new("git")
         .current_dir("./ob")
         .args(&["add", "."])
@@ -51,9 +55,11 @@ pub fn git_sync() {
 }
 
 fn process_request(req: &Request) -> Result<(), &'static str> {
+    git_pull();
     let date_str = req.date.to_string();
     //let parsed_date = NaiveDate::parse(date).expect("failed to parse date")?;
     let parsed_date = DateTime::parse_from_rfc3339(&date_str).unwrap();
+    let parsed_date = parsed_date.with_timezone(&FixedOffset::east(8*3600));
     println!("date: {:?}", &parsed_date);
     let date = parsed_date.format("%Y-%m-%d").to_string();
     let time = parsed_date.format("%H:%M:%S").to_string();
@@ -75,7 +81,7 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
         let image_path = Path::new(&image_path);
         fs::write(image_path, &image_buf).unwrap();
         //println!("image buf:\n {:?}", image_buf);
-        write_content = format!("{}\n![[{} | #x-small ]]\n", write_content, image_name);
+        write_content = format!("{}\n![[{} | #x-small]]\n", write_content, image_name);
     }
     fs::write(&path, write_content).expect("Unable to write file");
     git_sync();
@@ -112,7 +118,7 @@ fn main() {
     let port_key = "FUNCTIONS_CUSTOMHANDLER_PORT";
     let _port: u16 = match env::var(port_key) {
         Ok(val) => val.parse().expect("Custom Handler port is not a number!"),
-        Err(_) => 9004,
+        Err(_) => 8005,
     };
 
     run_server(_port);
