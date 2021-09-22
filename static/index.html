@@ -21,34 +21,74 @@
 <body>
     <nav class="navbar navbar-light" style="background-color: #e3f2fd;">
         <a class="navbar-brand" href="#">Obweb</a>
+        <div>
+            <button class="btn btn-warning" id="clear-btn" onclick="clearAll(this)">Clear</button>
+            <button class="btn btn-info btn-round float-right" style="margin-left: 10px;" data-toggle="modal" data-target="#loginModal">
+                Login
+            </button>
+        </div>
     </nav>
 
     <div class="container">
+        <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header border-bottom-0">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-title text-center">
+                            <h4>Login</h4>
+                        </div>
+                        <div class="d-flex flex-column text-center">
+                            <form>
+                                <div class="form-group">
+                                    <input type="username" class="form-control" id="username" placeholder="Username">
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" class="form-control" id="password" placeholder="Password">
+                                </div>
+                                <button type="button" class="btn btn-info btn-block btn-round" id="login-btn">Login</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <form name="entry" id="journal-entry" role="form">
             <div class="form-group row">
                 <div class="col-md-8">
                     <label for="entrytext"></label><br>
-                    <textarea name="entrytext" rows="8" class="form-control" id="entrytext" onchange="enableBtn()"></textarea>
+                    <textarea rows="8" class="form-control" id="entrytext" onchange="enableBtn()"></textarea>
                 </div>
             </div>
-            <div class="form-group row">
+
+            <div class="form-group row" hidden="true">
                 <div class="col-md-8">
-                    <input type="text" style="min-width: 300px" placeholder="Tags" value="" data-role="tagsinput" id="tags" name="entrytopic">
+                    <input type="text" style="min-width: 300px" placeholder="Tags" value="" data-role="tagsinput" id="tags">
                 </div>
             </div>
 
             <div class="form-group row">
                 <div class="col-md-8">
-                    <input type="text" style="min-width: 300px" placeholder="Links" value="" data-role="tagsinput" id="links" name="entrytopic">
+                    <input type="text" style="min-width: 300px" placeholder="Links" value="" data-role="tagsinput" id="links">
                 </div>
             </div>
 
-            <div class="form-group row" style="margin-top: 20px">
-                <div class="col-md-6">
+            <div class="form-group row">
+                <div class="col-md-8">
+                    <input type="text" style="min-width: 300px" placeholder="Page" value="" data-role="tagsinput" id="page">
+                </div>
+            </div>
+
+            <div class="row" style="margin-top: 20px">
+                <div class="col-md-8">
                     <input type="file" id="fileElem" class="visually-hidden" accept="image/*" onchange="fileSelected(this)" />
                     <label for="fileElem" class="noselect">图片</label>
-                    <button class="btn btn-success float-right" id="submit-btn" type="submit" style="margin-left: 4px;" data-loading-text="<i class='fa fa-spinner fa-spin '></i> Sending" disabled>提交</button>
-                    <button class="btn btn-warning float-right" id="clear-btn" onclick="clear()">清空</button>
+                    <button class="btn btn-success float-right" id="submit-btn" type="submit" style="margin-left: 4px;" disabled>提交</button>
                 </div>
             </div>
         </form>
@@ -58,6 +98,20 @@
                 <div class="text-center">
                     <div class="spinner-border text-success" role="status">
                         <span class="sr-only">Sending</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8" hidden="true" id="status-succ">
+                <div class="text-center">
+                    <div class="alert alert-success" role="alert">
+                        保存成功
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8" hidden="true" id="status-err">
+                <div class="text-center">
+                    <div class="alert alert-danger" role="alert">
+                        保存失败
                     </div>
                 </div>
             </div>

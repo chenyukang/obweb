@@ -1,14 +1,16 @@
-use std::env;
-use std::net::Ipv4Addr;
-use std::process::{Command};
-use warp::Filter;
-use chrono::{DateTime};
-use serde::Deserialize;
-use std::path::Path;
-use std::fs;
-use std::fs::File;
+use argon2::{self, Config};
 use base64::decode;
 use chrono::prelude::*;
+use chrono::DateTime;
+use rand::Rng;
+use serde::Deserialize;
+use std::env;
+use std::fs;
+use std::fs::File;
+use std::net::Ipv4Addr;
+use std::path::Path;
+use std::process::Command;
+use warp::Filter;
 
 #[derive(Deserialize, Debug)]
 pub struct Request {
@@ -17,19 +19,77 @@ pub struct Request {
     pub links: String,
     pub text: String,
     pub image: String,
+    pub page: String,
+    pub token: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct User {
+    username: String,
+    password: String,
+}
+
+fn verify_user(user: &User) -> bool {
+    let accounts = fs::read_to_string("./db/accounts.json").unwrap();
+    let users: Vec<User> = serde_json::from_str(&accounts).unwrap();
+    for u in users {
+        if u.username == user.username && u.password == user.password {
+            return true;
+        }
+    }
+    false
+}
+
+fn verify_token(token: &str) -> bool {
+    let data = fs::read_to_string("./db/tokens").unwrap();
+    let tokens: Vec<&str> = data.split("\n").collect();
+    for t in tokens {
+        if t == token {
+            return true;
+        }
+    }
+    false
+}
+
+fn hash(password: &[u8]) -> String {
+    let salt = rand::thread_rng().gen::<[u8; 32]>();
+    let config = Config::default();
+    println!("{:?} {:?}", salt, config);
+    argon2::hash_encoded(password, &salt, &config).unwrap()
+}
+
+fn gen_token(password: &str) -> String {
+    let path = Path::new("./db/tokens");
+    let mut prev_data = String::new();
+    let token = hash(password.as_bytes());
+    if !Path::new(&path).exists() {
+        File::create(&path).unwrap();
+    } else {
+        let data = fs::read_to_string(path).unwrap();
+        let mut tokens: Vec<&str> = data.split("\n").collect();
+        if tokens.len() > 3 {
+            tokens = tokens.into_iter().take(3).collect();
+        }
+        prev_data = tokens.join("\n").clone();
+        if !prev_data.is_empty() {
+            prev_data.push('\n');
+        }
+    }
+    fs::write(path, format!("{}{}", prev_data, token)).unwrap();
+    token
 }
 
 fn git_pull() {
     let child = Command::new("git")
-    .current_dir("./ob")
-    .args(&["pull", "--rebase"])
-    .spawn()
-    .expect("failed to execute child");
+        .current_dir("./ob")
+        .args(&["pull", "--rebase"])
+        .spawn()
+        .expect("failed to execute child");
     let output = child.wait_with_output().expect("failed to wait on child");
     println!("{:?}", output);
 }
 
-pub fn git_sync() {
+fn git_sync() {
     let child = Command::new("git")
         .current_dir("./ob")
         .args(&["add", "."])
@@ -39,34 +99,47 @@ pub fn git_sync() {
     println!("{:?}", output);
 
     let child = Command::new("git")
-    .current_dir("./ob")
-    .args(&["commit", "-am'ob-web'"])
-    .spawn()
-    .expect("failed to execute child");
+        .current_dir("./ob")
+        .args(&["commit", "-am'ob-web'"])
+        .spawn()
+        .expect("failed to execute child");
     let output = child.wait_with_output().expect("failed to wait on child");
     println!("{:?}", output);
 
     let child = Command::new("git")
-    .current_dir("./ob")
-    .args(&["push"])
-    .spawn()
-    .expect("failed to execute child");
+        .current_dir("./ob")
+        .args(&["push"])
+        .spawn()
+        .expect("failed to execute child");
     let output = child.wait_with_output().expect("failed to wait on child");
     println!("{:?}", output);
 }
 
-fn process_request(req: &Request) -> Result<(), &'static str> {
-    git_pull();
-    let date_str = req.date.to_string();
-    let parsed_date = DateTime::parse_from_rfc3339(&date_str).unwrap();
-    let parsed_date = parsed_date.with_timezone(&FixedOffset::east(8*3600));
-    let date = parsed_date.format("%Y-%m-%d").to_string();
-    let time = parsed_date.format("%H:%M:%S").to_string();
-    println!("date time: {:?}", date);
-    let path = format!("./ob/Daily/{}.md", date);
+fn gen_page(date: &String, page: &String) -> String {
+    let path = if page.is_empty() {
+        format!("./ob/Daily/{}.md", date)
+    } else {
+        format!("./ob/Unsort/{}.md", page)
+    };
     if !Path::new(&path).exists() {
         File::create(&path).unwrap();
     }
+    return path;
+}
+
+fn process_request(req: &Request) -> Result<(), &'static str> {
+    /* println!("request: {:?}", req);
+    return Ok(()); */
+    git_pull();
+    let date_str = req.date.to_string();
+    let page_str = req.page.to_string();
+    let parsed_date = DateTime::parse_from_rfc3339(&date_str)
+        .unwrap()
+        .with_timezone(&FixedOffset::east(8 * 3600));
+    let date = parsed_date.format("%Y-%m-%d").to_string();
+    let time = parsed_date.format("%H:%M:%S").to_string();
+    println!("date time: {:?}", date);
+    let path = gen_page(&date, &page_str);
     let mut data = fs::read_to_string(&path).expect("Unable to read file");
     if data.len() == 0 {
         data = format!("## {}", date);
@@ -101,7 +174,9 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
     }
     write_content += format!("\n\n{}", text).as_str();
     if req.image.len() > 0 {
-        let image = req.image.to_string()
+        let image = req
+            .image
+            .to_string()
             .replace("data:image/jpeg;base64,", "")
             .replace(" ", "+");
         let image_buf = decode(image).unwrap();
@@ -125,17 +200,30 @@ pub async fn run_server(port: u16) {
         .and(warp::post())
         .and(warp::body::json())
         .map(|request: Request| {
-            println!("request: {:?}", request);
-            let res = process_request(&request);
-            if res.is_err() {
-                format!("failed")
-            } else {
+            println!("request: {:?}", request.date);
+            if verify_token(&request.token) && process_request(&request).is_ok() {
                 format!("ok")
+            } else {
+                format!("failed")
             }
         });
 
     let pages = warp::path("static").and(warp::fs::dir("./static/"));
     let routes = routes.or(pages);
+
+    let login = warp::path!("api" / "login")
+        .and(warp::post())
+        .and(warp::body::json())
+        .map(|user: User| {
+            if verify_user(&user) {
+                let token = gen_token(&user.password);
+                format!("{}", token)
+            } else {
+                format!("failed")
+            }
+        });
+    let routes = routes.or(login);
+
     let routes = routes.with(warp::cors().allow_any_origin());
     let log = warp::log("ob-web.log");
     let routes = routes.with(log);
