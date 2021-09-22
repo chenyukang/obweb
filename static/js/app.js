@@ -36,10 +36,10 @@ App.prototype.handleSubmit = function() {
         },
         data: data,
         success: function(response) {
-            $("#submit-btn").prop('disabled', false);
-            console.log("finished ...");
+            $("#status-sp").prop('hidden', true);
         },
         error: function(err) {
+            $("#status-sp").prop('hidden', true);
             console.log("There was an error saving the entry: ", err);
         }
     });
@@ -53,6 +53,7 @@ App.prototype.checkFormValidity = function() {
 $(document).ready(function() {
     $('#submit-btn').on('click', function(event) {
         $("#submit-btn").prop('disabled', true);
+        $("#status-sp").prop('hidden', false);
         event.preventDefault();
         app.handleSubmit();
     });
@@ -95,7 +96,6 @@ function fileSelected(e) {
 }
 
 function enableBtn() {
-    console.log("enable button...");
     $("#submit-btn").prop('disabled', false);
 }
 

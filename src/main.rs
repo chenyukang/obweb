@@ -69,7 +69,7 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
     }
     let mut data = fs::read_to_string(&path).expect("Unable to read file");
     if data.len() == 0 {
-        data = format!("##{}", date);
+        data = format!("## {}", date);
     }
     let text = req.text.to_string();
     let mut write_content = data + "\n\n---";
