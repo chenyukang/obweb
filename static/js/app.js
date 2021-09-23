@@ -33,6 +33,20 @@ App.prototype.login = function() {
     });
 };
 
+function showSuccMsg() {
+    $('#status-sp').prop('hidden', true);
+    $('#status-msg').addClass("alert-success");
+    $('#status-msg').html("保存成功");
+    $('#status-msg').prop('hidden', false);
+}
+
+function showErrMsg() {
+    $('#status-sp').prop('hidden', true);
+    $('#status-msg').addClass("alert-danger");
+    $('#status-msg').html("保存失败");
+    $('#status-msg').prop('hidden', false);
+}
+
 App.prototype.handleSubmit = function() {
     var elem = document.getElementById("upload-pic");
     var token = window.localStorage.getItem('token');
@@ -62,17 +76,15 @@ App.prototype.handleSubmit = function() {
         },
         data: data,
         success: function(response) {
-            console.log(response);
-            $('#status-sp').prop('hidden', true);
+            console.log(response);            
             if (response == "ok") {
-                $('#status-succ').prop('hidden', false);
+                showSuccMsg();
             } else {
-                $('#status-err').prop('hidden', false);
+                showErrMsg();                
             }
         },
         error: function(err) {
-            $('#status-sp').prop('hidden', true);
-            $('#status-err').prop('hidden', false);
+            showErrMsg();
             console.log("There was an error saving the entry: ", err);
         }
     });
@@ -89,8 +101,7 @@ $(document).ready(function() {
 
     $('#submit-btn').on('click', function(event) {
         $("#submit-btn").prop('disabled', true);
-        $("#status-succ").prop('hidden', true);
-        $('#status-err').prop('hidden', true);
+        $("#status-msg").prop('hidden', true);        
 
         event.preventDefault();
         app.handleSubmit();

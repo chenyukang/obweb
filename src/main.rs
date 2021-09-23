@@ -128,8 +128,8 @@ fn gen_page(date: &String, page: &String) -> String {
 }
 
 fn process_request(req: &Request) -> Result<(), &'static str> {
-    /* println!("request: {:?}", req);
-    return Ok(()); */
+    //println!("request: {:?}", req);
+    //return Ok(());
     git_pull();
     let date_str = req.date.to_string();
     let page_str = req.page.to_string();
@@ -209,7 +209,10 @@ pub async fn run_server(port: u16) {
         });
 
     let pages = warp::path("static").and(warp::fs::dir("./static/"));
-    let routes = routes.or(pages);
+    let root = warp::path::end()
+        .and(warp::get())
+        .and(warp::fs::file("./static/index.html"));
+    let routes = routes.or(pages).or(root);
 
     let login = warp::path!("api" / "login")
         .and(warp::post())
