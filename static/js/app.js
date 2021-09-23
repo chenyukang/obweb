@@ -66,7 +66,7 @@ App.prototype.handleSubmit = function() {
         tags: $('#tags').val(),
         links: $('#links').val(),
         page: $('#page').val(),
-        text: $('textarea').val(),
+        text: $('#content').val(),
         image: (elem.src.indexOf("data:image") === 0 ? elem.src : ""),
         token: window.localStorage.getItem('token')
     });
@@ -113,13 +113,37 @@ $(document).ready(function() {
         app.handleSubmit();
     });
 
-    $('textarea').on('input', function() {
+    $('#content').on('input', function() {
         $("#submit-btn").prop('disabled', false);
     });
 
     $('#submit-btn').on('mouseover', function() {
         $("#submit-btn").prop('disabled', !app.checkFormValidity());
     });
+
+    document.getElementById('content').onpaste = function(event) {
+        var items = (event.clipboardData || event.originalEvent.clipboardData).items;
+        JSON.stringify(items);
+        // will give you the mime types
+        // find pasted image among pasted items
+        var blob = null;
+        for (var i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf("image") === 0) {
+                blob = items[i].getAsFile();
+                break;
+            }
+        }
+        // load image if there is a pasted image
+        if (blob !== null) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                console.log(event.target.result); // data url!
+                $("#upload-pic").prop("src", e.target.result);
+                $("#upload-pic").prop("hidden", false);
+            };
+            reader.readAsDataURL(blob);
+        }
+    }
 
     tryLogin();
 });
@@ -154,7 +178,7 @@ function clearAll() {
     $("#status-succ").prop('hidden', true);
     $("#upload-pic").prop("src", "")
     $("#upload-pic").prop("hidden", true);
-    $('textarea').val('');
+    $('#content').val('');
 }
 
 
