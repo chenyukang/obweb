@@ -135,7 +135,7 @@ fn process_image(data: &String) -> Vec<u8> {
 }
 
 fn process_request(req: &Request) -> Result<(), &'static str> {
-    println!("request: {:?}", req);
+    //println!("request: {:?}", req);
     //return Ok(());
     git_pull();
     let date_str = req.date.to_string();
