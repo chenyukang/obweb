@@ -175,9 +175,10 @@ function enableBtn() {
 }
 
 function clearAll() {
-    $("#status-succ").prop('hidden', true);
-    $("#upload-pic").prop("src", "")
-    $("#upload-pic").prop("hidden", true);
+    $('#status-succ').prop('hidden', true);
+    $("#upload-pic").prop('hidden', true);
+    $('#status-sp').prop('hidden', true);
+    $("#upload-pic").prop('src', "")
     $('#content').val('');
 }
 
