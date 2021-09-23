@@ -127,8 +127,15 @@ fn gen_page(date: &String, page: &String) -> String {
     return path;
 }
 
+fn process_image(data: &String) -> Vec<u8> {
+    let index = data.find(",").unwrap();
+    let mut image = data.chars().skip(index + 1).collect::<String>();
+    image = image.replace(" ", "+");
+    decode(image).unwrap()
+}
+
 fn process_request(req: &Request) -> Result<(), &'static str> {
-    //println!("request: {:?}", req);
+    println!("request: {:?}", req);
     //return Ok(());
     git_pull();
     let date_str = req.date.to_string();
@@ -174,12 +181,7 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
     }
     write_content += format!("\n\n{}", text).as_str();
     if req.image.len() > 0 {
-        let image = req
-            .image
-            .to_string()
-            .replace("data:image/jpeg;base64,", "")
-            .replace(" ", "+");
-        let image_buf = decode(image).unwrap();
+        let image_buf = process_image(&req.image.to_string());
         let image_name = format!("ob-web-{}-{}.png", date, time).replace(":", "-");
         let image_path = format!("./ob/Pics/{}", image_name);
         let image_path = Path::new(&image_path);

@@ -68,10 +68,9 @@ App.prototype.handleSubmit = function() {
         page: $('#page').val(),
         text: $('textarea').val(),
         image: (elem.src.indexOf("data:image") === 0 ? elem.src : ""),
-        token: token,
+        token: window.localStorage.getItem('token')
     });
-    $('#status-sp').prop('hidden', false);
-    console.log(data);
+    //console.log(data);
     $.ajax({
         url: this.server + "api/entry",
         crossDomain: true,
@@ -83,11 +82,11 @@ App.prototype.handleSubmit = function() {
         },
         data: data,
         success: function(response) {
-            console.log(response);            
+            console.log(response);
             if (response == "ok") {
                 showSuccMsg();
             } else {
-                showErrMsg();                
+                showErrMsg();
             }
         },
         error: function(err) {
@@ -108,8 +107,8 @@ $(document).ready(function() {
 
     $('#submit-btn').on('click', function(event) {
         $("#submit-btn").prop('disabled', true);
-        $("#status-msg").prop('hidden', true);        
-
+        $("#status-msg").prop('hidden', true);
+        $('#status-sp').prop('hidden', false);
         event.preventDefault();
         app.handleSubmit();
     });
@@ -125,8 +124,6 @@ $(document).ready(function() {
     tryLogin();
 });
 
-var image;
-
 function fileSelected(e) {
     const file = e.files[0];
     if (!file) {
@@ -140,13 +137,11 @@ function fileSelected(e) {
 
     const img = document.createElement('img-tag');
     img.file = file
-    image = img;
 
     const reader = new FileReader();
     reader.onload = function(e) {
-        var elem = document.getElementById("upload-pic");
-        elem.src = e.target.result;
-        elem.hidden = false;
+        $("#upload-pic").prop("src", e.target.result);
+        $("#upload-pic").prop("hidden", false);
     }
     reader.readAsDataURL(file);
 }
@@ -157,16 +152,9 @@ function enableBtn() {
 
 function clearAll() {
     $("#status-succ").prop('hidden', true);
-    var elem = document.getElementById("upload-pic");
-    elem.src = "";
-    elem.hidden = true;
+    $("#upload-pic").prop("src", "")
+    $("#upload-pic").prop("hidden", true);
     $('textarea').val('');
-
-    /* var tags = document.getElementById('tags');
-    tags.value = "";
-
-    var links = document.getElementById('links');
-    links.value = ""; */
 }
 
 
