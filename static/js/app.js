@@ -47,12 +47,19 @@ function showErrMsg() {
     $('#status-msg').prop('hidden', false);
 }
 
-App.prototype.handleSubmit = function() {
-    var elem = document.getElementById("upload-pic");
+function tryLogin() {
     var token = window.localStorage.getItem('token');
     if (token == null) {
         $('#loginModal').modal('show');
-        return;
+        return true;
+    }
+    return false;
+}
+
+App.prototype.handleSubmit = function() {
+    var elem = document.getElementById("upload-pic");
+    if (tryLogin()) {
+        return true;
     }
     var data = JSON.stringify({
         date: new Date().toISOString(),
@@ -114,6 +121,8 @@ $(document).ready(function() {
     $('#submit-btn').on('mouseover', function() {
         $("#submit-btn").prop('disabled', !app.checkFormValidity());
     });
+
+    tryLogin();
 });
 
 var image;
