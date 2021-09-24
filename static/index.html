@@ -22,10 +22,12 @@
 <body>
     <nav class="navbar navbar-light" style="background-color: #e3f2fd;">
         <a class="navbar-brand" href="/obweb/">Obweb</a>
-        <a class="navbar" href="/static/daily.html">Daily</a>
 
         <div>
-            <button class="btn btn-warning" id="clear-btn" onclick="clearAll(this)">Clear</button>
+            <a href = "/static/daily.html" >
+            <button class="btn btn-primary">Daily</button>
+            </a>
+            <button class="btn btn-warning" id="clear-btn" style="margin-left: 10px;" onclick="clearAll(this)">Clear</button>
             <button class="btn btn-info btn-round float-right" style="margin-left: 10px;" data-toggle="modal" data-target="#loginModal">
                 Login
             </button>
