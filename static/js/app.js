@@ -117,9 +117,18 @@ $(document).ready(function() {
         $("#submit-btn").prop('disabled', false);
     });
 
+    $('#content').on('change', function() {
+        var content = $('#content').val();
+        window.localStorage.setItem("content", content);
+    });
+
     $('#submit-btn').on('mouseover', function() {
         $("#submit-btn").prop('disabled', !app.checkFormValidity());
     });
+
+    if (window.localStorage.getItem("content") != null) {
+        $('#content').val(window.localStorage.getItem("content"));
+    }
 
     document.getElementById('content').onpaste = function(event) {
         var items = (event.clipboardData || event.originalEvent.clipboardData).items;
@@ -179,6 +188,7 @@ function clearAll() {
     $("#upload-pic").prop('hidden', true);
     $('#status-sp').prop('hidden', true);
     $("#upload-pic").prop('src', "")
+    window.localStorage.removeItem("content");
     $('#content').val('');
 }
 
