@@ -1,34 +1,5 @@
-var App = function(server) {
-    this.server = server;
+var App = function() {
     this.entries = [];
-};
-
-App.prototype.login = function() {
-    var data = JSON.stringify({
-        username: $('#username').val(),
-        password: $('#password').val(),
-    });
-    $.ajax({
-        url: this.server + "api/login",
-        crossDomain: true,
-        type: 'POST',
-        datatype: 'json',
-        contentType: "Application/json",
-        headers: {
-            "Access-Control-Allow-Origin": "*",
-        },
-        data: data,
-        success: function(response) {
-            if (response != "failed") {
-                var storage = window.localStorage;
-                storage.setItem('token', response);
-                $('#loginModal').modal('hide');
-            }
-        },
-        error: function(err) {
-            console.log("There was an error saving the entry: ", err);
-        }
-    });
 };
 
 function showSuccMsg() {
@@ -54,6 +25,34 @@ function tryLogin() {
     return false;
 }
 
+App.prototype.login = function() {
+    var data = JSON.stringify({
+        username: $('#username').val(),
+        password: $('#password').val(),
+    });
+    $.ajax({
+        url: "/api/login",
+        crossDomain: true,
+        type: 'POST',
+        datatype: 'json',
+        contentType: "Application/json",
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+        },
+        data: data,
+        success: function(response) {
+            if (response != "failed") {
+                var storage = window.localStorage;
+                storage.setItem('token', response);
+                $('#loginModal').modal('hide');
+            }
+        },
+        error: function(err) {
+            console.log("There was an error saving the entry: ", err);
+        }
+    });
+};
+
 App.prototype.handleSubmit = function() {
     var elem = document.getElementById("upload-pic");
     if (tryLogin()) {
@@ -70,7 +69,7 @@ App.prototype.handleSubmit = function() {
     });
     //console.log(data);
     $.ajax({
-        url: this.server + "api/entry",
+        url: "/api/entry",
         crossDomain: true,
         type: 'POST',
         datatype: 'json',
@@ -191,4 +190,4 @@ function clearAll() {
 }
 
 console.log("loaded");
-var app = new App('https://coderscat.com/obweb/');
+var app = new App();
