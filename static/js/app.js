@@ -8,7 +8,6 @@ App.prototype.login = function() {
         username: $('#username').val(),
         password: $('#password').val(),
     });
-    console.log(data);
     $.ajax({
         url: this.server + "api/login",
         crossDomain: true,
@@ -25,7 +24,6 @@ App.prototype.login = function() {
                 storage.setItem('token', response);
                 $('#loginModal').modal('hide');
             }
-            console.log(response);
         },
         error: function(err) {
             console.log("There was an error saving the entry: ", err);
