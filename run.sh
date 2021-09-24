@@ -3,4 +3,4 @@ pushd ob
 git checkout main
 git pull
 popd
-cargo build --release; cp target/release/ob-web ./ ; ./ob-web
+cargo build --release; cp target/release/ob-web ./ ; nohup ./ob-web  >/tmp/nog 2>&1 &

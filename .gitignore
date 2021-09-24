@@ -2,3 +2,5 @@ target/
 ob-web
 ob
 db
+nohup.out
+update.sh
