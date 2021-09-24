@@ -4,3 +4,4 @@ ob
 db
 nohup.out
 update.sh
+*.Identifier

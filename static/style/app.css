@@ -41,3 +41,10 @@ input.visually-hidden:focus+label {
 input.visually-hidden:focus-within+label {
     outline: thin dotted;
 }
+
+.dailyContent {
+    margin-top: 20px;
+    border: 2px outset green;
+    background-color: lightblue;    
+    text-align: center;
+  }

@@ -21,7 +21,22 @@
 
 <body>
     <nav class="navbar navbar-light" style="background-color: #e3f2fd;">
-        <a class="navbar-brand" href="#">Obweb</a>
+        <a class="navbar-brand" href="/">Obweb</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+              <li class="nav-item active">
+                <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/static/daily.html">Daily</a>
+              </li>
+            </ul>
+        </div>
+
         <div>
             <button class="btn btn-warning" id="clear-btn" onclick="clearAll(this)">Clear</button>
             <button class="btn btn-info btn-round float-right" style="margin-left: 10px;" data-toggle="modal" data-target="#loginModal">
@@ -118,7 +133,6 @@
                 </div>
             </div>
         </div>
-
     </div>
 
     <div class="row" style="margin-top: 20px">
@@ -127,11 +141,5 @@
             <img id="upload-pic" hidden="true" src="" style="display: block; margin-left: auto; margin-right: auto;max-width:250px; max-height:250px;" />
         </div>
     </div>
-
-    <br>
-    <div class="container entries">
-    </div>
-
 </body>
-
 </html>

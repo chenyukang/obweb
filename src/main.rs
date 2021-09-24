@@ -29,6 +29,12 @@ struct User {
     password: String,
 }
 
+#[derive(Debug, Deserialize)]
+struct DailyQuery {
+    date: String,
+    token: String,
+}
+
 fn verify_user(user: &User) -> bool {
     let accounts = fs::read_to_string("./db/accounts.json").unwrap();
     let users: Vec<User> = serde_json::from_str(&accounts).unwrap();
@@ -55,7 +61,8 @@ fn hash(password: &[u8]) -> String {
     let salt = rand::thread_rng().gen::<[u8; 32]>();
     let config = Config::default();
     println!("{:?} {:?}", salt, config);
-    argon2::hash_encoded(password, &salt, &config).unwrap()
+    let res = argon2::hash_encoded(password, &salt, &config).unwrap();
+    base64::encode(&res)
 }
 
 fn gen_token(password: &str) -> String {
@@ -75,6 +82,7 @@ fn gen_token(password: &str) -> String {
             prev_data.push('\n');
         }
     }
+    println!("write token: {:?}", token);
     fs::write(path, format!("{}{}", prev_data, token)).unwrap();
     token
 }
@@ -195,6 +203,21 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
     Ok(())
 }
 
+fn daily_query(req: &DailyQuery) -> Result<String, &'static str> {
+    let date_str = req.date.to_string();
+    let parsed_date = DateTime::parse_from_rfc3339(&date_str)
+        .unwrap()
+        .with_timezone(&FixedOffset::east(8 * 3600));
+    let date = parsed_date.format("%Y-%m-%d").to_string();
+    let path = format!("./ob/Daily/{}.md", date);
+    let p = Path::new(&path);
+    if Path::exists(&p) {
+        return Ok(fs::read_to_string(&path).expect("Unable to read file"));
+    } else {
+        return Err("No such file");
+    }
+}
+
 #[tokio::main]
 pub async fn run_server(port: u16) {
     pretty_env_logger::init();
@@ -228,6 +251,24 @@ pub async fn run_server(port: u16) {
             }
         });
     let routes = routes.or(login);
+
+    let daily = warp::path!("api" / "daily")
+        .and(warp::get())
+        .and(warp::query::<DailyQuery>())
+        .map(|daily: DailyQuery| {
+            //println!("token: {:?}", daily.token);
+            if verify_token(&daily.token) {
+                let res = daily_query(&daily);
+                if res.is_ok() {
+                    format!("{}", res.unwrap())
+                } else {
+                    format!("no-page")
+                }
+            } else {
+                format!("failed")
+            }
+        });
+    let routes = routes.or(daily);
 
     let routes = routes.with(warp::cors().allow_any_origin());
     let log = warp::log("ob-web.log");

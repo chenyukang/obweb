@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Obweb</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+
+    <script src="//cdn.jsdelivr.net/npm/showdown@1.9.1/dist/showdown.min.js"></script>
+
+    <script src="/static/js/tagsinput.js"></script>
+    <link rel="stylesheet" href="/static/style/app.css">
+    <link rel="stylesheet" href="/static/style/tagsinput.css">
+    <link rel="stylesheet" href="/static/style/font-awesome.min.css">
+    <link rel="icon" href="/static/style/favicon.ico">
+    <script src="/static/js/daily.js"></script>
+</head>
+
+<body>
+    <nav class="navbar navbar-light" style="background-color: #e3f2fd;">
+        <a class="navbar-brand" href="/">Obweb</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/static/daily.html">Daily</a>
+                </li>
+            </ul>
+        </div>
+
+        <div>
+            <button class="btn btn-warning" id="clear-btn" onclick="clearAll(this)">Clear</button>
+            <button class="btn btn-info btn-round float-right" style="margin-left: 10px;" data-toggle="modal"
+                data-target="#loginModal">
+                Login
+            </button>
+        </div>
+    </nav>
+
+    <div style="margin-top: 10px; margin-bottom: 10px;">
+        <i class="fa fa-arrow-circle-left" style="float: left; margin-left: 15px" aria-hidden="false" onclick="prevDaily()"></i>
+        <i class="fa fa-arrow-circle-right" style="float: right; margin-right: 15px" aria-hidden="true" onclick="nextDaily()"></i>
+    </div>
+    <div class="container">
+        <div class="dailyContent" id="daily" style="margin-top: 30px; text-align: left;">            
+        </div>
+    </div>
+
+</body>
+
+</html>
