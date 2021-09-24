@@ -4,6 +4,7 @@ var App = function() {
 
 function showSuccMsg() {
     $('#status-sp').prop('hidden', true);
+    $('#status-msg').removeClass("alert-danger");
     $('#status-msg').addClass("alert-success");
     $('#status-msg').html("保存成功");
     $('#status-msg').prop('hidden', false);
@@ -11,6 +12,7 @@ function showSuccMsg() {
 
 function showErrMsg() {
     $('#status-sp').prop('hidden', true);
+    $('#status-msg').removeClass("alert-success");
     $('#status-msg').addClass("alert-danger");
     $('#status-msg').html("保存失败");
     $('#status-msg').prop('hidden', false);
