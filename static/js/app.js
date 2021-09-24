@@ -183,7 +183,7 @@ function enableBtn() {
 }
 
 function clearAll() {
-    $('#status-succ').prop('hidden', true);
+    $('#status-msg').prop('hidden', true);
     $("#upload-pic").prop('hidden', true);
     $('#status-sp').prop('hidden', true);
     $("#upload-pic").prop('src', "")
