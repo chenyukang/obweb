@@ -182,7 +182,5 @@ function clearAll() {
     $('#content').val('');
 }
 
-
-
 console.log("loaded");
 var app = new App('http://coderscat.com/obweb/');
