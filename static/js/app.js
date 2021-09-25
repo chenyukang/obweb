@@ -67,7 +67,6 @@ App.prototype.handleSubmit = function() {
         page: $('#page').val(),
         text: $('#content').val(),
         image: (elem.src.indexOf("data:image") === 0 ? elem.src : ""),
-        token: window.localStorage.getItem('token')
     });
     //console.log(data);
     $.ajax({

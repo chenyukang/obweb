@@ -10,7 +10,7 @@ use std::fs::File;
 use std::net::Ipv4Addr;
 use std::path::Path;
 use std::process::Command;
-use warp::Filter;
+use warp::{reject, Filter, Rejection, Reply};
 
 #[derive(Deserialize, Debug)]
 pub struct Request {
@@ -20,7 +20,6 @@ pub struct Request {
     pub text: String,
     pub image: String,
     pub page: String,
-    pub token: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -32,7 +31,6 @@ struct User {
 #[derive(Debug, Deserialize)]
 struct DailyQuery {
     date: String,
-    token: String,
 }
 
 fn verify_user(user: &User) -> bool {
@@ -143,8 +141,10 @@ fn process_image(data: &String) -> Vec<u8> {
 }
 
 fn process_request(req: &Request) -> Result<(), &'static str> {
-    //println!("request: {:?}", req);
-    //return Ok(());
+    if !fs::read_to_string("./db/debug").is_err() {
+        println!("request: {:?}", req);
+        return Ok(());
+    }
     git_pull();
     let date_str = req.date.to_string();
     let page_str = req.page.to_string();
@@ -218,15 +218,39 @@ fn daily_query(req: &DailyQuery) -> Result<String, &'static str> {
     }
 }
 
+#[derive(Debug)]
+struct Unauthorized;
+
+impl reject::Reject for Unauthorized {}
+
+fn auth_validation() -> impl Filter<Extract = ((),), Error = Rejection> + Copy {
+    warp::header::<String>("Cookie").and_then(|n: String| async move {
+        //println!("cookie: {:?}", n);
+        let vals: Vec<&str> = n.split(";").collect();
+        for val in vals {
+            let v = val.trim().to_owned();
+            if v.starts_with("token=") {
+                let token = v.replace("token=", "");
+                if verify_token(&token) {
+                    return Ok(());
+                }
+            }
+        }
+        Err(reject::custom(Unauthorized))
+    })
+}
+
 #[tokio::main]
 pub async fn run_server(port: u16) {
     pretty_env_logger::init();
     let routes = warp::path!("api" / "entry")
         .and(warp::post())
+        .and(auth_validation())
+        .untuple_one()
         .and(warp::body::json())
         .map(|request: Request| {
             println!("request: {:?}", request.date);
-            if verify_token(&request.token) && process_request(&request).is_ok() {
+            if process_request(&request).is_ok() {
                 format!("ok")
             } else {
                 format!("failed")
@@ -245,27 +269,29 @@ pub async fn run_server(port: u16) {
         .map(|user: User| {
             if verify_user(&user) {
                 let token = gen_token(&user.password);
-                format!("{}", token)
+                warp::reply::with_header(
+                    token.clone(),
+                    "set-cookie",
+                    format!("token={}; Path=/; HttpOnly", token),
+                )
+                .into_response()
             } else {
-                format!("failed")
+                warp::reply::with_status("failed", http::StatusCode::UNAUTHORIZED).into_response()
             }
         });
     let routes = routes.or(login);
 
     let daily = warp::path!("api" / "daily")
         .and(warp::get())
+        .and(auth_validation())
+        .untuple_one()
         .and(warp::query::<DailyQuery>())
         .map(|daily: DailyQuery| {
-            //println!("token: {:?}", daily.token);
-            if verify_token(&daily.token) {
-                let res = daily_query(&daily);
-                if res.is_ok() {
-                    format!("{}", res.unwrap())
-                } else {
-                    format!("no-page")
-                }
+            let res = daily_query(&daily);
+            if res.is_ok() {
+                format!("{}", res.unwrap())
             } else {
-                format!("failed")
+                format!("no-page")
             }
         });
     let routes = routes.or(daily);

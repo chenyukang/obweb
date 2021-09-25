@@ -2,7 +2,7 @@
 function getDaily(date) {
     var res = "";
     $.ajax({
-        url: "/api/daily?date=" + date + "&token=" + window.localStorage.getItem('token'),
+        url: "/api/daily?date=" + date,
         crossDomain: true,
         type: 'GET',
         datatype: 'json',
