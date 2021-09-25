@@ -24,7 +24,7 @@ function tryLogin() {
         $('#loginModal').modal('show');
         return true;
     } else {
-        $("#loginBtn").prop("hidden", true)
+        //$("#loginBtn").prop("hidden", true)
     }
     return false;
 }
