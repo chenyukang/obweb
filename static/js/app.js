@@ -23,6 +23,8 @@ function tryLogin() {
     if (token == null) {
         $('#loginModal').modal('show');
         return true;
+    } else {
+        $("#loginBtn").prop("hidden", true)
     }
     return false;
 }
@@ -47,6 +49,7 @@ App.prototype.login = function() {
                 var storage = window.localStorage;
                 storage.setItem('token', response);
                 $('#loginModal').modal('hide');
+                $("#loginBtn").prop("hidden", true)
             }
         },
         error: function(err) {

@@ -263,6 +263,14 @@ pub async fn run_server(port: u16) {
         .and(warp::fs::file("./static/index.html"));
     let routes = routes.or(pages).or(root);
 
+    let images = warp::path("api")
+        .and(warp::path("images"))
+        .and(warp::get())
+        .and(auth_validation())
+        .untuple_one()
+        .and(warp::fs::dir("./ob/Pics"));
+    let routes = routes.or(images);
+
     let login = warp::path!("api" / "login")
         .and(warp::post())
         .and(warp::body::json())

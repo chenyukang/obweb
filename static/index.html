@@ -7,15 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-        crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
-        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
-        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
     <script src="//cdn.jsdelivr.net/npm/showdown@1.9.1/dist/showdown.min.js"></script>
 
@@ -39,18 +34,15 @@
         </div>
 
         <div style="margin-left: 0px">
-            <button class="btn btn-warning" id="clear-btn" style="margin-left: 10px;"
-                onclick="clearAll(this)">Clear</button>
-            <button class="btn btn-info btn-round float-right" style="margin-left: 10px;" data-toggle="modal"
-                data-target="#loginModal">
+            <button class="btn btn-warning" id="clear-btn" style="margin-left: 10px;" onclick="clearAll(this)">Clear</button>
+            <button class="btn btn-info btn-round float-right" style="margin-left: 10px;" data-toggle="modal" id="loginBtn" data-target="#loginModal">
                 Login
             </button>
         </div>
     </nav>
 
     <div class="container">
-        <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-            aria-hidden="true">
+        <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header border-bottom-0">
@@ -70,8 +62,7 @@
                                 <div class="form-group">
                                     <input type="password" class="form-control" id="password" placeholder="Password">
                                 </div>
-                                <button type="button" class="btn btn-info btn-block btn-round"
-                                    id="login-btn">Login</button>
+                                <button type="button" class="btn btn-info btn-block btn-round" id="login-btn">Login</button>
                             </form>
                         </div>
                     </div>
@@ -85,8 +76,7 @@
                         <div class="col-md-2"></div>
                         <div class="col-md-8">
                             <label for="entrytext"></label><br>
-                            <textarea rows="8" id="content" class="form-control" id="entrytext"
-                                onchange="enableBtn()"></textarea>
+                            <textarea rows="8" id="content" class="form-control" id="entrytext" onchange="enableBtn()"></textarea>
                         </div>
                     </div>
 
@@ -114,11 +104,9 @@
                     <div class="row" style="margin-top: 20px">
                         <div class="col-md-2"></div>
                         <div class="col-md-8">
-                            <input type="file" id="fileElem" class="visually-hidden" accept="image/*"
-                                onchange="fileSelected(this)" />
+                            <input type="file" id="fileElem" class="visually-hidden" accept="image/*" onchange="fileSelected(this)" />
                             <label for="fileElem" class="noselect">图片</label>
-                            <button class="btn btn-success float-right" id="submit-btn" type="submit"
-                                style="margin-left: 4px;" disabled>提交</button>
+                            <button class="btn btn-success float-right" id="submit-btn" type="submit" style="margin-left: 4px;" disabled>提交</button>
                         </div>
                     </div>
                 </form>
@@ -148,8 +136,7 @@
                 <div class="row" style="margin-top: 20px">
                     <div class="col-md-4"></div>
                     <div class="col-md-4">
-                        <img id="upload-pic" hidden="true" src=""
-                            style="display: block; margin-left: auto; margin-right: auto;max-width:250px; max-height:250px;" />
+                        <img id="upload-pic" hidden="true" src="" style="display: block; margin-left: auto; margin-right: auto;max-width:250px; max-height:250px;" />
                     </div>
                 </div>
             </div>

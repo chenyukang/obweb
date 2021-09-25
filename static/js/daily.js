@@ -1,8 +1,11 @@
+function convertTZ(date, tzString) {
+    return new Date((typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", { timeZone: tzString }));
+}
 
 function getDaily(date) {
     var res = "";
     $.ajax({
-        url: "/api/daily?date=" + date,
+        url: "/api/daily?date=" + date.toISOString(),
         crossDomain: true,
         type: 'GET',
         datatype: 'json',
@@ -10,17 +13,23 @@ function getDaily(date) {
         headers: {
             "Access-Control-Allow-Origin": "*",
         },
-        success: function (response) {
+        success: function(response) {
             //console.log(response);
+            var local_date = convertTZ(date, 'Asia/Shanghai').toISOString().substr(0, 10);
             if (response != "no-page") {
+                header = "## " + local_date;
+                if (response.indexOf(header) == -1) {
+                    response = header + "\n\n---\n" + response;
+                }
+                response = response.replaceAll("![[", "\n![img](/api/images/").replaceAll(" | #x-small]]", ")\n")
                 var converter = new showdown.Converter(),
-                html      = converter.makeHtml(response);
+                    html = converter.makeHtml(response);
                 $('#daily-content').html(html);
             } else {
-                $('#daily-content').html("<h2>No Daily</h2>" + " " + date);
-            }            
+                $('#daily-content').html("<h3>No Page</h3>" + " " + local_date)
+            }
         },
-        error: function (err) {
+        error: function(err) {
             return err;
         }
     });
@@ -32,15 +41,15 @@ var date = new Date();
 
 function nextDaily() {
     date = new Date(date.setDate(date.getDate() + 1));
-    getDaily(date.toISOString());
+    getDaily(date);
 }
 
 function prevDaily() {
     date = new Date(date.setDate(date.getDate() - 1));
-    getDaily(date.toISOString());
+    getDaily(date);
 }
 
 
-$(document).ready(function () {
-    getDaily(date.toISOString());
+$(document).ready(function() {
+    getDaily(date);
 });
