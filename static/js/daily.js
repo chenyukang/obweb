@@ -4,6 +4,7 @@ function convertTZ(date, tzString) {
 
 function getDaily(date) {
     var res = "";
+    $('#status-daily-sp').prop('hidden', false);
     $.ajax({
         url: "/api/daily?date=" + date.toISOString(),
         crossDomain: true,
@@ -15,6 +16,7 @@ function getDaily(date) {
         },
         success: function(response) {
             //console.log(response);
+            $('#status-daily-sp').prop('hidden', true);
             var local_date = convertTZ(date, 'Asia/Shanghai').toISOString().substr(0, 10);
             if (response != "no-page") {
                 header = "## " + local_date;
@@ -30,6 +32,7 @@ function getDaily(date) {
             }
         },
         error: function(err) {
+            $('#status-daily-sp').prop('hidden', true);
             return err;
         }
     });
