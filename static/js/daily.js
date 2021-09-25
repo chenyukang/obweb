@@ -15,9 +15,9 @@ function getDaily(date) {
             if (response != "no-page") {
                 var converter = new showdown.Converter(),
                 html      = converter.makeHtml(response);
-                $('#daily').html(html);
+                $('#daily-content').html(html);
             } else {
-                $('#daily').html("<h2>No Daily</h2>" + " " + date);
+                $('#daily-content').html("<h2>No Daily</h2>" + " " + date);
             }            
         },
         error: function (err) {
