@@ -44,7 +44,7 @@ input.visually-hidden:focus-within+label {
 
 .dailyContent {
     margin-top: 20px;
-    border: 2px outset green;
-    background-color: lightblue;    
-    text-align: center;
+    border: 1px outset green;
+    background-color: rgb(216, 234, 240);    
+    text-align: left;
   }
