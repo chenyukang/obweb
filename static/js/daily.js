@@ -49,7 +49,12 @@ function prevDaily() {
     getDaily(date);
 }
 
+function currentDaily() {
+    getDaily(date);
+}
 
 $(document).ready(function() {
-    getDaily(date);
+    if (document.getElementById('daily').classList.contains('active')) {
+        getDaily(date);
+    }
 });
