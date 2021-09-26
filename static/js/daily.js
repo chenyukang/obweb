@@ -6,6 +6,15 @@ function padding(value, n) {
     return String(value).padStart(n, '0');
 }
 
+function getLocaleDateString() {
+    const formats = {
+        "zh-CN": "yyyy/MM/dd",
+        "en": "YY/MM/dd",
+        "zu-ZA": "yyyy/MM/dd",
+    };
+
+    return formats[navigator.language] || "yyyy/MM/dd";
+}
 
 function getDaily(date) {
     var res = "";
@@ -36,10 +45,10 @@ function getDaily(date) {
             var local_date = elems[2] + "-" + padding(elems[0], 2) + "-" + padding(elems[1], 2);
             console.log(local_date);
             if (response != "no-page") {
-                header = "## " + local_date;
-                if (response.indexOf(header) == -1) {
+                //header = "## " + local_date;
+                /* if (response.indexOf(header) == -1) {
                     response = header + "\n\n---\n" + response;
-                }
+                } */
                 response = response.replaceAll("![[", "\n![img](/api/images/").replaceAll(" | #x-small]]", ")\n")
                 var converter = new showdown.Converter(),
                     html = converter.makeHtml(response);
