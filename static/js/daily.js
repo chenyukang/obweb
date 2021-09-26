@@ -23,8 +23,18 @@ function getDaily(date) {
             //console.log(response);
             $('#status-daily-sp').prop('hidden', true);
             //console.log(date);
+            var lang = window.navigator.userLanguage || window.navigator.language;
+            var date = new Date();
+            var options = {
+                year: "numeric",
+                month: "2-digit",
+                day: "numeric"
+            };
+
+            var local_date = date.toLocaleDateString(lang, options);
             var elems = date.toLocaleDateString().split("/");
             var local_date = elems[2] + "-" + padding(elems[0], 2) + "-" + padding(elems[1], 2);
+            console.log(local_date);
             if (response != "no-page") {
                 header = "## " + local_date;
                 if (response.indexOf(header) == -1) {
