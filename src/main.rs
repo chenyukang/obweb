@@ -33,6 +33,11 @@ struct DailyQuery {
     date: String,
 }
 
+#[derive(Debug, Deserialize)]
+struct SearchQuery {
+    keyword: String,
+}
+
 fn verify_user(user: &User) -> bool {
     let accounts = fs::read_to_string("./db/accounts.json").unwrap();
     let users: Vec<User> = serde_json::from_str(&accounts).unwrap();
@@ -204,6 +209,7 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
 }
 
 fn daily_query(req: &DailyQuery) -> Result<String, &'static str> {
+    std::thread::spawn(|| git_pull());
     let date_str = req.date.to_string();
     let parsed_date = DateTime::parse_from_rfc3339(&date_str)
         .unwrap()
@@ -216,6 +222,51 @@ fn daily_query(req: &DailyQuery) -> Result<String, &'static str> {
     } else {
         return Err("No such file");
     }
+}
+
+fn search_query(req: &SearchQuery) -> Result<String, &'static str> {
+    std::thread::spawn(|| git_pull());
+    use glob::{glob, glob_with, MatchOptions};
+
+    let mut res = String::new();
+    let mut files = vec![];
+
+    let pattern = format!("./ob/**/*{}*.md", req.keyword);
+    let options = MatchOptions {
+        case_sensitive: false,
+        ..Default::default()
+    };
+    for entry in glob_with(&pattern, options).expect("failed") {
+        match entry {
+            Ok(path) => {
+                println!("{:?}", path.display());
+                files.push(format!("{}", path.display()));
+            }
+            Err(e) => println!("{:?}", e),
+        }
+    }
+    for entry in glob("./ob/**/*.md").expect("failed") {
+        match entry {
+            Ok(path) => {
+                println!("{:?}", path.display());
+                let content = fs::read_to_string(path.clone()).unwrap_or(String::from(""));
+                if content
+                    .to_ascii_lowercase()
+                    .contains(&req.keyword.to_ascii_lowercase())
+                {
+                    files.push(format!("{}", path.display()));
+                }
+            }
+            Err(e) => println!("{:?}", e),
+        }
+    }
+
+    for f in files.iter() {
+        let link = format!("\n- [{}](#)", &f);
+        let link = link.replace("ob/", "");
+        res += &link;
+    }
+    Ok(res)
 }
 
 #[derive(Debug)]
@@ -258,10 +309,19 @@ pub async fn run_server(port: u16) {
         });
 
     let pages = warp::path("static").and(warp::fs::dir("./static/"));
-    let root = warp::path::end()
+    let root1 = warp::path::end()
         .and(warp::get())
         .and(warp::fs::file("./static/index.html"));
-    let routes = routes.or(pages).or(root);
+    let root2 = warp::path!("obweb")
+        .and(warp::get())
+        .and(warp::fs::file("./static/index.html"));
+    let daily = warp::path!("daily")
+        .and(warp::get())
+        .and(warp::fs::file("./static/daily.html"));
+    let search = warp::path!("search")
+        .and(warp::get())
+        .and(warp::fs::file("./static/search.html"));
+    let routes = routes.or(pages).or(root1).or(root2).or(daily).or(search);
 
     let images = warp::path("api")
         .and(warp::path("images"))
@@ -270,6 +330,14 @@ pub async fn run_server(port: u16) {
         .untuple_one()
         .and(warp::fs::dir("./ob/Pics"));
     let routes = routes.or(images);
+
+    let page = warp::path("api")
+        .and(warp::path("page"))
+        .and(warp::get())
+        .and(auth_validation())
+        .untuple_one()
+        .and(warp::fs::dir("./ob/"));
+    let routes = routes.or(page);
 
     let login = warp::path!("api" / "login")
         .and(warp::post())
@@ -303,6 +371,21 @@ pub async fn run_server(port: u16) {
             }
         });
     let routes = routes.or(daily);
+
+    let search = warp::path!("api" / "search")
+        .and(warp::get())
+        .and(auth_validation())
+        .untuple_one()
+        .and(warp::query::<SearchQuery>())
+        .map(|query: SearchQuery| {
+            let res = search_query(&query);
+            if res.is_ok() {
+                format!("{}", res.unwrap())
+            } else {
+                format!("no-page")
+            }
+        });
+    let routes = routes.or(search);
 
     let routes = routes.with(warp::cors().allow_any_origin());
     let log = warp::log("ob-web.log");

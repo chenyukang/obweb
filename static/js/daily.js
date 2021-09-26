@@ -57,7 +57,5 @@ function currentDaily() {
 }
 
 $(document).ready(function() {
-    if (document.getElementById('daily').classList.contains('active')) {
-        getDaily(date);
-    }
+    getDaily(date);
 });

@@ -14,6 +14,8 @@
 
     <script src="//cdn.jsdelivr.net/npm/showdown@1.9.1/dist/showdown.min.js"></script>
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/fontawesome.min.css" integrity="sha384-jLKHWM3JRmfMU0A5x5AkjWkw/EYfGUAGagvnfryNV3F9VqM98XiIH7VBGVoxVSc7" crossorigin="anonymous">
+
     <script src="/static/js/tagsinput.js"></script>
     <link rel="stylesheet" href="/static/style/app.css">
     <link rel="stylesheet" href="/static/style/tagsinput.css">
@@ -25,11 +27,17 @@
 <body>
     <nav class="navbar navbar-light" style="background-color: #e3f2fd;">
         <div>
-            <ul class="nav nav-pills">
+            <ul class="nav dropdown">
                 <li> <a class="navbar-brand" href="/obweb/">Obweb</a> </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-toggle="pill" href="#daily" onclick="currentDaily()">Daily</a>
-                </li>
+                <div class="dropdown">
+                    <a class="btn btn-primary dropdown-toggle" href="#" role="button" data-toggle="dropdown" id="dropdownMenuLink" aria-expanded="false">
+                        Menu
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                        <li><a class="dropdown-item" href="/daily">Daily</a></li>
+                        <li><a class="dropdown-item" href="/search">Search</a></li>
+                    </ul>
+                </div>
             </ul>
         </div>
 
@@ -140,29 +148,9 @@
                     </div>
                 </div>
             </div>
-            <div class="tab-pane container fade" id="daily">
-                <div class="row" style="margin-top: 20px">
-                    <div class="col-md-12 bg-light text-right">
-                        <button type="button" class="btn btn-secondary" style="float: left" onclick="prevDaily()">Prev</button>
-                        <button type="button" class="btn btn-secondary" onclick="nextDaily()">Next</button>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-2"></div>
-                    <div class="col-md-8" hidden="true" id="status-daily-sp">
-                        <div class="text-center">
-                            <div class="spinner-border text-success" role="status">
-                                <span class="sr-only">Sending</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <div class="dailyContent" id="daily-content">
-                    </div>
-                </div>
 
-            </div>
+
+
         </div>
 
     </div>
