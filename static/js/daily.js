@@ -2,6 +2,11 @@ function convertTZ(date, tzString) {
     return new Date((typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", { timeZone: tzString }));
 }
 
+function padding(value, n) {
+    return String(value).padStart(n, '0');
+}
+
+
 function getDaily(date) {
     var res = "";
     $('#status-daily-sp').prop('hidden', false);
@@ -17,7 +22,9 @@ function getDaily(date) {
         success: function(response) {
             //console.log(response);
             $('#status-daily-sp').prop('hidden', true);
-            var local_date = convertTZ(date, 'Asia/Shanghai').toISOString().substr(0, 10);
+            //console.log(date);
+            var elems = date.toLocaleDateString().split("/");
+            var local_date = elems[2] + "-" + padding(elems[0], 2) + "-" + padding(elems[1], 2);
             if (response != "no-page") {
                 header = "## " + local_date;
                 if (response.indexOf(header) == -1) {
