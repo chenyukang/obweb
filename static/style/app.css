@@ -64,3 +64,7 @@ input.visually-hidden:focus-within+label {
     width: 50%;
     height: 50%;
 }
+
+.highlight {
+    background-color: yellow;
+}

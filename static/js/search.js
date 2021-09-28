@@ -1,11 +1,12 @@
-function search() {
-
+function highlight(keyword) {
+    var inputText = document.getElementById("search-content");
+    var innerHTML = inputText.innerHTML;
+    inputText.innerHTML = innerHTML.replaceAll(keyword, "<span class=\"highlight\">" + keyword + "</span>");
 }
 
-
-function search(date) {
-    var input = $('#searchInput').val()
-        //console.log(input);
+function search() {
+    var input = $('#searchInput').val();
+    //console.log(input);
     $('#status-sp').prop('hidden', false);
     $.ajax({
         url: "/api/search?keyword=" + input,
@@ -23,6 +24,7 @@ function search(date) {
                 var converter = new showdown.Converter(),
                     html = converter.makeHtml(response);
                 $('#search-content').html(html);
+                highlight(input);
             } else {
                 $('#search-content').html("<h3>No Page</h3>" + " " + local_date)
             }
@@ -58,6 +60,7 @@ function fetchPage(e) {
                 var converter = new showdown.Converter(),
                     html = converter.makeHtml(response);
                 $('#search-content').html(html);
+                highlight($('#searchInput').val());
             } else {
                 $('#search-content').html("<h3>No Page</h3>" + " " + local_date)
             }
