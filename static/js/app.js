@@ -18,15 +18,21 @@ function showErrMsg() {
     $('#status-msg').prop('hidden', false);
 }
 
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
 function tryLogin() {
-    var token = window.localStorage.getItem('token');
+    var token = getCookie('token');
     if (token == null) {
         $('#loginModal').modal('show');
         return true;
     } else {
-        //$("#loginBtn").prop("hidden", true)
+        $("#loginBtn").prop("hidden", true)
+        return false;
     }
-    return false;
 }
 
 App.prototype.login = function() {

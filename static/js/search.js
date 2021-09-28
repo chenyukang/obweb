@@ -5,8 +5,7 @@ function search() {
 
 function search(date) {
     var input = $('#searchInput').val()
-    console.log(input);
-    var res = "";
+        //console.log(input);
     $('#status-sp').prop('hidden', false);
     $.ajax({
         url: "/api/search?keyword=" + input,
@@ -33,8 +32,6 @@ function search(date) {
             return err;
         }
     });
-    console.log("res: {}", res);
-    return res;
 }
 
 function fetchPage(e) {
@@ -74,8 +71,16 @@ function fetchPage(e) {
 
 $(document).ready(function() {
     $("body").on("click", "a", function(e) {
-        console.log("clicked");
+        // console.log("clicked");
         // e.preventDefault(); // Prevent a link from following the URL
         fetchPage(e);
+    });
+
+    var input = document.getElementById("searchInput");
+    input.addEventListener("keyup", function(event) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            document.getElementById("searchBtn").click();
+        }
     });
 });

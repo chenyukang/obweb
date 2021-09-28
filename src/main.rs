@@ -63,7 +63,7 @@ fn verify_token(token: &str) -> bool {
 fn hash(password: &[u8]) -> String {
     let salt = rand::thread_rng().gen::<[u8; 32]>();
     let config = Config::default();
-    println!("{:?} {:?}", salt, config);
+    //println!("{:?} {:?}", salt, config);
     let res = argon2::hash_encoded(password, &salt, &config).unwrap();
     base64::encode(&res)
 }
@@ -85,7 +85,7 @@ fn gen_token(password: &str) -> String {
             prev_data.push('\n');
         }
     }
-    println!("write token: {:?}", token);
+    //println!("write token: {:?}", token);
     fs::write(path, format!("{}{}", prev_data, token)).unwrap();
     token
 }
@@ -239,8 +239,8 @@ fn search_query(req: &SearchQuery) -> Result<String, &'static str> {
     for entry in glob_with(&pattern, options).expect("failed") {
         match entry {
             Ok(path) => {
-                println!("{:?}", path.display());
-                files.push(format!("{}", path.display()));
+                //println!("{:?}", path.display());
+                files.push((format!("{}", path.display()), fs::metadata(path).unwrap()));
             }
             Err(e) => println!("{:?}", e),
         }
@@ -248,20 +248,27 @@ fn search_query(req: &SearchQuery) -> Result<String, &'static str> {
     for entry in glob("./ob/**/*.md").expect("failed") {
         match entry {
             Ok(path) => {
-                println!("{:?}", path.display());
+                //println!("{:?}", path.display());
                 let content = fs::read_to_string(path.clone()).unwrap_or(String::from(""));
                 if content
                     .to_ascii_lowercase()
                     .contains(&req.keyword.to_ascii_lowercase())
                 {
-                    files.push(format!("{}", path.display()));
+                    files.push((format!("{}", path.display()), fs::metadata(path).unwrap()));
                 }
             }
             Err(e) => println!("{:?}", e),
         }
     }
 
-    for f in files.iter() {
+    files.sort_by(|(_, a), (_, b)| {
+        b.modified()
+            .unwrap()
+            .partial_cmp(&a.modified().unwrap())
+            .unwrap()
+    });
+
+    for (f, _) in files.iter() {
         let link = format!("\n- [{}](#)", &f);
         let link = link.replace("ob/", "");
         if !res.contains(&link) {
@@ -350,7 +357,7 @@ pub async fn run_server(port: u16) {
                 warp::reply::with_header(
                     token.clone(),
                     "set-cookie",
-                    format!("token={}; Path=/; HttpOnly; Max-Age=1209600", token),
+                    format!("token={}; Path=/; Max-Age=1209600", token),
                 )
                 .into_response()
             } else {

@@ -29,7 +29,7 @@ function getDaily(date) {
             "Access-Control-Allow-Origin": "*",
         },
         success: function(response) {
-            //console.log(response);
+            console.log(response);
             $('#status-daily-sp').prop('hidden', true);
             //console.log(date);
             var lang = window.navigator.userLanguage || window.navigator.language;
@@ -59,6 +59,7 @@ function getDaily(date) {
         },
         error: function(err) {
             $('#status-daily-sp').prop('hidden', true);
+            console.log(err);
             return err;
         }
     });
