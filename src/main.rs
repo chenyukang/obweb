@@ -77,8 +77,9 @@ fn gen_token(password: &str) -> String {
     } else {
         let data = fs::read_to_string(path).unwrap();
         let mut tokens: Vec<&str> = data.split("\n").collect();
-        if tokens.len() > 3 {
-            tokens = tokens.into_iter().take(3).collect();
+        let len = tokens.len();
+        if len > 3 {
+            tokens = tokens.into_iter().skip(len - 3).collect();
         }
         prev_data = tokens.join("\n").clone();
         if !prev_data.is_empty() {
