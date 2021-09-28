@@ -56,7 +56,7 @@ function fetchPage(e) {
             //console.log(response);
             $('#status-sp').prop('hidden', true);
             if (response != "no-page") {
-                response = response.replaceAll("![[", "\n![img](/api/images/").replaceAll(" | #x-small]]", ")\n")
+                response = response.replaceAll("![[", "\n![img](/static/images/").replaceAll(" | #x-small]]", ")\n")
                 var converter = new showdown.Converter(),
                     html = converter.makeHtml(response);
                 $('#search-content').html(html);

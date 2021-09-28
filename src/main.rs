@@ -333,7 +333,7 @@ pub async fn run_server(port: u16) {
         .and(warp::fs::file("./static/search.html"));
     let routes = routes.or(pages).or(root1).or(root2).or(daily).or(search);
 
-    let images = warp::path("api")
+    let images = warp::path("static")
         .and(warp::path("images"))
         .and(warp::get())
         .and(auth_validation())

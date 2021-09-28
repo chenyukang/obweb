@@ -49,7 +49,7 @@ function getDaily(date) {
                 /* if (response.indexOf(header) == -1) {
                     response = header + "\n\n---\n" + response;
                 } */
-                response = response.replaceAll("![[", "\n![img](/api/images/").replaceAll(" | #x-small]]", ")\n")
+                response = response.replaceAll("![[", "\n![img](/static/images/").replaceAll(" | #x-small]]", ")\n")
                 var converter = new showdown.Converter(),
                     html = converter.makeHtml(response);
                 $('#daily-content').html(html);
