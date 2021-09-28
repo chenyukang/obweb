@@ -18,7 +18,7 @@ function search(date) {
             "Access-Control-Allow-Origin": "*",
         },
         success: function(response) {
-            console.log(response);
+            //console.log(response);
             $('#status-sp').prop('hidden', true);
             if (response != "no-page") {
                 var converter = new showdown.Converter(),
@@ -40,6 +40,8 @@ function search(date) {
 function fetchPage(e) {
     console.log(e);
     var url = e.target.innerText;
+    var date = new Date();
+    let begin_date = new Date(date.setDate(date.getDate() - 1000));
     $('#status-sp').prop('hidden', false);
     $.ajax({
         url: "/api/page/" + url,
@@ -49,6 +51,7 @@ function fetchPage(e) {
         contentType: "Application/json",
         headers: {
             "Access-Control-Allow-Origin": "*",
+            "If-Modified-Since": begin_date.toISOString(),
         },
         success: function(response) {
             //console.log(response);
