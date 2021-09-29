@@ -55,6 +55,7 @@ input.visually-hidden:focus-within+label {
     margin-right: auto;
     width: 50%;
     height: 50%;
+    word-wrap: break-word;
 }
 
 .tab-content img {
