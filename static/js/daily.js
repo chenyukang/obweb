@@ -61,6 +61,11 @@ function getDaily(date) {
     $('#status-sp').prop('hidden', false);
     var date_str = dateStr(date);
     $.ajax({
+        statusCode: {
+            500: function() {
+                window.location.href = '/obweb';
+            }
+        },
         url: "/api/daily?date=" + date_str,
         crossDomain: true,
         type: 'GET',
