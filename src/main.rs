@@ -29,6 +29,12 @@ struct User {
 }
 
 #[derive(Debug, Deserialize)]
+struct Update {
+    file: String,
+    content: String,
+}
+
+#[derive(Debug, Deserialize)]
 struct DailyQuery {
     date: String,
 }
@@ -212,18 +218,22 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
 
 fn daily_query(req: &DailyQuery) -> Result<String, &'static str> {
     std::thread::spawn(|| git_pull());
-    let date_str = req.date.to_string();
-    let parsed_date = DateTime::parse_from_rfc3339(&date_str)
-        .unwrap()
-        .with_timezone(&FixedOffset::east(8 * 3600));
-    let date = parsed_date.format("%Y-%m-%d").to_string();
-    let path = format!("./ob/Daily/{}.md", date);
+    let path = format!("./ob/Daily/{}.md", req.date.to_string());
+    println!("path : {:?}", path);
     let p = Path::new(&path);
     if Path::exists(&p) {
         return Ok(fs::read_to_string(&path).expect("Unable to read file"));
     } else {
         return Err("No such file");
     }
+}
+
+fn process_update(update: &Update) -> Result<(), &'static str> {
+    std::thread::spawn(|| git_pull());
+    let path = format!("./ob/{}", update.file.to_string());
+    fs::write(path, update.content.to_string()).expect("Unable to write file");
+    git_sync();
+    Ok(())
 }
 
 fn search_query(req: &SearchQuery) -> Result<String, &'static str> {
@@ -349,6 +359,18 @@ pub async fn run_server(port: u16) {
         .untuple_one()
         .and(warp::fs::dir("./ob/"));
     let routes = routes.or(page);
+
+    let update = warp::path!("api" / "page")
+        .and(warp::post())
+        .and(auth_validation())
+        .untuple_one()
+        .and(warp::body::json())
+        .map(|update: Update| {
+            println!("update: {:?}", update);
+            process_update(&update).unwrap();
+            warp::reply::with_status("ok", http::status::StatusCode::OK).into_response()
+        });
+    let routes = routes.or(update);
 
     let login = warp::path!("api" / "login")
         .and(warp::post())

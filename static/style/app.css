@@ -48,6 +48,7 @@ input.visually-hidden:focus-within+label {
     background-color: rgb(216, 234, 240);
     text-align: left;
     word-wrap: break-word;
+    padding: 8px;
 }
 
 .tab-content img {
