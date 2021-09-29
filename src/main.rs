@@ -84,7 +84,7 @@ fn gen_token(password: &str) -> String {
         let data = fs::read_to_string(path).unwrap();
         let mut tokens: Vec<&str> = data.split("\n").collect();
         let len = tokens.len();
-        let max_len = 3;
+        let max_len = 4;
         if len > max_len {
             tokens = tokens.into_iter().skip(len - max_len).collect();
         }
