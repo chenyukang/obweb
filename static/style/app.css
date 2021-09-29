@@ -47,6 +47,7 @@ input.visually-hidden:focus-within+label {
     border: 1px outset green;
     background-color: rgb(216, 234, 240);
     text-align: left;
+    word-wrap: break-word;
 }
 
 .tab-content img {
@@ -55,7 +56,6 @@ input.visually-hidden:focus-within+label {
     margin-right: auto;
     width: 50%;
     height: 50%;
-    word-wrap: break-word;
 }
 
 .tab-content img {
