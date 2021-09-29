@@ -18,57 +18,8 @@ function showErrMsg() {
     $('#status-msg').prop('hidden', false);
 }
 
-function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-}
-
-function tryLogin() {
-    var token = getCookie('token');
-    if (token == null) {
-        $('#loginModal').modal('show');
-        return true;
-    } else {
-        //$("#loginBtn").prop("hidden", true)
-        return false;
-    }
-}
-
-App.prototype.login = function() {
-    var data = JSON.stringify({
-        username: $('#username').val(),
-        password: $('#password').val(),
-    });
-    $.ajax({
-        url: "/api/login",
-        crossDomain: true,
-        type: 'POST',
-        datatype: 'json',
-        contentType: "Application/json",
-        headers: {
-            "Access-Control-Allow-Origin": "*",
-        },
-        data: data,
-        success: function(response) {
-            if (response != "failed") {
-                var storage = window.localStorage;
-                storage.setItem('token', response);
-                $('#loginModal').modal('hide');
-                $("#loginBtn").prop("hidden", true)
-            }
-        },
-        error: function(err) {
-            console.log("There was an error saving the entry: ", err);
-        }
-    });
-};
-
 App.prototype.handleSubmit = function() {
     var elem = document.getElementById("upload-pic");
-    if (tryLogin()) {
-        return true;
-    }
     var data = JSON.stringify({
         date: new Date().toISOString(),
         tags: $('#tags').val(),
@@ -108,10 +59,6 @@ App.prototype.checkFormValidity = function() {
 };
 
 $(document).ready(function() {
-    $('#login-btn').on('click', function(event) {
-        app.login();
-    });
-
     $('#submit-btn').on('click', function(event) {
         $("#submit-btn").prop('disabled', true);
         $("#status-msg").prop('hidden', true);
@@ -161,7 +108,6 @@ $(document).ready(function() {
         }
     }
 
-    tryLogin();
 });
 
 function fileSelected(e) {

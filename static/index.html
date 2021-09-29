@@ -20,31 +20,20 @@
     <link rel="stylesheet" href="/static/style/app.css">
     <link rel="stylesheet" href="/static/style/tagsinput.css">
     <link rel="icon" href="/static/style/favicon.ico">
+    <script src="/static/js/base.js"></script>
     <script src="/static/js/app.js"></script>
 </head>
 
 <body>
     <nav class="navbar navbar-light" style="background-color: #e3f2fd;">
         <div>
-            <ul class="nav dropdown">
-                <li> <a class="navbar-brand" href="/obweb/">Obweb</a> </li>
-                <div class="dropdown">
-                    <a class="btn btn-primary dropdown-toggle" href="#" role="button" data-toggle="dropdown" id="dropdownMenuLink" aria-expanded="false">
-                        Menu
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                        <li><a class="dropdown-item" href="/static/daily.html">Daily</a></li>
-                        <li><a class="dropdown-item" href="/static/search.html">Search</a></li>
-                    </ul>
-                </div>
-            </ul>
+            <a class="navbar-brand" href="/obweb/">Obweb</a>
         </div>
 
         <div style="margin-left: 0px">
-            <button class="btn btn-warning" id="clear-btn" style="margin-left: 10px;" onclick="clearAll(this)">Clear</button>
-            <button class="btn btn-info btn-round float-right" style="margin-left: 10px;" data-toggle="modal" id="loginBtn" data-target="#loginModal">
-                Login
-            </button>
+            <a href="/static/daily.html"><button class="btn btn-secondary btn-sm" style="margin-right: 4px">Daily</button></a>
+            <a href="/static/search.html"><button class="btn btn-info btn-sm">Search</button></a>
+            <button class="btn btn-warning btn-sm" id="clear-btn" style="margin-left: 10px;" onclick="clearAll(this)">Clear</button>
         </div>
     </nav>
 
@@ -69,7 +58,7 @@
                                 <div class="form-group">
                                     <input type="password" class="form-control" id="password" placeholder="Password">
                                 </div>
-                                <button type="button" class="btn btn-info btn-block btn-round" id="login-btn">Login</button>
+                                <button type="button" class="btn btn-info btn-block btn-round" id="loginBtn">Login</button>
                             </form>
                         </div>
                     </div>

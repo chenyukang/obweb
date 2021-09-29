@@ -19,27 +19,25 @@
     <link rel="stylesheet" href="/static/style/font-awesome.min.css">
     <link rel="stylesheet" href="/static/fonts/fontawesome-webfont.ttf">
     <link rel="icon" href="/static/style/favicon.ico">
+    <script src="/static/js/base.js"></script>
     <script src="/static/js/search.js"></script>
 </head>
 
 <body>
     <nav class="navbar navbar-light" style="background-color: #e3f2fd;">
         <div>
-            <ul class="nav dropdown">
-                <li> <a class="navbar-brand" href="/obweb/">Obweb</a> </li>
-                <div class="dropdown">
-                    <a class="btn btn-primary dropdown-toggle" href="#" role="button" data-toggle="dropdown" id="dropdownMenuLink" aria-expanded="false">
-                        Menu
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                        <li><a class="dropdown-item" href="/static/daily.html">Daily</a></li>
-                        <li><a class="dropdown-item active" href="/static/search.html">Search</a></li>
-                    </ul>
-                </div>
-            </ul>
+            <a class="navbar-brand" href="/obweb/">Obweb</a>
+        </div>
+
+        <div style="margin-left: 0px">
+            <a href="/static/daily.html"><button class="btn btn-secondary btn-sm" style="margin-right: 4px">Daily</button></a>
+            <a href="/static/search.html"><button class="btn btn-info btn-sm">Search</button></a>
+            <button class="btn btn-warning btn-sm" id="clear-btn" style="margin-left: 10px;" onclick="clearAll(this)">Clear</button>
+            <!--             <button class="btn btn-info btn-round float-right btn-sm" style="margin-left: 10px;" data-toggle="modal" id="loginBtn" data-target="#loginModal">
+                Login
+            </button> -->
         </div>
     </nav>
-
 
     <div class="container">
         <div class="tab-content">
@@ -63,10 +61,10 @@
                     </div>
                 </div>
                 <div>
-                    <div class="dailyContent" hidden="true" id="page-content" style="margin-top: 30px">
+                    <div class="pageContent" hidden="true" id="page-content" style="margin-top: 30px">
                     </div>
-                    <div class="col-md-12 bg-light text-right" style="margin-top: 10px;">
-                        <button type="button" class="btn btn-secondary" hidden="true" style="float: right" id="editBtn" onclick="editPage()">Edit</button>
+                    <div class="col-md-14 bg-light text-right" style="margin-top: 10px;">
+                        <button type="button" class="btn btn-info" hidden="true" style="float: right" id="editBtn" onclick="editPage()">Edit</button>
                     </div>
                 </div>
             </div>
