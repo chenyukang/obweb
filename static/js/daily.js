@@ -1,73 +1,13 @@
-function convertTZ(date, tzString) {
-    return new Date((typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", { timeZone: tzString }));
-}
+var date = new Date();
 
 function padding(value, n) {
     return String(value).padStart(n, '0');
 }
 
-function getLocaleDateString() {
-    const formats = {
-        "zh-CN": "yyyy/MM/dd",
-        "en": "YY/MM/dd",
-        "zu-ZA": "yyyy/MM/dd",
-    };
 
-    return formats[navigator.language] || "yyyy/MM/dd";
+function dateStr(date) {
+    return date.getFullYear() + "-" + padding(date.getMonth() + 1, 2) + "-" + padding(date.getDate(), 2);
 }
-
-function getDaily(date) {
-    var res = "";
-    $('#status-daily-sp').prop('hidden', false);
-    $.ajax({
-        url: "/api/daily?date=" + date.toISOString(),
-        crossDomain: true,
-        type: 'GET',
-        datatype: 'json',
-        contentType: "Application/json",
-        headers: {
-            "Access-Control-Allow-Origin": "*",
-        },
-        success: function(response) {
-            console.log(response);
-            $('#status-daily-sp').prop('hidden', true);
-            //console.log(date);
-            var lang = window.navigator.userLanguage || window.navigator.language;
-            var date = new Date();
-            var options = {
-                year: "numeric",
-                month: "2-digit",
-                day: "numeric"
-            };
-
-            var local_date = date.toLocaleDateString(lang, options);
-            var elems = date.toLocaleDateString().split("/");
-            var local_date = elems[2] + "-" + padding(elems[0], 2) + "-" + padding(elems[1], 2);
-            console.log(local_date);
-            if (response != "no-page") {
-                //header = "## " + local_date;
-                /* if (response.indexOf(header) == -1) {
-                    response = header + "\n\n---\n" + response;
-                } */
-                response = response.replaceAll("![[", "\n![img](/static/images/").replaceAll(" | #x-small]]", ")\n")
-                var converter = new showdown.Converter(),
-                    html = converter.makeHtml(response);
-                $('#daily-content').html(html);
-            } else {
-                $('#daily-content').html("<h3>No Page</h3>" + " " + local_date)
-            }
-        },
-        error: function(err) {
-            $('#status-daily-sp').prop('hidden', true);
-            console.log(err);
-            return err;
-        }
-    });
-    console.log("res: {}", res);
-    return res;
-}
-
-var date = new Date();
 
 function nextDaily() {
     date = new Date(date.setDate(date.getDate() + 1));
@@ -81,6 +21,97 @@ function prevDaily() {
 
 function currentDaily() {
     getDaily(date);
+}
+
+
+function updatePage(file, content) {
+    $('#status-sp').prop('hidden', false);
+    $.ajax({
+        url: "/api/update",
+        crossDomain: true,
+        type: 'PUT',
+        datatype: 'json',
+        contentType: "Application/json",
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+        },
+        data: {
+            "file": file,
+            "content": content
+        },
+        success: function(response) {
+            console.log(response);
+            $('#status-sp').prop('hidden', true);
+            localStorage.setItem('page', content);
+        },
+        error: function(err) {
+            $('#status-sp').prop('hidden', true);
+            console.log(err);
+            return err;
+        }
+    });
+}
+
+
+function getDaily(date) {
+    $('#status-sp').prop('hidden', false);
+    var date_str = dateStr(date);
+    $.ajax({
+        url: "/api/daily?date=" + date_str,
+        crossDomain: true,
+        type: 'GET',
+        datatype: 'json',
+        contentType: "Application/json",
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+        },
+        success: function(response) {
+            console.log(response);
+            $('#status-sp').prop('hidden', true);
+            localStorage.setItem('page', response);
+            //console.log(date);
+            console.log(date_str)
+            if (response != "no-page") {
+                header = "## " + date_str;
+                if (response.indexOf(heaader) == -1) {
+                    response = header + "\n\n---\n" + response;
+                }
+                response = response.replaceAll("![[", "\n![img](/static/images/").replaceAll(" | #x-small]]", ")\n")
+                var converter = new showdown.Converter(),
+                    html = converter.makeHtml(response);
+                $('#daily-content').html(html);
+            } else {
+                $('#daily-content').html("<h3>No Page</h3>" + " " + date_str)
+            }
+        },
+        error: function(err) {
+            $('#status-sp').prop('hidden', true);
+            console.log(err);
+            return err;
+        }
+    });
+}
+
+function savePage() {
+    console.log("saving now ...");
+    var content = document.getElementById('daily-content');
+    var text = content.innerText;
+    var button = document.getElementById('editBtn');
+    button.innerText = 'Edit';
+    button.setAttribute('onclick', 'editPage()');
+    content.setAttribute('contenteditable', 'false');
+    content.style.backgroundColor = '#d8eaf0';
+    updatePage("Daily/" + dateStr(date), text);
+}
+
+function editPage() {
+    var content = document.getElementById('daily-content');
+    content.innerText = localStorage.getItem('page');
+    content.setAttribute('contenteditable', 'true');
+    content.style.backgroundColor = 'yellow';
+    var button = document.getElementById('editBtn');
+    button.innerText = 'Save';
+    button.setAttribute('onclick', 'savePage()');
 }
 
 $(document).ready(function() {
