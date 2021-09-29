@@ -78,8 +78,9 @@ fn gen_token(password: &str) -> String {
         let data = fs::read_to_string(path).unwrap();
         let mut tokens: Vec<&str> = data.split("\n").collect();
         let len = tokens.len();
-        if len > 3 {
-            tokens = tokens.into_iter().skip(len - 3).collect();
+        let max_len = 3;
+        if len > max_len {
+            tokens = tokens.into_iter().skip(len - max_len).collect();
         }
         prev_data = tokens.join("\n").clone();
         if !prev_data.is_empty() {
@@ -166,8 +167,8 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
         data = format!("## {}", date);
     }
     let text = req.text.to_string();
-    let mut write_content = data + "\n\n---";
-    write_content += format!("\n### {}", time).as_str();
+    let mut content = data + "\n\n---";
+    content += format!("\n### {}", time).as_str();
     if req.links.len() > 0 {
         let links = req.links.to_string();
         let links_vec: Vec<&str> = links.split(",").collect();
@@ -178,7 +179,7 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
             }
             links_text += format!("[[{}]]", link).as_str();
         }
-        write_content = format!("{}\nLinks: {}", write_content, links_text);
+        content = format!("{}\nLinks: {}", content, links_text);
     }
 
     if req.tags.len() > 0 {
@@ -191,9 +192,9 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
             }
             tags_text += format!("#{}", link).as_str();
         }
-        write_content = format!("{}\nTags: {}", write_content, tags_text);
+        content = format!("{}\nTags: {}", content, tags_text);
     }
-    write_content += format!("\n\n{}", text).as_str();
+    content += format!("\n\n{}", text).as_str();
     if req.image.len() > 0 {
         let image_buf = process_image(&req.image.to_string());
         let image_name = format!("ob-web-{}-{}.png", date, time).replace(":", "-");
@@ -201,10 +202,10 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
         let image_path = Path::new(&image_path);
         fs::write(image_path, &image_buf).unwrap();
         //println!("image buf:\n {:?}", image_buf);
-        write_content = format!("{}\n![[{} | #x-small]]\n", write_content, image_name);
+        content = format!("{}\n![[{} | #x-small]]\n", content, image_name);
     }
 
-    fs::write(&path, write_content).expect("Unable to write file");
+    fs::write(&path, content).expect("Unable to write file");
     git_sync();
     Ok(())
 }
