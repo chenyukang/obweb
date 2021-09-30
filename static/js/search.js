@@ -1,7 +1,19 @@
+function isAsciiOnly(str) {
+    for (var i = 0; i < str.length; i++)
+        if (str.charCodeAt(i) > 127)
+            return false;
+    return true;
+}
+
 function highlight(keyword) {
-    var inputText = document.getElementById("page-content");
-    var innerHTML = inputText.innerHTML;
-    inputText.innerHTML = innerHTML.replaceAll(keyword, "<span class=\"highlight\">" + keyword + "</span>");
+    if (isAsciiOnly(keyword)) {
+        var myHilitor = new Hilitor("page-content");
+        myHilitor.apply(keyword);
+    } else {
+        var inputText = document.getElementById("page-content");
+        var innerHTML = inputText.innerHTML;
+        inputText.innerHTML = innerHTML.replaceAll(keyword, "<span class=\"highlight\">" + keyword + "</span>");
+    }
 }
 
 function search() {
@@ -21,10 +33,7 @@ function search() {
             //console.log(response);
             $('#status-sp').prop('hidden', true);
             if (response != "no-page") {
-                var converter = new showdown.Converter(),
-                    html = converter.makeHtml(response);
-                $('#page-content').html(html);
-                highlight(input);
+                $('#page-content').html(renderMdToHtml(response));
                 $('#editBtn').prop('hidden', true);
                 $('#page-content').prop('hidden', false);
             } else {
@@ -58,10 +67,7 @@ function updatePage(file, content) {
             console.log(response);
             $('#status-sp').prop('hidden', true);
             localStorage.setItem('page', content);
-            response = content.replaceAll("![[", "\n![img](/static/images/").replaceAll(" | #x-small]]", ")\n")
-            var converter = new showdown.Converter(),
-                html = converter.makeHtml(response);
-            $('#page-content').html(html);
+            $('#page-content').html(renderMdToHtml(response));
             $('#page-content').prop('hidden', false);
         },
         error: function(err) {
@@ -94,10 +100,7 @@ function fetchPage(e) {
             if (response != "no-page") {
                 localStorage.setItem('page', response);
                 localStorage.setItem('file', url);
-                response = response.replaceAll("![[", "\n![img](/static/images/").replaceAll(" | #x-small]]", ")\n")
-                var converter = new showdown.Converter(),
-                    html = converter.makeHtml(response);
-                $('#page-content').html(html);
+                $('#page-content').html(renderMdToHtml(response));
                 highlight($('#searchInput').val());
                 $('#editBtn').prop('hidden', false);
                 $('#page-content').prop('hidden', false);
@@ -137,9 +140,8 @@ function editPage() {
 }
 
 $(document).ready(function() {
+    tryLogin();
     $("body").on("click", "a", function(e) {
-        // console.log("clicked");
-        // e.preventDefault(); // Prevent a link from following the URL
         fetchPage(e);
     });
 

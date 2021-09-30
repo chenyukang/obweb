@@ -147,3 +147,7 @@ function clearAll() {
 
 console.log("loaded");
 var app = new App();
+
+$(document).ready(function() {
+    tryLogin();
+});

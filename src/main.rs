@@ -2,6 +2,7 @@ use argon2::{self, Config};
 use base64::decode;
 use chrono::prelude::*;
 use chrono::DateTime;
+use glob::{glob, glob_with, MatchOptions};
 use rand::Rng;
 use serde::Deserialize;
 use std::env;
@@ -248,6 +249,30 @@ fn daily_query(req: &DailyQuery) -> Result<String, &'static str> {
     }
 }
 
+fn rand_query() -> Result<String, &'static str> {
+    use rand::seq::SliceRandom;
+    std::thread::spawn(|| git_pull());
+
+    let mut files = vec![];
+    for entry in glob("./ob/**/*.md").expect("failed") {
+        match entry {
+            Ok(path) => {
+                //println!("{:?}", path.display());
+                files.push(format!("{}", path.display()));
+            }
+            Err(e) => println!("{:?}", e),
+        }
+    }
+    let path = files.choose(&mut rand::thread_rng()).unwrap();
+    println!("path : {:?}", path);
+    let p = Path::new(&path);
+    if Path::exists(&p) {
+        return Ok(fs::read_to_string(&path).expect("Unable to read file"));
+    } else {
+        return Err("No such file");
+    }
+}
+
 fn process_update(update: &Update) -> Result<(), &'static str> {
     std::thread::spawn(|| git_pull());
     let path = format!("./ob/{}", update.file.to_string());
@@ -258,7 +283,6 @@ fn process_update(update: &Update) -> Result<(), &'static str> {
 
 fn search_query(req: &SearchQuery) -> Result<String, &'static str> {
     std::thread::spawn(|| git_pull());
-    use glob::{glob, glob_with, MatchOptions};
 
     let mut res = String::new();
     let mut files = vec![];
@@ -431,6 +455,20 @@ pub async fn run_server(port: u16) {
             }
         });
     let routes = routes.or(daily);
+
+    let rand = warp::path!("api" / "rand")
+        .and(warp::get())
+        .and(auth_validation())
+        .untuple_one()
+        .map(|| {
+            let res = rand_query();
+            if res.is_ok() {
+                format!("{}", res.unwrap())
+            } else {
+                format!("no-page")
+            }
+        });
+    let routes = routes.or(rand);
 
     let search = warp::path!("api" / "search")
         .and(warp::get())

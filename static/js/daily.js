@@ -4,7 +4,6 @@ function padding(value, n) {
     return String(value).padStart(n, '0');
 }
 
-
 function dateStr(date) {
     return date.getFullYear() + "-" + padding(date.getMonth() + 1, 2) + "-" + padding(date.getDate(), 2);
 }
@@ -22,40 +21,6 @@ function prevDaily() {
 function currentDaily() {
     getDaily(date);
 }
-
-
-function updatePage(file, content) {
-    $('#status-sp').prop('hidden', false);
-    $.ajax({
-        url: "/api/page",
-        crossDomain: true,
-        type: 'POST',
-        datatype: 'json',
-        contentType: "Application/json",
-        headers: {
-            "Access-Control-Allow-Origin": "*",
-        },
-        data: JSON.stringify({
-            "file": file,
-            "content": content
-        }),
-        success: function(response) {
-            console.log(response);
-            $('#status-sp').prop('hidden', true);
-            localStorage.setItem('page', content);
-            response = content.replaceAll("![[", "\n![img](/static/images/").replaceAll(" | #x-small]]", ")\n")
-            var converter = new showdown.Converter(),
-                html = converter.makeHtml(response);
-            $('#page-content').html(html);
-        },
-        error: function(err) {
-            $('#status-sp').prop('hidden', true);
-            console.log(err);
-            return err;
-        }
-    });
-}
-
 
 function getDaily(date) {
     $('#status-sp').prop('hidden', false);
@@ -85,10 +50,7 @@ function getDaily(date) {
                 if (response.indexOf(header) == -1) {
                     response = header + "\n\n---\n" + response;
                 }
-                response = response.replaceAll("![[", "\n![img](/static/images/").replaceAll(" | #x-small]]", ")\n")
-                var converter = new showdown.Converter(),
-                    html = converter.makeHtml(response);
-                $('#page-content').html(html);
+                $('#page-content').html(renderMdToHtml(response));
             } else {
                 $('#page-content').html("<h3>No Page</h3>" + " " + date_str)
             }
@@ -99,28 +61,6 @@ function getDaily(date) {
             return err;
         }
     });
-}
-
-function savePage() {
-    console.log("saving now ...");
-    var content = document.getElementById('page-content');
-    var text = content.innerText;
-    var button = document.getElementById('editBtn');
-    button.innerText = 'Edit';
-    button.setAttribute('onclick', 'editPage()');
-    content.setAttribute('contenteditable', 'false');
-    content.style.backgroundColor = '#d8eaf0';
-    updatePage("Daily/" + dateStr(date) + ".md", text);
-}
-
-function editPage() {
-    var content = document.getElementById('page-content');
-    content.innerText = localStorage.getItem('page');
-    content.setAttribute('contenteditable', 'true');
-    content.style.backgroundColor = 'yellow';
-    var button = document.getElementById('editBtn');
-    button.innerText = 'Save';
-    button.setAttribute('onclick', 'savePage()');
 }
 
 $(document).ready(function() {
