@@ -43,6 +43,7 @@ function getDaily(date) {
             console.log(response);
             $('#status-sp').prop('hidden', true);
             localStorage.setItem('page', response);
+            localStorage.setItem('file', 'Daily/' + date_str + '.md');
             //console.log(date);
             console.log(date_str)
             if (response != "no-page") {

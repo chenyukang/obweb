@@ -76,6 +76,63 @@ function Login() {
     });
 };
 
+function isAsciiOnly(str) {
+    for (var i = 0; i < str.length; i++)
+        if (str.charCodeAt(i) > 127)
+            return false;
+    return true;
+}
+
+function highlight(keyword) {
+    if (isAsciiOnly(keyword)) {
+        var myHilitor = new Hilitor("page-content");
+        myHilitor.apply(keyword);
+    } else {
+        var inputText = document.getElementById("page-content");
+        var innerHTML = inputText.innerHTML;
+        inputText.innerHTML = innerHTML.replaceAll(keyword, "<span class=\"highlight\">" + keyword + "</span>");
+    }
+}
+
+function fetchPage(url) {
+    var date = new Date();
+    let begin_date = new Date(date.setDate(date.getDate() - 1000));
+    $('#status-sp').prop('hidden', false);
+    $.ajax({
+        url: "/api/page/" + url,
+        crossDomain: true,
+        type: 'GET',
+        datatype: 'json',
+        contentType: "Application/json",
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "If-Modified-Since": begin_date.toISOString(),
+        },
+        success: function(response) {
+            //console.log(response);
+            $('#status-sp').prop('hidden', true);
+            if (response != "no-page") {
+                localStorage.setItem('page', response);
+                localStorage.setItem('file', url);
+                $('#page-content').html(renderMdToHtml(response));
+                var keyword = $('#searchInput');
+                if (keyword != null) {
+                    highlight(keyword.val());
+                }
+                $('#editBtn').prop('hidden', false);
+                $('#page-content').prop('hidden', false);
+                console.log("finished ...");
+            } else {
+                $('#page-content').html("<h3>No Page</h3>" + " " + local_date)
+            }
+        },
+        error: function(err) {
+            $('#status-sp').prop('hidden', true);
+            return err;
+        }
+    });
+}
+
 function updatePage(file, content) {
     $('#status-sp').prop('hidden', false);
     $.ajax({
@@ -117,7 +174,7 @@ function savePage() {
     button.setAttribute('onclick', 'editPage()');
     content.setAttribute('contenteditable', 'false');
     content.style.backgroundColor = '#d8eaf0';
-    updatePage("Daily/" + dateStr(date) + ".md", text);
+    updatePage(localStorage.getItem('file'), text);
 }
 
 function editPage() {
