@@ -221,7 +221,7 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
             let image_path = format!("./ob/Pics/{}", image_name);
             let image_path = Path::new(&image_path);
             fs::write(image_path, &image_buf).unwrap();
-            content = format!("{}\n![[{} | #x-small]]\n", content, image_name);
+            content = format!("{}\n\n![[{} | #x-small]]\n", content, image_name);
         }
     }
 
