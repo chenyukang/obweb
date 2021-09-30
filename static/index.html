@@ -35,7 +35,7 @@
             <a href="/static/search.html"><button class="btn btn-success btn-sm">Find</button></a>
             <a href="/static/rand.html"><button class="btn btn-secondary btn-sm">Rand</button></a>
             <a href="/static/todo.html"><button class="btn btn-info btn-sm">Todo</button></a>
-            <button class="btn btn-warning btn-sm" id="clear-btn" onclick="clearAll(this)">Clear</button>
+
         </div>
     </nav>
 
@@ -104,6 +104,7 @@
                         <div class="col-md-8">
                             <input type="file" id="fileElem" class="visually-hidden" accept="image/*" onchange="fileSelected(this)" />
                             <label for="fileElem" class="noselect">图片</label>
+                            <button class="btn btn-warning" id="clear-btn" onclick="clearAll(this)">清空</button>
                             <button class="btn btn-success float-right" id="submit-btn" type="submit" style="margin-left: 4px;" disabled>提交</button>
                         </div>
                     </div>
