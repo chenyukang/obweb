@@ -171,49 +171,69 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
         .with_timezone(&FixedOffset::east(8 * 3600));
     let date = parsed_date.format("%Y-%m-%d").to_string();
     let time = parsed_date.format("%H:%M:%S").to_string();
-    println!("date time: {:?}", date);
     let path = gen_page(&date, &page_str);
+
     let mut data = fs::read_to_string(&path).expect("Unable to read file");
-    if data.len() == 0 {
+    if data.len() == 0 && page_str != "todo" {
         data = format!("## {}", date);
     }
+
+    let mut content = String::new();
     let text = req.text.to_string();
-    let mut content = data + "\n\n---";
-    content += format!("\n### {}", time).as_str();
-    if req.links.len() > 0 {
-        let links = req.links.to_string();
-        let links_vec: Vec<&str> = links.split(",").collect();
-        let mut links_text = String::new();
-        for link in links_vec {
-            if links_text.len() > 0 {
-                links_text += " ";
-            }
-            links_text += format!("[[{}]]", link).as_str();
+
+    // generate content according to input
+    {
+        if page_str == "todo" {
+            content += format!("\n### {} {}", date, time).as_str();
+        } else {
+            content += format!("\n### {}", time).as_str();
         }
-        content = format!("{}\nLinks: {}", content, links_text);
+        if req.links.len() > 0 {
+            let links = req.links.to_string();
+            let links_vec: Vec<&str> = links.split(",").collect();
+            let mut links_text = String::new();
+            for link in links_vec {
+                if links_text.len() > 0 {
+                    links_text += " ";
+                }
+                links_text += format!("[[{}]]", link).as_str();
+            }
+            content = format!("{}\nLinks: {}", content, links_text);
+        }
+
+        if req.tags.len() > 0 {
+            let tags = req.tags.to_string();
+            let tags_vec: Vec<&str> = tags.split(",").collect();
+            let mut tags_text = String::new();
+            for link in tags_vec {
+                if tags_text.len() > 0 {
+                    tags_text += " ";
+                }
+                tags_text += format!("#{}", link).as_str();
+            }
+            content = format!("{}\nTags: {}", content, tags_text);
+        }
+        let append = if page_str == "todo" {
+            format!("- [ ] {}", text)
+        } else {
+            text
+        };
+        content += format!("\n{}", append).as_str();
+        if req.image.len() > 0 {
+            let image_buf = process_image(&req.image.to_string());
+            let image_name = format!("ob-web-{}-{}.png", date, time).replace(":", "-");
+            let image_path = format!("./ob/Pics/{}", image_name);
+            let image_path = Path::new(&image_path);
+            fs::write(image_path, &image_buf).unwrap();
+            content = format!("{}\n![[{} | #x-small]]\n", content, image_name);
+        }
     }
 
-    if req.tags.len() > 0 {
-        let tags = req.tags.to_string();
-        let tags_vec: Vec<&str> = tags.split(",").collect();
-        let mut tags_text = String::new();
-        for link in tags_vec {
-            if tags_text.len() > 0 {
-                tags_text += " ";
-            }
-            tags_text += format!("#{}", link).as_str();
-        }
-        content = format!("{}\nTags: {}", content, tags_text);
-    }
-    content += format!("\n\n{}", text).as_str();
-    if req.image.len() > 0 {
-        let image_buf = process_image(&req.image.to_string());
-        let image_name = format!("ob-web-{}-{}.png", date, time).replace(":", "-");
-        let image_path = format!("./ob/Pics/{}", image_name);
-        let image_path = Path::new(&image_path);
-        fs::write(image_path, &image_buf).unwrap();
-        //println!("image buf:\n {:?}", image_buf);
-        content = format!("{}\n![[{} | #x-small]]\n", content, image_name);
+    if page_str == "todo" {
+        content = format!("{}\n---\n", content);
+        content = format!("{}\n{}", content, data);
+    } else {
+        content = data + "\n" + content.as_str() + "\n";
     }
 
     fs::write(&path, content).expect("Unable to write file");
