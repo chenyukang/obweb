@@ -13,24 +13,27 @@ function showLoginModal() {
     console.log("please login");
 }
 
+// Try to verify token in cookie, 
+// if it's not valid we need to show up login modal
 function tryLogin() {
     var token = getCookie('token');
     if (token == null) {
         showLoginModal();
     } else {
-        var data = JSON.stringify({
-            token: token
-        });
         $.ajax({
+            statusCode: {
+                500: function() {
+                    showLoginModal();
+                }
+            },
             url: "/api/verify",
             crossDomain: true,
-            type: 'POST',
+            type: 'GET',
             datatype: 'json',
             contentType: "Application/json",
             headers: {
                 "Access-Control-Allow-Origin": "*",
             },
-            data: data,
             success: function(response) {
                 if (response != "failed") {
                     $('#loginModal').modal('hide');
@@ -39,7 +42,7 @@ function tryLogin() {
                 }
             },
             error: function(err) {
-                console.log("There was an error saving the entry: ", err);
+                console.log("TryLogin error: ", err);
             }
         });
     }

@@ -29,11 +29,6 @@ struct User {
 }
 
 #[derive(Debug, Deserialize)]
-struct TokenVerify {
-    token: String,
-}
-
-#[derive(Debug, Deserialize)]
 struct Update {
     file: String,
     content: String,
@@ -416,15 +411,10 @@ pub async fn run_server(port: u16) {
     let routes = routes.or(login);
 
     let verify = warp::path!("api" / "verify")
-        .and(warp::post())
-        .and(warp::body::json())
-        .map(|info: TokenVerify| {
-            if verify_token(&info.token) {
-                warp::reply::reply().into_response()
-            } else {
-                warp::reply::with_status("failed", http::StatusCode::OK).into_response()
-            }
-        });
+        .and(warp::get())
+        .and(auth_validation())
+        .untuple_one()
+        .map(|| warp::reply::reply().into_response());
     let routes = routes.or(verify);
 
     let daily = warp::path!("api" / "daily")
