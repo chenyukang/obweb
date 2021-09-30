@@ -112,6 +112,7 @@ function fetchPage(url) {
             //console.log(response);
             $('#status-sp').prop('hidden', true);
             if (response != "no-page") {
+                console.log("fetchPage");
                 localStorage.setItem('page', response);
                 localStorage.setItem('file', url);
                 $('#page-content').html(renderMdToHtml(response));
@@ -119,6 +120,7 @@ function fetchPage(url) {
                 if (keyword != null) {
                     highlight(keyword.val());
                 }
+
                 $('#editBtn').prop('hidden', false);
                 $('#page-content').prop('hidden', false);
                 console.log("finished ...");
@@ -152,10 +154,8 @@ function updatePage(file, content) {
             console.log(response);
             $('#status-sp').prop('hidden', true);
             localStorage.setItem('page', content);
-            response = content.replaceAll("![[", "\n![img](/static/images/").replaceAll(" | #x-small]]", ")\n")
-            var converter = new showdown.Converter(),
-                html = converter.makeHtml(response);
-            $('#page-content').html(html);
+            localStorage.setItem('file', file);
+            $('#page-content').html(renderMdToHtml(content));
         },
         error: function(err) {
             $('#status-sp').prop('hidden', true);

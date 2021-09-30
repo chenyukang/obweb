@@ -29,62 +29,6 @@ function search() {
     });
 }
 
-
-function updatePage(file, content) {
-    $('#status-sp').prop('hidden', false);
-    $.ajax({
-        url: "/api/page",
-        crossDomain: true,
-        type: 'POST',
-        datatype: 'json',
-        contentType: "Application/json",
-        headers: {
-            "Access-Control-Allow-Origin": "*",
-        },
-        data: JSON.stringify({
-            "file": file,
-            "content": content
-        }),
-        success: function(response) {
-            console.log(response);
-            $('#status-sp').prop('hidden', true);
-            localStorage.setItem('page', content);
-            $('#page-content').html(renderMdToHtml(response));
-            $('#page-content').prop('hidden', false);
-        },
-        error: function(err) {
-            $('#status-sp').prop('hidden', true);
-            console.log(err);
-            return err;
-        }
-    });
-}
-
-
-
-
-function savePage() {
-    console.log("saving now ...");
-    var content = document.getElementById('page-content');
-    var text = content.innerText;
-    var button = document.getElementById('editBtn');
-    button.innerText = 'Edit';
-    button.setAttribute('onclick', 'editPage()');
-    content.setAttribute('contenteditable', 'false');
-    content.style.backgroundColor = '#d8eaf0';
-    updatePage(localStorage.getItem('file'), text);
-}
-
-function editPage() {
-    var content = document.getElementById('page-content');
-    content.innerText = localStorage.getItem('page');
-    content.setAttribute('contenteditable', 'true');
-    content.style.backgroundColor = 'yellow';
-    var button = document.getElementById('editBtn');
-    button.innerText = 'Save';
-    button.setAttribute('onclick', 'savePage()');
-}
-
 $(document).ready(function() {
     tryLogin();
     $("body").on("click", "a", function(e) {

@@ -17,9 +17,17 @@ function getRand() {
         success: function(response) {
             console.log(response);
             $('#status-sp').prop('hidden', true);
-            localStorage.setItem('page', response);
-            if (response != "no-page") {
-                $('#page-content').html(renderMdToHtml(response));
+            content = response[1]
+            file = response[0]
+            localStorage.setItem('page', content);
+            localStorage.setItem('file', file);
+            var fileName = document.getElementById('fileName');
+            console.log(fileName);
+            if (fileName != null) {
+                fileName.innerText = file;
+            }
+            if (content != "no-page") {
+                $('#page-content').html(renderMdToHtml(content));
             } else {
                 $('#page-content').html("<h3>No Page</h3>")
             }

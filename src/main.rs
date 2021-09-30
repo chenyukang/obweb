@@ -249,7 +249,7 @@ fn daily_query(req: &DailyQuery) -> Result<String, &'static str> {
     }
 }
 
-fn rand_query() -> Result<String, &'static str> {
+fn rand_query() -> Result<(String, String), &'static str> {
     use rand::seq::SliceRandom;
     std::thread::spawn(|| git_pull());
 
@@ -267,7 +267,10 @@ fn rand_query() -> Result<String, &'static str> {
     println!("path : {:?}", path);
     let p = Path::new(&path);
     if Path::exists(&p) {
-        return Ok(fs::read_to_string(&path).expect("Unable to read file"));
+        return Ok((
+            path.to_string().replace("ob/", ""),
+            fs::read_to_string(&path).expect("Unable to read file"),
+        ));
     } else {
         return Err("No such file");
     }
@@ -462,11 +465,7 @@ pub async fn run_server(port: u16) {
         .untuple_one()
         .map(|| {
             let res = rand_query();
-            if res.is_ok() {
-                format!("{}", res.unwrap())
-            } else {
-                format!("no-page")
-            }
+            warp::reply::json(&res.unwrap())
         });
     let routes = routes.or(rand);
 
