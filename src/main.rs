@@ -230,7 +230,7 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
     }
 
     if page_str == "todo" {
-        content = format!("{}\n---\n", content);
+        content = format!("{}\n\n---\n", content);
         content = format!("{}\n{}", content, data);
     } else {
         content = data + "\n" + content.as_str() + "\n";
