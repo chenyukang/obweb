@@ -187,8 +187,27 @@ function editPage() {
     button.setAttribute('onclick', 'savePage()');
 }
 
+function preprocessImage(response) {
+    var result = ""
+    var left = response;
+    var last = 0;
+    while (left.indexOf("![[") != -1) {
+        var prev = left.substring(0, left.indexOf("![["));
+        result += prev;
+        var start = left.indexOf("![[") + 3;
+        var end = left.indexOf("]]", start);
+        var image = left.substring(start, end);
+        var image_url = image.split("|")[0].trim();
+        result += "![img](/static/images/" + image_url.replaceAll(' ', '%20') + ")";
+        left = left.substring(end + 2);
+        last = end + 2;
+    }
+    result += left;
+    return result;
+}
+
 function renderMdToHtml(response) {
-    response = response.replaceAll("![[", "\n![img](/static/images/").replaceAll(" | #x-small]]", ")\n")
+    var result = preprocessImage(response);
     var converter = new showdown.Converter();
-    return converter.makeHtml(response);
+    return converter.makeHtml(result);
 }

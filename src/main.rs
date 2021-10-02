@@ -110,6 +110,7 @@ fn git_pull() {
 }
 
 fn git_sync() {
+    git_pull();
     let child = Command::new("git")
         .current_dir("./ob")
         .args(&["add", "."])
@@ -170,7 +171,8 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
     let path = gen_page(&date, &page_str);
 
     let mut data = fs::read_to_string(&path).expect("Unable to read file");
-    if data.len() == 0 && page_str != "todo" {
+    if data.len() == 0 && page_str.is_empty() {
+        // Add date as a header for daily page
         data = format!("## {}", date);
     }
 
@@ -179,11 +181,12 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
 
     // generate content according to input
     {
-        if page_str == "todo" {
+        if !page_str.is_empty() {
             content += format!("\n### {} {}", date, time).as_str();
         } else {
             content += format!("\n### {}", time).as_str();
         }
+        // Currently I treat links as tags.
         if req.links.len() > 0 {
             let links = req.links.to_string();
             let links_vec: Vec<&str> = links.split(",").collect();
@@ -196,25 +199,12 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
             }
             content = format!("{}\nLinks: {}", content, links_text);
         }
-
-        if req.tags.len() > 0 {
-            let tags = req.tags.to_string();
-            let tags_vec: Vec<&str> = tags.split(",").collect();
-            let mut tags_text = String::new();
-            for link in tags_vec {
-                if tags_text.len() > 0 {
-                    tags_text += " ";
-                }
-                tags_text += format!("#{}", link).as_str();
-            }
-            content = format!("{}\nTags: {}", content, tags_text);
-        }
         let append = if page_str == "todo" {
             format!("- [ ] {}", text)
         } else {
             text
         };
-        content += format!("\n{}", append).as_str();
+        content += format!("\n\n{}", append).as_str();
         if req.image.len() > 0 {
             let image_buf = process_image(&req.image.to_string());
             let image_name = format!("ob-web-{}-{}.png", date, time).replace(":", "-");
@@ -225,6 +215,7 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
         }
     }
 
+    // If it's a todo, we add new content from head to tail
     if page_str == "todo" {
         content = format!("{}\n\n---\n", content);
         content = format!("{}\n{}", content, data);
