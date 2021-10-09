@@ -88,10 +88,18 @@ function clearAll() {
     $("#upload-pic").prop('hidden', true);
     $('#status-sp').prop('hidden', true);
     $("#upload-pic").prop('src', "")
-    window.localStorage.removeItem("content");
     window.localStorage.removeItem("links");
     window.localStorage.removeItem("page");
+    clearInput();
+}
+
+function clearInput() {
     $('#content').val('');
+    window.localStorage.removeItem("content");
+}
+
+function enableBtn() {
+    $("#submit-btn").prop('disabled', (!app.checkFormValidity()) || ($('#content').val() == ""));
 }
 
 var app = new App();
@@ -120,15 +128,17 @@ $(document).ready(function() {
     });
 
     $('#submit-btn').on('mouseover', function() {
-        $("#submit-btn").prop('disabled', !app.checkFormValidity());
+        enableBtn();
     });
 
     $('#links').on('change', function() {
         window.localStorage.setItem("links", $('#links').val());
+        enableBtn();
     });
 
     $('#page').on('change', function() {
         window.localStorage.setItem("page", $('#page').val());
+        enableBtn();
     });
 
     if (window.localStorage.getItem("content") != null) {
