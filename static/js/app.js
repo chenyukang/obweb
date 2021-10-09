@@ -58,58 +58,6 @@ App.prototype.checkFormValidity = function() {
     return document.getElementById('journal-entry').checkValidity();
 };
 
-$(document).ready(function() {
-    $('#submit-btn').on('click', function(event) {
-        $("#submit-btn").prop('disabled', true);
-        $("#status-msg").prop('hidden', true);
-        $('#status-sp').prop('hidden', false);
-        event.preventDefault();
-        app.handleSubmit();
-    });
-
-    $('#content').on('input', function() {
-        $("#submit-btn").prop('disabled', false);
-    });
-
-    $('#content').on('change', function() {
-        var content = $('#content').val();
-        window.localStorage.setItem("content", content);
-    });
-
-    $('#submit-btn').on('mouseover', function() {
-        $("#submit-btn").prop('disabled', !app.checkFormValidity());
-    });
-
-    if (window.localStorage.getItem("content") != null) {
-        $('#content').val(window.localStorage.getItem("content"));
-    }
-
-    document.getElementById('content').onpaste = function(event) {
-        var items = (event.clipboardData || event.originalEvent.clipboardData).items;
-        JSON.stringify(items);
-        // will give you the mime types
-        // find pasted image among pasted items
-        var blob = null;
-        for (var i = 0; i < items.length; i++) {
-            if (items[i].type.indexOf("image") === 0) {
-                blob = items[i].getAsFile();
-                break;
-            }
-        }
-        // load image if there is a pasted image
-        if (blob !== null) {
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                console.log(event.target.result); // data url!
-                $("#upload-pic").prop("src", e.target.result);
-                $("#upload-pic").prop("hidden", false);
-            };
-            reader.readAsDataURL(blob);
-        }
-    }
-
-});
-
 function fileSelected(e) {
     const file = e.files[0];
     if (!file) {
@@ -145,9 +93,61 @@ function clearAll() {
     $('#content').val('');
 }
 
-console.log("loaded");
 var app = new App();
 
 $(document).ready(function() {
     tryLogin();
+
+    $('#submit-btn').on('click', function(event) {
+        $("#submit-btn").prop('disabled', true);
+        $("#status-msg").prop('hidden', true);
+        $('#status-sp').prop('hidden', false);
+        event.preventDefault();
+        app.handleSubmit();
+    });
+
+    $('#content').on('input', function() {
+        $("#submit-btn").prop('disabled', false);
+    });
+
+    $('#content').on('change', function() {
+        var content = $('#content').val();
+        window.localStorage.setItem("content", content);
+    });
+
+    $('#submit-btn').on('mouseover', function() {
+        $("#submit-btn").prop('disabled', !app.checkFormValidity());
+    });
+
+    $('#loginBtn').on('click', function() {
+        Login();
+    });
+
+    if (window.localStorage.getItem("content") != null) {
+        $('#content').val(window.localStorage.getItem("content"));
+    }
+
+    document.getElementById('content').onpaste = function(event) {
+        var items = (event.clipboardData || event.originalEvent.clipboardData).items;
+        JSON.stringify(items);
+        // will give you the mime types
+        // find pasted image among pasted items
+        var blob = null;
+        for (var i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf("image") === 0) {
+                blob = items[i].getAsFile();
+                break;
+            }
+        }
+        // load image if there is a pasted image
+        if (blob !== null) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                console.log(event.target.result); // data url!
+                $("#upload-pic").prop("src", e.target.result);
+                $("#upload-pic").prop("hidden", false);
+            };
+            reader.readAsDataURL(blob);
+        }
+    }
 });

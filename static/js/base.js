@@ -53,6 +53,7 @@ function Login() {
         username: $('#username').val(),
         password: $('#password').val(),
     });
+    console.log(data);
     $.ajax({
         url: "/api/login",
         crossDomain: true,
@@ -71,7 +72,7 @@ function Login() {
             }
         },
         error: function(err) {
-            console.log("There was an error saving the entry: ", err);
+            console.log("There was an error when login: ", err);
         }
     });
 };
@@ -166,7 +167,6 @@ function updatePage(file, content) {
 }
 
 function savePage() {
-    console.log("saving now ...");
     var content = document.getElementById('page-content');
     var text = content.innerText;
     var button = document.getElementById('editBtn');
