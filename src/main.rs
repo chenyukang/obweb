@@ -16,7 +16,6 @@ use warp::{reject, Filter, Rejection, Reply};
 #[derive(Deserialize, Debug)]
 pub struct Request {
     pub date: String,
-    pub tags: String,
     pub links: String,
     pub text: String,
     pub image: String,
