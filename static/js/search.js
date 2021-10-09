@@ -1,4 +1,5 @@
 function search() {
+    setSearchDefault();
     var input = $('#searchInput').val();
     //console.log(input);
     $('#status-sp').prop('hidden', false);
@@ -16,7 +17,7 @@ function search() {
             $('#status-sp').prop('hidden', true);
             if (response != "no-page") {
                 $('#page-content').html(renderMdToHtml(response));
-                $('#editBtn').prop('hidden', true);
+                $('#pageNavBar').prop('hidden', true);
                 $('#page-content').prop('hidden', false);
             } else {
                 $('#page-content').html("<h3>No Page</h3>" + " " + local_date)

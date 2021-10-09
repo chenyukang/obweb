@@ -109,13 +109,20 @@ function fetchPage(url) {
                 console.log("fetchPage");
                 localStorage.setItem('page-content', response);
                 localStorage.setItem('file', url);
+
+                var fileName = document.getElementById('fileName');
+                if (fileName != null) {
+                    fileName.innerText = url;
+                }
+
                 $('#page-content').html(renderMdToHtml(response));
                 var keyword = $('#searchInput');
                 if (keyword != null) {
                     highlight(keyword.val());
                 }
 
-                $('#editBtn').prop('hidden', false);
+                $('#pageNavBar').prop('hidden', false);
+                $('#fileName').prop('hidden', false);
                 $('#page-content').prop('hidden', false);
                 console.log("finished ...");
             } else {
@@ -159,15 +166,29 @@ function updatePage(file, content) {
     });
 }
 
-function savePage() {
+function setSearchDefault() {
+    $('#pageNavbar').prop('hidden', true);
+    $('#fileName').prop('hidden', true);
     var content = document.getElementById('page-content');
-    var text = content.innerText;
+    content.setAttribute('contenteditable', 'false');
+    content.style.backgroundColor = '#d8eaf0';
+
     var button = document.getElementById('editBtn');
     button.innerText = 'Edit';
     button.setAttribute('onclick', 'editPage()');
-    content.setAttribute('contenteditable', 'false');
-    content.style.backgroundColor = '#d8eaf0';
-    updatePage(localStorage.getItem('file'), text);
+}
+
+function savePage() {
+    setSearchDefault();
+    var content = document.getElementById('page-content');
+    var text = content.innerText;
+    var prev_content = localStorage.getItem('page-content');
+    if (prev_content != text) {
+        updatePage(localStorage.getItem('file'), text);
+    } else {
+        console.log("no change");
+        $('#page-content').html(renderMdToHtml(prev_content));
+    }
 }
 
 function editPage() {

@@ -40,12 +40,16 @@
     <div class="container">
         <div class="tab-content">
             <div id="search">
-                <div class="input-group" style="margin-top: 30px">
-                    <input type="text" class="form-control" placeholder="search ..." id="searchInput">
-                    <div class="input-group-append">
-                        <button class="btn btn-secondary" type="button" id="searchBtn" style="margin-left: 5px" onclick="search()">
-                    <i class="fa fa-search"></i>
-                  </button>
+                <div class="row">
+                    <div class="col-md-10">
+                        <div class="input-group" style="margin-top: 30px">
+                            <input type="text" class="form-control" placeholder="search ..." id="searchInput">
+                            <div class="input-group-append">
+                                <button class="btn btn-secondary" type="button" id="searchBtn" style="margin-left: 5px" onclick="search()">
+                                <i class="fa fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="row">
@@ -58,14 +62,27 @@
                         </div>
                     </div>
                 </div>
-                <div>
-                    <div class="pageContent" hidden="true" id="page-content" style="margin-top: 30px">
+                <div class="row">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-6">
+                        <div class="text-center" style="margin-top: 20px;">
+                            <h4><span class="badge badge-secondary" id="fileName"></span></h4>
+                        </div>
                     </div>
-                    <div class="col-md-14 bg-light text-right" style="margin-top: 10px;">
-                        <button type="button" class="btn btn-info" hidden="true" style="float: right" id="editBtn" onclick="editPage()">Edit</button>
+                    <div class="col-md-2"></div>
+                </div>
+                <div class="row card sticky-top" style="margin-top: 10px;">
+                    <div class="col-md-10 text-right" id="pageNavBar" hidden="true">
+                        <button type="button" class="btn btn-info" style="float: left" id="backBtn" onclick="search()">Back</button>
+                        <button type="button" class="btn btn-info" id="editBtn" onclick="editPage()">Edit</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-10">
+                        <div class="pageContent" hidden="true" id="page-content">
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 </body>

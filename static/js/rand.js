@@ -21,8 +21,8 @@ function getRand() {
             file = response[0]
             localStorage.setItem('page-content', content);
             localStorage.setItem('file', file);
+
             var fileName = document.getElementById('fileName');
-            console.log(fileName);
             if (fileName != null) {
                 fileName.innerText = file;
             }
