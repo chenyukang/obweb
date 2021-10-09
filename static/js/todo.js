@@ -17,7 +17,7 @@ function getRand() {
         success: function(response) {
             console.log(response);
             $('#status-sp').prop('hidden', true);
-            localStorage.setItem('page', response);
+            localStorage.setItem('page-content', response);
             //localStorage.setItem('file', )
             if (response != "no-page") {
                 $('#page-content').html(renderMdToHtml(response));

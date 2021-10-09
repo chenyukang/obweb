@@ -19,7 +19,7 @@ function getRand() {
             $('#status-sp').prop('hidden', true);
             content = response[1]
             file = response[0]
-            localStorage.setItem('page', content);
+            localStorage.setItem('page-content', content);
             localStorage.setItem('file', file);
             var fileName = document.getElementById('fileName');
             console.log(fileName);

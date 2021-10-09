@@ -42,7 +42,7 @@ function getDaily(date) {
         success: function(response) {
             console.log(response);
             $('#status-sp').prop('hidden', true);
-            localStorage.setItem('page', response);
+            localStorage.setItem('page-content', response);
             localStorage.setItem('file', 'Daily/' + date_str + '.md');
             //console.log(date);
             console.log(date_str)

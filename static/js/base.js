@@ -114,7 +114,7 @@ function fetchPage(url) {
             $('#status-sp').prop('hidden', true);
             if (response != "no-page") {
                 console.log("fetchPage");
-                localStorage.setItem('page', response);
+                localStorage.setItem('page-content', response);
                 localStorage.setItem('file', url);
                 $('#page-content').html(renderMdToHtml(response));
                 var keyword = $('#searchInput');
@@ -154,7 +154,7 @@ function updatePage(file, content) {
         success: function(response) {
             console.log(response);
             $('#status-sp').prop('hidden', true);
-            localStorage.setItem('page', content);
+            localStorage.setItem('page-content', content);
             localStorage.setItem('file', file);
             $('#page-content').html(renderMdToHtml(content));
         },
@@ -179,7 +179,7 @@ function savePage() {
 
 function editPage() {
     var content = document.getElementById('page-content');
-    content.innerText = localStorage.getItem('page');
+    content.innerText = localStorage.getItem('page-content');
     content.setAttribute('contenteditable', 'true');
     content.style.backgroundColor = 'yellow';
     var button = document.getElementById('editBtn');
