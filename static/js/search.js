@@ -29,6 +29,7 @@ function search() {
     });
 }
 
+
 $(document).ready(function() {
     tryLogin();
     $("body").on("click", "a", function(e) {
