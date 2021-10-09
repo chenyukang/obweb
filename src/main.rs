@@ -2,7 +2,7 @@ use argon2::{self, Config};
 use base64::decode;
 use chrono::prelude::*;
 use chrono::DateTime;
-use glob::{glob, glob_with, MatchOptions};
+use glob::glob;
 use rand::Rng;
 use serde::Deserialize;
 use std::env;
@@ -279,30 +279,20 @@ fn search_query(req: &SearchQuery) -> Result<String, &'static str> {
 
     let mut res = String::new();
     let mut files = vec![];
+    let search_key = req.keyword.to_ascii_lowercase();
 
-    let pattern = format!("./ob/**/*{}*.md", req.keyword);
-    let options = MatchOptions {
-        case_sensitive: false,
-        ..Default::default()
-    };
-    for entry in glob_with(&pattern, options).expect("failed") {
-        match entry {
-            Ok(path) => {
-                //println!("{:?}", path.display());
-                files.push((format!("{}", path.display()), fs::metadata(path).unwrap()));
-            }
-            Err(e) => println!("{:?}", e),
-        }
-    }
     for entry in glob("./ob/**/*.md").expect("failed") {
         match entry {
             Ok(path) => {
                 //println!("{:?}", path.display());
-                let content = fs::read_to_string(path.clone()).unwrap_or(String::from(""));
-                if content
-                    .to_ascii_lowercase()
-                    .contains(&req.keyword.to_ascii_lowercase())
-                {
+                let path_str = format!("{}", &path.display()).to_ascii_lowercase();
+                if path_str.contains(".excalidraw.") {
+                    continue;
+                }
+                let content = fs::read_to_string(path.clone())
+                    .unwrap_or(String::from(""))
+                    .to_ascii_lowercase();
+                if path_str.contains(&search_key) || content.contains(&search_key) {
                     files.push((format!("{}", path.display()), fs::metadata(path).unwrap()));
                 }
             }

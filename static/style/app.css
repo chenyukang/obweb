@@ -70,3 +70,8 @@ input.visually-hidden:focus-within+label {
 .highlight {
     background-color: yellow;
 }
+
+mark {
+    background: orange;
+    color: black;
+}

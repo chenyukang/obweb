@@ -77,22 +77,15 @@ function Login() {
     });
 };
 
-function isAsciiOnly(str) {
-    for (var i = 0; i < str.length; i++)
-        if (str.charCodeAt(i) > 127)
-            return false;
-    return true;
-}
 
 function highlight(keyword) {
-    if (isAsciiOnly(keyword)) {
-        var myHilitor = new Hilitor("page-content");
-        myHilitor.apply(keyword);
-    } else {
-        var inputText = document.getElementById("page-content");
-        var innerHTML = inputText.innerHTML;
-        inputText.innerHTML = innerHTML.replaceAll(keyword, "<span class=\"highlight\">" + keyword + "</span>");
-    }
+    var markInstance = new Mark(document.getElementById("page-content"));
+    var options = {};
+    markInstance.unmark({
+        done: function() {
+            markInstance.mark(keyword, options);
+        }
+    });
 }
 
 function fetchPage(url) {
@@ -206,8 +199,27 @@ function preprocessImage(response) {
     return result;
 }
 
+function preprocessLink(response) {
+    var result = ""
+    var left = response;
+    var last = 0;
+    while (left.indexOf("[[") != -1) {
+        var prev = left.substring(0, left.indexOf("[["));
+        result += prev;
+        var start = left.indexOf("[[") + 2;
+        var end = left.indexOf("]]", start);
+        var link = left.substring(start, end).trim();
+        result += "[" + link + "]" + "(" + "/static/search.html?page=" + link.replaceAll(' ', '%20') + ")";
+        left = left.substring(end + 2);
+        last = end + 2;
+    }
+    result += left;
+    return result;
+}
+
 function renderMdToHtml(response) {
     var result = preprocessImage(response);
+    result = preprocessLink(result);
     var converter = new showdown.Converter();
     return converter.makeHtml(result);
 }

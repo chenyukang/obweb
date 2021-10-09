@@ -30,11 +30,37 @@ function search() {
 }
 
 
+function searchParams() {
+    var urlParams;
+    (window.onpopstate = function() {
+        var match,
+            pl = /\+/g, // Regex for replacing addition symbol with a space
+            search = /([^&=]+)=?([^&]*)/g,
+            decode = function(s) { return decodeURIComponent(s.replace(pl, " ")); },
+            query = window.location.search.substring(1);
+
+        urlParams = {};
+        while (match = search.exec(query))
+            urlParams[decode(match[1])] = decode(match[2]);
+    })();
+    return urlParams;
+}
+
+
 $(document).ready(function() {
     tryLogin();
+
+
     $("body").on("click", "a", function(e) {
         fetchPage(e.target.innerText);
     });
+
+    var input = $('#searchInput').val();
+    var keyword = searchParams()["page"];
+    if (input == "" && keyword != undefined) {
+        document.getElementById("searchInput").value = keyword;
+        search();
+    }
 
     var input = document.getElementById("searchInput");
     input.addEventListener("keyup", function(event) {
