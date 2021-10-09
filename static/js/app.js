@@ -22,7 +22,6 @@ App.prototype.handleSubmit = function() {
     var elem = document.getElementById("upload-pic");
     var data = JSON.stringify({
         date: new Date().toISOString(),
-        tags: $('#tags').val(),
         links: $('#links').val(),
         page: $('#page').val(),
         text: $('#content').val(),
