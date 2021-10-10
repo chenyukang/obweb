@@ -124,6 +124,7 @@ function fetchPage(url) {
                 $('#pageNavBar').prop('hidden', false);
                 $('#fileName').prop('hidden', false);
                 $('#page-content').prop('hidden', false);
+                hljs.highlightAll();
                 console.log("finished ...");
             } else {
                 $('#page-content').html("<h3>No Page</h3>" + " " + local_date)
@@ -230,8 +231,11 @@ function preprocessLink(response) {
         var start = left.indexOf("[[") + 2;
         var end = left.indexOf("]]", start);
         var link = left.substring(start, end).trim();
-        result += "[" + link + "]" + "(" + "/static/search.html?page=" + link.replaceAll(' ', '%20') + ")";
         left = left.substring(end + 2);
+        if (prev.indexOf("```") != -1 && left.indexOf("```") != -1)
+            result += link;
+        else
+            result += "[" + link + "]" + "(" + "/static/search.html?page=" + link.replaceAll(' ', '%20') + ")";
         last = end + 2;
     }
     result += left;

@@ -28,6 +28,7 @@ function getRand() {
             }
             if (content != "no-page") {
                 $('#page-content').html(renderMdToHtml(content));
+                hljs.highlightAll();
             } else {
                 $('#page-content').html("<h3>No Page</h3>")
             }

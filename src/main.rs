@@ -253,16 +253,16 @@ fn rand_query() -> Result<(String, String), &'static str> {
             Err(e) => println!("{:?}", e),
         }
     }
-    let path = files.choose(&mut rand::thread_rng()).unwrap();
-    println!("path : {:?}", path);
-    let p = Path::new(&path);
-    if Path::exists(&p) {
-        return Ok((
-            path.to_string().replace("ob/", ""),
-            fs::read_to_string(&path).expect("Unable to read file"),
-        ));
-    } else {
-        return Err("No such file");
+    loop {
+        let path = files.choose(&mut rand::thread_rng()).unwrap();
+        //println!("path : {:?}", path);
+        let content = fs::read_to_string(&path).unwrap_or(String::new());
+        if content.len() <= 4 {
+            // too short content tend to be meannless in random reading
+            continue;
+        } else {
+            return Ok((path.to_string().replace("ob/", ""), content));
+        }
     }
 }
 
