@@ -51,7 +51,6 @@ $(document).ready(function() {
 
     $("body").on("click", "a", function(e) {
         fetchPage(e.target.innerText);
-
     });
 
     var keyword = searchParams()["page"];

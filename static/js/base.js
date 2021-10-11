@@ -241,3 +241,17 @@ function renderMdToHtml(response) {
     var converter = new showdown.Converter();
     return converter.makeHtml(result);
 }
+
+
+$(document).ready(function() {
+    $("body").on("click", "img", function(e) {
+        var rato = $(this).width() / $(this).parent().width();
+        if (rato <= 0.5) {
+            $(this).css('width', '100%');
+            $(this).css('height', '100%');
+        } else {
+            $(this).css('width', '50%');
+            $(this).css('height', '50%');
+        }
+    });
+});
