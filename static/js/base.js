@@ -10,7 +10,6 @@ function showLoginModal() {
         window.location.href = '/obweb';
     }
     $('#loginModal').modal('show');
-    console.log("please login");
 }
 
 // Try to verify token in cookie, 
@@ -53,7 +52,6 @@ function Login() {
         username: $('#username').val(),
         password: $('#password').val(),
     });
-    console.log(data);
     $.ajax({
         url: "/api/login",
         crossDomain: true,
@@ -106,7 +104,6 @@ function fetchPage(url) {
             //console.log(response);
             $('#status-sp').prop('hidden', true);
             if (response != "no-page") {
-                console.log("fetchPage");
                 localStorage.setItem('page-content', response);
                 localStorage.setItem('file', url);
 
@@ -125,7 +122,6 @@ function fetchPage(url) {
                 $('#fileName').prop('hidden', false);
                 $('#page-content').prop('hidden', false);
                 hljs.highlightAll();
-                console.log("finished ...");
             } else {
                 $('#page-content').html("<h3>No Page</h3>" + " " + local_date)
             }
@@ -153,7 +149,6 @@ function updatePage(file, content) {
             "content": content
         }),
         success: function(response) {
-            console.log(response);
             $('#status-sp').prop('hidden', true);
             localStorage.setItem('page-content', content);
             localStorage.setItem('file', file);
@@ -187,7 +182,6 @@ function savePage() {
     if (prev_content != text) {
         updatePage(localStorage.getItem('file'), text);
     } else {
-        console.log("no change");
         $('#page-content').html(renderMdToHtml(prev_content));
     }
 }

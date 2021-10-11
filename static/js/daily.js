@@ -40,12 +40,10 @@ function getDaily(date) {
             "Access-Control-Allow-Origin": "*",
         },
         success: function(response) {
-            console.log(response);
             $('#status-sp').prop('hidden', true);
             localStorage.setItem('page-content', response);
             localStorage.setItem('file', 'Daily/' + date_str + '.md');
             //console.log(date);
-            console.log(date_str)
             if (response != "no-page") {
                 header = "## " + date_str;
                 if (response.indexOf(header) == -1) {

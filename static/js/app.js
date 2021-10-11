@@ -1,12 +1,8 @@
-var App = function() {
-    this.entries = [];
-};
-
 function showSuccMsg() {
     $('#status-sp').prop('hidden', true);
     $('#status-msg').removeClass("alert-danger");
     $('#status-msg').addClass("alert-success");
-    $('#status-msg').html("保存成功");
+    $('#status-msg').html("Save successfully");
     $('#status-msg').prop('hidden', false);
 }
 
@@ -14,11 +10,11 @@ function showErrMsg() {
     $('#status-sp').prop('hidden', true);
     $('#status-msg').removeClass("alert-success");
     $('#status-msg').addClass("alert-danger");
-    $('#status-msg').html("保存失败");
+    $('#status-msg').html("Save failed");
     $('#status-msg').prop('hidden', false);
 }
 
-App.prototype.handleSubmit = function() {
+function handleSubmit() {
     var elem = document.getElementById("upload-pic");
     var data = JSON.stringify({
         date: new Date().toISOString(),
@@ -39,7 +35,6 @@ App.prototype.handleSubmit = function() {
         },
         data: data,
         success: function(response) {
-            console.log(response);
             if (response == "ok") {
                 showSuccMsg();
             } else {
@@ -53,7 +48,7 @@ App.prototype.handleSubmit = function() {
     });
 };
 
-App.prototype.checkFormValidity = function() {
+function checkFormValidity() {
     return document.getElementById('journal-entry').checkValidity();
 };
 
@@ -99,10 +94,8 @@ function clearInput() {
 }
 
 function enableBtn() {
-    $("#submit-btn").prop('disabled', (!app.checkFormValidity()) || ($('#content').val() == ""));
+    $("#submit-btn").prop('disabled', (!checkFormValidity()) || ($('#content').val() == ""));
 }
-
-var app = new App();
 
 $(document).ready(function() {
     tryLogin();
@@ -116,7 +109,7 @@ $(document).ready(function() {
         $("#status-msg").prop('hidden', true);
         $('#status-sp').prop('hidden', false);
         event.preventDefault();
-        app.handleSubmit();
+        handleSubmit();
     });
 
     $('#content').on('input', function() {
@@ -173,7 +166,6 @@ $(document).ready(function() {
         if (blob !== null) {
             var reader = new FileReader();
             reader.onload = function(e) {
-                console.log(event.target.result); // data url!
                 $("#upload-pic").prop("src", e.target.result);
                 $("#upload-pic").prop("hidden", false);
             };

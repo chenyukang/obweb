@@ -15,7 +15,6 @@ function getRand() {
             "Access-Control-Allow-Origin": "*",
         },
         success: function(response) {
-            console.log(response);
             $('#status-sp').prop('hidden', true);
             content = response[1]
             file = response[0]

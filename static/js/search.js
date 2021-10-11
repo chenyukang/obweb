@@ -1,7 +1,6 @@
 function search() {
     setSearchDefault();
     var input = $('#searchInput').val();
-    //console.log(input);
     $('#status-sp').prop('hidden', false);
     $.ajax({
         url: "/api/search?keyword=" + input,
@@ -13,7 +12,6 @@ function search() {
             "Access-Control-Allow-Origin": "*",
         },
         success: function(response) {
-            //console.log(response);
             $('#status-sp').prop('hidden', true);
             if (response != "no-page") {
                 $('#page-content').html(renderMdToHtml(response));
@@ -51,21 +49,18 @@ function searchParams() {
 $(document).ready(function() {
     tryLogin();
 
-
     $("body").on("click", "a", function(e) {
         fetchPage(e.target.innerText);
 
     });
 
-    var input = $('#searchInput').val();
     var keyword = searchParams()["page"];
-    if (input == "" && keyword != undefined) {
+    if ($('#searchInput').val() == "" && keyword != undefined) {
         document.getElementById("searchInput").value = keyword;
         search();
     }
 
-    var input = document.getElementById("searchInput");
-    input.addEventListener("keyup", function(event) {
+    document.getElementById("searchInput").addEventListener("keyup", function(event) {
         if (event.keyCode === 13) {
             event.preventDefault();
             document.getElementById("searchBtn").click();
