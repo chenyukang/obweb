@@ -39,6 +39,8 @@
     <div class="container">
         <div class="tab-content">
             <div id="daily">
+
+
                 <div class="row">
                     <div class="col-md-2"></div>
                     <div class="col-md-6" hidden="true" id="status-sp">
@@ -59,15 +61,19 @@
                     </div>
                 </div>
 
+                <div class="row sticky-top">
+                    <div class="col-md-10 text-right" style="margin-top: 10px;">
+                        <button type="button" class="btn btn-info" id="editBtn" onclick="editPage()">Edit</button>
+                    </div>
+                </div>
+
                 <div class="row">
                     <div class="col-md-10">
                         <div class="pageContent" id="page-content">
                         </div>
                     </div>
                 </div>
-                <div class="col-md-10 text-right" style="margin-top: 10px;">
-                    <button type="button" class="btn btn-info" id="editBtn" onclick="editPage()">Edit</button>
-                </div>
+
             </div>
         </div>
     </div>
