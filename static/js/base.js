@@ -65,7 +65,6 @@ function Login() {
         success: function(response) {
             if (response != "failed") {
                 var storage = window.localStorage;
-                storage.setItem('token', response);
                 $('#loginModal').modal('hide');
             }
         },

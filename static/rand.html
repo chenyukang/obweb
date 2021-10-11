@@ -41,7 +41,7 @@
             <div id="daily">
                 <div class="row">
                     <div class="col-md-2"></div>
-                    <div class="col-md-8" hidden="true" id="status-sp">
+                    <div class="col-md-6" hidden="true" id="status-sp">
                         <div class="text-center">
                             <div class="spinner-border text-success" role="status">
                                 <span class="sr-only">Sending</span>
@@ -52,18 +52,20 @@
 
                 <div class="row">
                     <div class="col-md-2"></div>
-                    <div class="col-md-8">
+                    <div class="col-md-6">
                         <div class="text-center" style="margin-top: 20px;">
                             <h4><span class="badge badge-secondary" id="fileName"></span></h4>
                         </div>
                     </div>
                 </div>
 
-                <div>
-                    <div class="pageContent" id="page-content">
+                <div class="row">
+                    <div class="col-md-10">
+                        <div class="pageContent" id="page-content">
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-14 bg-light text-right" style="margin-top: 10px;">
+                <div class="col-md-10 text-right" style="margin-top: 10px;">
                     <button type="button" class="btn btn-info" id="editBtn" onclick="editPage()">Edit</button>
                 </div>
             </div>
