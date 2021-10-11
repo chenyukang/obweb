@@ -62,7 +62,7 @@ $(document).ready(function() {
     document.getElementById("searchInput").addEventListener("keyup", function(event) {
         if (event.keyCode === 13) {
             event.preventDefault();
-            document.getElementById("searchBtn").click();
+            search();
         }
     });
 });

@@ -307,7 +307,13 @@ fn search_query(req: &SearchQuery) -> Result<String, &'static str> {
             .unwrap()
     });
 
-    for (f, _) in files.iter() {
+    let max_len = if search_key.len() == 0 {
+        6
+    } else {
+        files.len()
+    };
+
+    for (f, _) in files[..max_len].iter() {
         let link = format!("\n- [{}](#)", &f);
         let link = link.replace("ob/", "");
         if !res.contains(&link) {
