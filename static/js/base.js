@@ -76,7 +76,7 @@ function Login() {
 
 
 function highlight(keyword) {
-    var markInstance = new Mark(document.getElementById("page-content"));
+    var markInstance = new Mark($("#page-content").get(0));
     var options = {};
     markInstance.unmark({
         done: function() {
@@ -106,9 +106,9 @@ function fetchPage(url) {
                 localStorage.setItem('page-content', response);
                 localStorage.setItem('file', url);
 
-                var fileName = document.getElementById('fileName');
+                var fileName = $('#fileName')[0];
                 if (fileName != null) {
-                    fileName.innerText = url;
+                    $(fileName).text(url);
                 }
 
                 $('#page-content').html(renderMdToHtml(response));
@@ -175,7 +175,7 @@ function setSearchDefault() {
 
 function savePage() {
     setSearchDefault();
-    var text = $('#page-content').text();
+    var text = document.getElementById('page-content').innerText;
     var prev_content = localStorage.getItem('page-content');
     if (prev_content != text) {
         updatePage(localStorage.getItem('file'), text);
