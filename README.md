@@ -19,25 +19,17 @@ I don't want to store any data on other third-party servers, here we will deploy
 + Backend: Rust + Warp for API
 + Frontend: Javascript, Bootstrap, JQuery. I'm a novice in Javascript :)
 
+The UI is designed to be more suitable for a mobile device. On PC/Mac, the Obsidian native application is more convenient.
 
-The `UI` is designed to be more suitable for a mobile device. On PC/Mac, the Obsidian native application is more convenient.
-
-Most part of code is straightforward, there are some hard-coded part. For a MVP, I want to keep it stupid and simple.
+For a MVP, I want to keep it stupid and simple. Most of code is simple and easy to understand, there are some hard-coded part.
 
 Maybe you need to do some trivial tweaks. Any PR is welcome to make it better and useful for others.
 
 ## Usage
 
-Obweb assume you have your Obsidian repo cloned on the server, and you have permission to push to Git repo. When you are posting things from API, Obweb will push things to remote.
+1. Initialize login accounts
 
-
-If you didn't installed Rust, run with command:
-
-```bash
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-```
-
-1. Initialize login accounts, create `db/accounts.json` with your customed accounts:
+Create `db/accounts.json` with your customed accounts:
 ```json
 [{
     "username": "user name",
@@ -45,7 +37,9 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 }]
 ```
 
-2. Initialize Obsidian repo:
+2. Initialize Obsidian repo
+
+Obweb assume you have your Obsidian repo cloned on the server, and you have permission to push to Git repo. When you are posting things from API, Obweb will push things to remote.
 
 ```bash
 git clone http://your-ob-repo ob
@@ -55,12 +49,15 @@ git config user.email "you@example.com"
 git config user.name "Your Name"
 ```
 
-3. Run server:
+3. Compile and run server
+
+Make sure you have installed [Rust and Cargo](http://rust-lang.org).
+
 ```bash
 ./bin/debug
 
 ```
-Now you can access it on your browser [http:://localhost:8005/obweb](http://localhost:8005/obweb/).
+Now you can access it on your browser [http://localhost:8005/obweb](http://localhost:8005/obweb/).
 
 Or you may start with Docker:
 
