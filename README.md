@@ -60,7 +60,7 @@ git config user.name "Your Name"
 ./bin/debug
 
 ```
-Now you can access it on your browser [http:://localhost:8005/obweb](http:://localhost:8005/obweb).
+Now you can access it on your browser [http:://localhost:8005/obweb](http://localhost:8005/obweb/).
 
 Or you may start with Docker:
 
