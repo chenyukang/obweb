@@ -175,8 +175,7 @@ function setSearchDefault() {
 
 function savePage() {
     setSearchDefault();
-    var content = document.getElementById('page-content');
-    var text = content.innerText;
+    var text = $('#page-content').text();
     var prev_content = localStorage.getItem('page-content');
     if (prev_content != text) {
         updatePage(localStorage.getItem('file'), text);
@@ -206,7 +205,7 @@ function preprocessImage(response) {
         var end = left.indexOf("]]", start);
         var image = left.substring(start, end);
         var image_url = image.split("|")[0].trim();
-        result += "![img](/static/images/" + image_url.replaceAll(' ', '%20') + ")";
+        result += "![img](/static/images/" + encodeURI(image_url) + ")";
         left = left.substring(end + 2);
         last = end + 2;
     }
@@ -228,7 +227,7 @@ function preprocessLink(response) {
         if (prev.indexOf("```") != -1 && left.indexOf("```") != -1)
             result += link;
         else
-            result += "[" + link + "]" + "(" + "/static/search.html?page=" + link.replaceAll(' ', '%20') + ")";
+            result += "[" + link + "]" + "(" + "/static/search.html?page=" + encodeURI(link) + ")";
         last = end + 2;
     }
     result += left;
