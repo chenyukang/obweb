@@ -1,7 +1,7 @@
 # Obweb : Obsidian + Web = Obsdian on Mobile and Flomo 
 
 <p align="center">
-  <img src="static/logo.png">
+  <img src="static/style/logo.png">
 </p>
 
 ## Motivation
