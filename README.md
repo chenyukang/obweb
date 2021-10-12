@@ -1,4 +1,4 @@
-# Obweb : Obsidian + Web = Obsdian on Mobile and Flomo 
+# Obweb : Obsidian + Web = Obsdian on Mobile + Flomo 
 
 <p align="center">
   <img src="static/style/logo.png">
