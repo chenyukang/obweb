@@ -10,17 +10,17 @@
 
 I use Obsidian for knowledge management and Flomo for my thoughts or memos.
 
-But Obsidian don't have a mobile version for Andriod and flomo don't work well with Obsidian. So I decided to create a Web interface for Obsidian, so I can use it on my mobile devices and work in the way of flomo.
+But Obsidian don't have a mobile version for Andriod and flomo don't work well with Obsidian. I decided to create a Web interface for Obsidian, so I can use it on my mobile devices and work in the way of flomo.
 
-And I don't want to store any data on other third-party servers, so here we will deploy this Application on our own server.
+I don't want to store any data on other third-party servers, here we will deploy it on our own server.
 
-## Dev 
+## Develop 
 
 + Backend: Rust + Warp for API 
-+ Frontend: Javascript, Bootstrap, JQuery (I'm a novice in Javascript)
++ Frontend: Javascript, Bootstrap, JQuery. I'm a novice in Javascript :)
 
-Most code is straightforward, there are some hard-coded part. Maybe you need to do some trivial tweaks.
-Any PR is welcome to make it better and useful for others.
+Most code is straightforward, there are some hard-coded part. For a MVP, I want to keep it stupid and simple. 
+Maybe you need to do some trivial tweaks. Any PR is welcome to make it better and useful for others.
 
 ## Usage
 
@@ -32,3 +32,5 @@ docker-compose up
 
 //access it on your browser http:://localhost:8005/obweb
 ```
+
+I use it everyday right now, and hope it will be useful for you.
