@@ -66,4 +66,6 @@ Or you may start with Docker:
 docker-compose up
 ```
 
-I use it everyday right now, and hope it will be useful for you.
+----
+
+**I use this App everyday, hope it will be useful for you.**
