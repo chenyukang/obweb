@@ -26,11 +26,24 @@ Maybe you need to do some trivial tweaks. Any PR is welcome to make it better an
 
 Obweb assume you have your Obsidian repo cloned on the server, and you have permission to push to Git repo. When you are posting things from API, Obweb will push things to remote.
 
+
+If you didn't installed Rust, run with command:
+
+```bash 
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
 ```bash 
 git clone http://your-ob-repo ob 
-docker-compose up 
 
+./bin/debug
 //access it on your browser http:://localhost:8005/obweb
+```
+
+Or you may start with Docker:
+
+```bash
+docker-compose up 
 ```
 
 I use it everyday right now, and hope it will be useful for you.
