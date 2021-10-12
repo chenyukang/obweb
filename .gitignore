@@ -1,7 +1,8 @@
 target/
 ob-web
 ob
-db
+db/accounts.json
+db/tokens
 nohup.out
 update.sh
 *.Identifier

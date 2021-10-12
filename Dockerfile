@@ -1,8 +1,15 @@
 FROM rust:1.55
 
-COPY ./ ./
+RUN USER=root cargo new --bin ob-web
+WORKDIR /ob-web
 
+COPY ./Cargo.lock ./Cargo.lock
+COPY ./Cargo.toml ./Cargo.toml
 
-RUN cargo build --release
+RUN rm src/*.rs
 
-CMD ["./target/release/ob-web"]
+COPY ./src ./src
+
+RUN cargo install --path .
+
+COPY ./static ./static

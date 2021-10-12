@@ -33,13 +33,29 @@ If you didn't installed Rust, run with command:
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
+1. Initialize Obsidian repo:
+   
 ```bash 
-git clone http://your-ob-repo ob 
+git clone http://your-ob-repo ob
 
+cd ob 
+git config user.email "you@example.com"
+git config user.name "Your Name"
+```
+
+2. Initialize login accounts, create `db/accounts.json` with following content:
+```json 
+[{
+    "username": "user name",
+    "password": "password"
+}]
+```
+
+3. Run server:
+```bash 
 ./bin/debug
 //access it on your browser http:://localhost:8005/obweb
 ```
-
 Or you may start with Docker:
 
 ```bash

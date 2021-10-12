@@ -1,0 +1,10 @@
+ob-web:
+ build: .
+ ports:
+  - "8005:8005"
+ volumes:
+  - ~/.ssh:/root/.ssh
+  - ./db:/ob-web/db:rw
+  - ./ob:/ob-web/ob:rw
+ command: ob-web
+ 
