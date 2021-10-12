@@ -43,7 +43,7 @@ git config user.email "you@example.com"
 git config user.name "Your Name"
 ```
 
-2. Initialize login accounts, create `db/accounts.json` with following content:
+2. Initialize login accounts, create `db/accounts.json` with your customed accounts:
 ```json 
 [{
     "username": "user name",
