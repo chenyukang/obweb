@@ -244,6 +244,10 @@ function renderMdToHtml(response) {
 
 
 $(document).ready(function() {
+    $(".pageContent").on("click", "a", function(e) {
+        fetchPage(e.target.innerText);
+    });
+
     $("body").on("click", "img", function(e) {
         var rato = $(this).width() / $(this).parent().width();
         if (rato <= 0.5) {

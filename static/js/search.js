@@ -49,13 +49,12 @@ function searchParams() {
 $(document).ready(function() {
     tryLogin();
 
-    $("body").on("click", "a", function(e) {
-        fetchPage(e.target.innerText);
-    });
-
     var keyword = searchParams()["page"];
     if ($('#searchInput').val() == "" && keyword != undefined) {
         document.getElementById("searchInput").value = keyword;
+        search();
+    } else {
+        // List top 5 recently modified files
         search();
     }
 
