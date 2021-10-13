@@ -70,7 +70,7 @@ function fileSelected(e) {
     const reader = new FileReader();
     reader.onload = function(e) {
         $("#upload-pic").prop("src", e.target.result);
-        $("#upload-pic").prop("hidden", false);
+        $("#imageDiv").prop("hidden", false);
     }
     reader.readAsDataURL(file);
 }
@@ -79,26 +79,29 @@ function enableBtn() {
     $("#submit-btn").prop('disabled', false);
 }
 
-function clearAll() {
-    $('#status-msg').prop('hidden', true);
-    $("#upload-pic").prop('hidden', true);
-    $('#status-sp').prop('hidden', true);
-    $("#upload-pic").prop('src', "")
-    window.localStorage.removeItem("links");
-    window.localStorage.removeItem("page");
-    clearInput();
-}
-
 function clearInput() {
     $('#content').val('');
     window.localStorage.removeItem("content");
     console.log("finished clear input");
 }
 
+function removePic() {
+    $("#imageDiv").prop("hidden", true);
+    $("#upload-pic").prop("src", "");
+}
+
+function clearAll() {
+    $('#status-msg').prop('hidden', true);
+    $('#status-sp').prop('hidden', true);
+    window.localStorage.removeItem("links");
+    window.localStorage.removeItem("page");
+    clearInput();
+    removePic();
+}
+
 function enableBtn() {
     $("#submit-btn").prop('disabled', (!checkFormValidity()) || ($('#content').val() == ""));
 }
-
 
 var doubletapDeltaTime_ = 800;
 var doubletap1Function_ = null;
@@ -200,7 +203,7 @@ $(document).ready(function() {
             var reader = new FileReader();
             reader.onload = function(e) {
                 $("#upload-pic").prop("src", e.target.result);
-                $("#upload-pic").prop("hidden", false);
+                $("#imageDiv").prop("hidden", false);
             };
             reader.readAsDataURL(blob);
         }
