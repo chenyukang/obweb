@@ -46,6 +46,13 @@ function searchParams() {
 $(document).ready(function() {
     tryLogin();
 
+    $(".pageContent").on("click", "a", function(e) {
+        var url = e.target.innerText;
+        if (url.endsWith(".md")) {
+            fetchPage(url);
+        }
+    });
+
     var keyword = searchParams()["page"];
     if ($('#searchInput').val() == "" && keyword != undefined) {
         document.getElementById("searchInput").value = keyword;

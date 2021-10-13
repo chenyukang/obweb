@@ -232,12 +232,6 @@ function renderMdToHtml(response) {
 
 
 $(document).ready(function() {
-    $(".pageContent").on("click", "a", function(e) {
-        var url = e.target.innerText;
-        if (url.indexOf("http://") == -1 && url.indexOf("https://") == -1) {
-            fetchPage(url);
-        }
-    });
 
     $("body").on("click", "img", function(e) {
         var rato = $(this).width() / $(this).parent().width();
