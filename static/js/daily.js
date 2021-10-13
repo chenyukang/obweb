@@ -47,6 +47,7 @@ function getDaily(date) {
                     response = header + "\n\n---\n" + response;
                 }
                 $('#page-content').html(renderMdToHtml(response));
+                $('#page-content').prop('hidden', false);
             } else {
                 $('#page-content').html("<h3>No Page</h3>" + " " + date_str)
             }

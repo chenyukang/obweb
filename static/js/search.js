@@ -49,11 +49,8 @@ $(document).ready(function() {
     var keyword = searchParams()["page"];
     if ($('#searchInput').val() == "" && keyword != undefined) {
         document.getElementById("searchInput").value = keyword;
-        search();
-    } else {
-        // List top 5 recently modified files
-        search();
     }
+    search();
 
     document.getElementById("searchInput").addEventListener("keyup", function(event) {
         if (event.keyCode === 13) {

@@ -155,7 +155,7 @@ function setSearchDefault() {
     $('#fileName').prop('hidden', true);
     var content = document.getElementById('page-content');
     content.setAttribute('contenteditable', 'false');
-    content.style.backgroundColor = '#d8eaf0';
+    content.style.backgroundColor = 'white';
 
     var button = document.getElementById('editBtn');
     button.innerText = 'Edit';
@@ -177,7 +177,7 @@ function editPage() {
     var content = document.getElementById('page-content');
     content.innerText = localStorage.getItem('page-content');
     content.setAttribute('contenteditable', 'true');
-    content.style.backgroundColor = 'yellow';
+    content.style.backgroundColor = '#fffcc0';
     var button = document.getElementById('editBtn');
     button.innerText = 'Save';
     button.setAttribute('onclick', 'savePage()');

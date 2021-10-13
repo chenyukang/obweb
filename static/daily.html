@@ -39,9 +39,9 @@
             <div id="daily">
                 <div class="row card sticky-top" style="margin-top: 20px; border: 0;">
                     <div class="col-md-10 text-right">
-                        <button type="button" class="btn btn-secondary" style="float: left" onclick="prevDaily()">Prev</button>
-                        <button type="button" class="btn btn-info" style="float: center" id="editBtn" onclick="editPage()">Edit</button>
-                        <button type="button" class="btn btn-secondary" onclick="nextDaily()">Next</button>
+                        <button type="button" class="btn btn-info" style="float: left" onclick="prevDaily()">Prev</button>
+                        <button type="button" class="btn btn-warning" style="float: center" id="editBtn" onclick="editPage()">Edit</button>
+                        <button type="button" class="btn btn-info" onclick="nextDaily()">Next</button>
                     </div>
                 </div>
                 <div class="row">
@@ -56,7 +56,7 @@
                 </div>
                 <div class="row">
                     <div class="col-md-10">
-                        <div class="pageContent" id="page-content">
+                        <div class="pageContent" hidden="true" id="page-content">
                         </div>
                     </div>
                 </div>

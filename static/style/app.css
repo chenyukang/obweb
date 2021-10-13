@@ -45,7 +45,7 @@ input.visually-hidden:focus-within+label {
 .pageContent {
     margin-top: 20px;
     border: 1px outset green;
-    background-color: rgb(216, 234, 240);
+    /* background-color: rgb(216, 234, 240); */
     text-align: left;
     word-wrap: break-word;
     padding: 8px;
