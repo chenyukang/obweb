@@ -11,9 +11,6 @@ function getRand() {
         type: 'GET',
         datatype: 'json',
         contentType: "Application/json",
-        headers: {
-            "Access-Control-Allow-Origin": "*",
-        },
         success: function(response) {
             $('#status-sp').prop('hidden', true);
             content = response[1]

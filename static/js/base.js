@@ -26,13 +26,7 @@ function tryLogin() {
                 }
             },
             url: "/api/verify",
-            crossDomain: true,
             type: 'GET',
-            datatype: 'json',
-            contentType: "Application/json",
-            headers: {
-                "Access-Control-Allow-Origin": "*",
-            },
             success: function(response) {
                 if (response != "failed") {
                     $('#loginModal').modal('hide');
@@ -58,9 +52,6 @@ function Login() {
         type: 'POST',
         datatype: 'json',
         contentType: "Application/json",
-        headers: {
-            "Access-Control-Allow-Origin": "*",
-        },
         data: data,
         success: function(response) {
             if (response != "failed") {
@@ -96,7 +87,6 @@ function fetchPage(url) {
         datatype: 'json',
         contentType: "Application/json",
         headers: {
-            "Access-Control-Allow-Origin": "*",
             "If-Modified-Since": begin_date.toISOString(),
         },
         success: function(response) {
@@ -140,9 +130,6 @@ function updatePage(file, content) {
         type: 'POST',
         datatype: 'json',
         contentType: "Application/json",
-        headers: {
-            "Access-Control-Allow-Origin": "*",
-        },
         data: JSON.stringify({
             "file": file,
             "content": content

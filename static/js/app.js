@@ -30,9 +30,6 @@ function handleSubmit() {
         type: 'POST',
         datatype: 'json',
         contentType: "Application/json",
-        headers: {
-            "Access-Control-Allow-Origin": "*",
-        },
         data: data,
         success: function(response) {
             if (response == "ok") {
