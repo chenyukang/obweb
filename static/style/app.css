@@ -56,15 +56,7 @@ input.visually-hidden:focus-within+label {
     margin-left: auto;
     margin-right: auto;
     width: 50%;
-    height: 50%;
-}
-
-.tab-content img {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    width: 50%;
-    height: 50%;
+    /* height: 50%; */
 }
 
 .highlight {

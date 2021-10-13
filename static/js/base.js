@@ -236,12 +236,13 @@ $(document).ready(function() {
 
     $("body").on("click", "img", function(e) {
         var rato = $(this).width() / $(this).parent().width();
-        if (rato <= 0.5) {
+        console.log(rato);
+        if (rato <= 0.6) {
             $(this).css('width', '100%');
             $(this).css('height', '100%');
         } else {
             $(this).css('width', '50%');
-            $(this).css('height', '50%');
+            //$(this).css('height', '50%');
         }
     });
 });
