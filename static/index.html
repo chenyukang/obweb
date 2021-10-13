@@ -74,7 +74,7 @@
                         <div class="col-md-2"></div>
                         <div class="col-md-8">
                             <label for="entrytext"></label><br>
-                            <textarea rows="8" id="content" class="form-control" id="entrytext" onchange="enableBtn()"></textarea>
+                            <textarea rows="8" id="content" class="form-control" id="entrytext" onclick="tap(null, clearInput)" onchange="enableBtn()"></textarea>
                         </div>
                     </div>
 
@@ -99,8 +99,6 @@
                             <label for="fileElem">Photo</label>
 
                             <button class="btn btn-danger btn-sm" onclick="clearAll(this)">Reset</button>
-                            <button class="btn btn-warning btn-sm" onclick="clearInput(this)">Input</button>
-
                             <button class="btn btn-success float-right" id="submit-btn" type="submit" style="margin-left: 4px;" disabled>Save</button>
                         </div>
                     </div>

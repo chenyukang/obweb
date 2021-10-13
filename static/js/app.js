@@ -45,6 +45,10 @@ function handleSubmit() {
     });
 };
 
+function test() {
+    console.log("test");
+}
+
 function checkFormValidity() {
     return document.getElementById('journal-entry').checkValidity();
 };
@@ -88,10 +92,42 @@ function clearAll() {
 function clearInput() {
     $('#content').val('');
     window.localStorage.removeItem("content");
+    console.log("finished clear input");
 }
 
 function enableBtn() {
     $("#submit-btn").prop('disabled', (!checkFormValidity()) || ($('#content').val() == ""));
+}
+
+
+var doubletapDeltaTime_ = 800;
+var doubletap1Function_ = null;
+var doubletap2Function_ = null;
+var doubletapTimer_ = null;
+var waitForDoubleTap = false;
+
+function doubletapTimeout() {
+    // Wait for second tap timeout
+    if (doubletap1Function_ != null) {
+        doubletap1Function_();
+    }
+    clearTimeout(doubletapTimer_);
+    doubleTapTimer_ = 0;
+    waitForDoubleTap = false;
+}
+
+function tap(singleTapFunc, doubleTapFunc) {
+    if (!waitForDoubleTap) {
+        doubletapTimer_ = setTimeout(doubletapTimeout, doubletapDeltaTime_);
+        waitForDoubleTap = true;
+        doubletap1Function_ = singleTapFunc;
+        doubletap2Function_ = doubleTapFunc;
+    } else {
+        // Second tap
+        clearTimeout(doubletapTimer_);
+        waitForDoubleTap = false;
+        doubletap2Function_();
+    }
 }
 
 $(document).ready(function() {
