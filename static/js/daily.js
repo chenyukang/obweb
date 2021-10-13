@@ -49,7 +49,8 @@ function getDaily(date) {
                 $('#page-content').html(renderMdToHtml(response));
                 $('#page-content').prop('hidden', false);
             } else {
-                $('#page-content').html("<h3>No Page</h3>" + " " + date_str)
+                $('#page-content').html("<h3>No Page</h3>" + " " + date_str);
+                $('#page-content').prop('hidden', false);
             }
         },
         error: function(err) {
