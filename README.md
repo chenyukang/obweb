@@ -39,7 +39,7 @@ Create `db/accounts.json` with your customed accounts:
 
 2. Initialize Obsidian repo
 
-Obweb assume you have your Obsidian repo cloned on the server, and you have permission to push to Git repo. When you are posting things from API, Obweb will push things to remote.
+Obweb assume you have your Obsidian repo cloned on the server, and you have permission to push to Git repo. When you are posting things from API, Obweb will push changes to remote.
 
 ```bash
 git clone http://your-ob-repo ob
