@@ -69,11 +69,13 @@ function Login() {
 function highlight(keyword) {
     var markInstance = new Mark($("#page-content").get(0));
     var options = {};
-    markInstance.unmark({
-        done: function() {
-            markInstance.mark(keyword, options);
-        }
-    });
+    if (keyword != "" && keyword != undefined) {
+        markInstance.unmark({
+            done: function() {
+                markInstance.mark(keyword, options);
+            }
+        });
+    }
 }
 
 function fetchPage(url) {
