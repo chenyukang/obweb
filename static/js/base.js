@@ -164,7 +164,7 @@ function setSearchDefault() {
 
 function savePage() {
     setSearchDefault();
-    var text = document.getElementById('page-content').innerText;
+    var text = document.getElementById('page-content').innerText.replace(/\u00a0/g, ' ');
     var prev_content = localStorage.getItem('page-content');
     if (prev_content != text) {
         updatePage(localStorage.getItem('file'), text);
@@ -175,7 +175,8 @@ function savePage() {
 
 function editPage() {
     var content = document.getElementById('page-content');
-    content.innerText = localStorage.getItem('page-content');
+    content.innerText = localStorage.getItem('page-content').replace(/ /g, '\u00a0');;
+    console.log(localStorage.getItem('page-content'));
     content.setAttribute('contenteditable', 'true');
     content.style.backgroundColor = '#fffcc0';
     var button = document.getElementById('editBtn');
