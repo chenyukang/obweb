@@ -57,6 +57,8 @@ git config user.email "you@example.com"
 git config user.name "Your Name"
 ```
 
+Obweb assume your Obsidian vault has `Daily` and `Unsort` directories to store daily memos and unsorted notes.
+
 3. Compile and run
 
 You may start with Docker:
