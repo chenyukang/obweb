@@ -223,7 +223,7 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
     }
 
     fs::write(&path, content).expect("Unable to write file");
-    git_sync();
+    std::thread::spawn(|| git_sync());
     Ok(())
 }
 
@@ -270,7 +270,7 @@ fn process_update(update: &Update) -> Result<(), &'static str> {
     std::thread::spawn(|| git_pull());
     let path = format!("./ob/{}", update.file.to_string());
     fs::write(path, update.content.to_string()).expect("Unable to write file");
-    git_sync();
+    std::thread::spawn(|| git_sync());
     Ok(())
 }
 
