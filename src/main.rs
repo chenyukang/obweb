@@ -460,8 +460,6 @@ pub async fn run_server(port: u16) {
         });
     let routes = routes.or(search);
 
-    let routes = routes.with(warp::cors().allow_any_origin());
-
     let log = warp::log("obweb::api");
     let routes = routes.with(log);
     println!("listen to : {} ...", port);
