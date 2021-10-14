@@ -72,6 +72,10 @@ Otherwise, make sure you have installed [Rust and Cargo](http://rust-lang.org), 
 ./bin/debug
 ```
 
+4. Post configuration
+
+If you have your own domain, you can config it to a custom domain. You may want to add some other security enhancement such as HTTPS, request frequency limit, etc.
+
 ----
 
 **I use this App everyday, hope it will be useful for you.**
