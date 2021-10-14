@@ -8,24 +8,30 @@
 
 [Obsidian](https://obsidian.md/) and [Flomo](https://flomoapp.com/) are two of my favorite Applications.
 
-I use Obsidian for knowledge management and Flomo for my thoughts or memos.
+I use Obsidian for knowledge management and Flomo for daily thoughts or memos.
 
-But Obsidian don't have a mobile version for Android and flomo don't work well with Obsidian. I decided to create a Web interface for Obsidian, so I can use it on my mobile devices and work in the way of flomo.
+But Obsidian don't have a mobile version for Android and flomo don't work well with Obsidian. I decided to create a Web interface for Obsidian, so I can use it on my mobile devices and work in a mixed way of Obsidian and flomo.
 
-I don't want to store any data on other third-party servers, here we will deploy it on our own server.
+Here are the principles of this project:
 
-## Dev
+1. The UI is designed to be more suitable for a mobile device. On PC/Mac, the Obsidian native application is more convenient than Web Applications. 
+
+2. We won't do complicated edit on mobile end, in most scenarios, we create simple note and memos in daily life, but we can use `link` in Obsidian to build connections between notes.
+
+3. Keep everything simple, plain Markdown is preferable. Git as database and no other deps.
+
+4. We don't want to store any data on other third-parties, here we will deploy it on our own server.
+
+## Development
 
 + Backend: Rust + Warp for API
-+ Frontend: Javascript, Bootstrap, JQuery. I'm a novice in Javascript :)
++ Frontend: Javascript, Bootstrap, JQuery. I'm a novice in Frontend :)
 
-The UI is designed to be more suitable for a mobile device. On PC/Mac, the Obsidian native application is more convenient.
-
-For a MVP, I want to keep it stupid and simple. Most of code is simple and easy to understand, there are some hard-coded part.
+For a MVP, I want to keep it stupid and simple. Most of code is simple and easy to understand, there are some hard-coded parts.
 
 Maybe you need to do some trivial tweaks. Any PR is welcome to make it better and useful for others.
 
-## Usage
+## Deployment
 
 1. Initialize login accounts
 
@@ -39,7 +45,9 @@ Create `db/accounts.json` with your customed accounts:
 
 2. Initialize Obsidian repo
 
-Obweb assume you have your Obsidian repo cloned on the server, and you have permission to push to Git repo. When you are posting things from API, Obweb will push changes to remote.
+There is a plugin [Obsidian Git](https://github.com/denolehov/obsidian-git) to help you sync you Obsidian vault with remote repository.
+
+Obweb assume you have your Obsidian repository is cloned on the deploying server, and you have the permission of Git pull/push. When you are posting things from API, Obweb will push changes to remote.
 
 ```bash
 git clone http://your-ob-repo ob
@@ -49,23 +57,23 @@ git config user.email "you@example.com"
 git config user.name "Your Name"
 ```
 
-3. Compile and run server
+3. Compile and run
 
-Make sure you have installed [Rust and Cargo](http://rust-lang.org).
-
-```bash
-./bin/debug
-
-```
-Now you can access it on your browser [http://localhost:8005/obweb](http://localhost:8005/obweb/).
-
-Or you may start with Docker:
+You may start with Docker:
 
 ```bash
 docker-compose up
-
 ```
+
+Otherwise, make sure you have installed [Rust and Cargo](http://rust-lang.org), and then run:
+
+```bash
+./bin/debug
+```
+
+Now you can access it on your browser [http://localhost:8005/obweb](http://localhost:8005/obweb/).
 
 ----
 
 **I use this App everyday, hope it will be useful for you.**
+
