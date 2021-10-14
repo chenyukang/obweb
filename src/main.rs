@@ -98,7 +98,7 @@ fn gen_token(password: &str) -> String {
     token
 }
 
-fn git_pull() {
+fn git_pull() {    
     let child = Command::new("git")
         .current_dir("./ob")
         .args(&["pull", "--rebase"])
@@ -108,8 +108,7 @@ fn git_pull() {
     println!("{:?}", output);
 }
 
-fn git_sync() {
-    git_pull();
+fn git_sync() {    
     let child = Command::new("git")
         .current_dir("./ob")
         .args(&["add", "."])
@@ -159,7 +158,8 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
         println!("request: {:?}", req);
         return Ok(());
     }
-    git_pull();
+    std::thread::spawn(|| git_pull());
+
     let date_str = req.date.to_string();
     let page_str = req.page.to_string();
     let parsed_date = DateTime::parse_from_rfc3339(&date_str)
