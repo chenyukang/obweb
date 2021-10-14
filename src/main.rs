@@ -98,7 +98,7 @@ fn gen_token(password: &str) -> String {
     token
 }
 
-fn git_pull() {    
+fn git_pull() {
     let child = Command::new("git")
         .current_dir("./ob")
         .args(&["pull", "--rebase"])
@@ -108,7 +108,7 @@ fn git_pull() {
     println!("{:?}", output);
 }
 
-fn git_sync() {    
+fn git_sync() {
     let child = Command::new("git")
         .current_dir("./ob")
         .args(&["add", "."])
@@ -124,6 +124,8 @@ fn git_sync() {
         .expect("failed to execute child");
     let output = child.wait_with_output().expect("failed to wait on child");
     println!("{:?}", output);
+
+    git_pull();
 
     let child = Command::new("git")
         .current_dir("./ob")
@@ -158,8 +160,6 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
         println!("request: {:?}", req);
         return Ok(());
     }
-    std::thread::spawn(|| git_pull());
-
     let date_str = req.date.to_string();
     let page_str = req.page.to_string();
     let parsed_date = DateTime::parse_from_rfc3339(&date_str)
@@ -267,7 +267,6 @@ fn rand_query() -> Result<(String, String), &'static str> {
 }
 
 fn process_update(update: &Update) -> Result<(), &'static str> {
-    std::thread::spawn(|| git_pull());
     let path = format!("./ob/{}", update.file.to_string());
     fs::write(path, update.content.to_string()).expect("Unable to write file");
     std::thread::spawn(|| git_sync());
