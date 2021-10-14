@@ -64,14 +64,13 @@ You may start with Docker:
 ```bash
 docker-compose up
 ```
+Now you can access it on your browser [http://localhost:8005/obweb](http://localhost:8005/obweb/).
 
 Otherwise, make sure you have installed [Rust and Cargo](http://rust-lang.org), and then run:
 
 ```bash
 ./bin/debug
 ```
-
-Now you can access it on your browser [http://localhost:8005/obweb](http://localhost:8005/obweb/).
 
 ----
 
