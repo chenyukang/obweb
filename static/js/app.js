@@ -32,14 +32,14 @@ function handleSubmit() {
         datatype: 'json',
         contentType: "Application/json",
         data: data,
-        success: function(response) {
+        success: function (response) {
             if (response == "ok") {
                 showSuccMsg();
             } else {
                 showErrMsg();
             }
         },
-        error: function(err) {
+        error: function (err) {
             showErrMsg();
             console.log("There was an error saving the entry: ", err);
         }
@@ -69,7 +69,7 @@ function fileSelected(e) {
     img.file = file
 
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (e) {
         $("#upload-pic").prop("src", e.target.result);
         $("#imageDiv").prop("hidden", false);
     }
@@ -134,14 +134,14 @@ function tap(singleTapFunc, doubleTapFunc) {
     }
 }
 
-$(document).ready(function() {
+$(document).ready(function () {
     tryLogin();
 
-    $('#loginBtn').on('click', function() {
+    $('#loginBtn').on('click', function () {
         Login();
     });
 
-    $('#submit-btn').on('click', function(event) {
+    $('#submit-btn').on('click', function (event) {
         $("#submit-btn").prop('disabled', true);
         $("#status-msg").prop('hidden', true);
         $('#status-sp').prop('hidden', false);
@@ -149,24 +149,32 @@ $(document).ready(function() {
         handleSubmit();
     });
 
-    $('#content').on('input', function() {
+    $('#content').on('keyup', event => {
+        if (event.key == '[' || event.key == ']') {
+            var content = $('#content').val();
+            content = content.replaceAll("【", "[").replaceAll("】", "]");
+            $('#content').val(content);
+        }
+    });
+
+    $('#content').on('input', function (event) {
         $("#submit-btn").prop('disabled', false);
     });
 
-    $('#content').on('change', function() {
+    $('#content').on('change', function () {
         window.localStorage.setItem("content", $('#content').val());
     });
 
-    $('#submit-btn').on('mouseover', function() {
+    $('#submit-btn').on('mouseover', function () {
         enableBtn();
     });
 
-    $('#links').on('change', function() {
+    $('#links').on('change', function () {
         window.localStorage.setItem("links", $('#links').val());
         enableBtn();
     });
 
-    $('#page').on('change', function() {
+    $('#page').on('change', function () {
         window.localStorage.setItem("page", $('#page').val());
         enableBtn();
     });
@@ -177,7 +185,7 @@ $(document).ready(function() {
 
     var links = window.localStorage.getItem("links");
     if (links != null) {
-        links.split(",").forEach(function(link) {
+        links.split(",").forEach(function (link) {
             $('#links').tagsinput('add', link);
         });
     };
@@ -187,7 +195,7 @@ $(document).ready(function() {
         $('#page').tagsinput('add', page);
     };
 
-    document.getElementById('content').onpaste = function(event) {
+    document.getElementById('content').onpaste = function (event) {
         var items = (event.clipboardData || event.originalEvent.clipboardData).items;
         JSON.stringify(items);
         // will give you the mime types
@@ -202,7 +210,7 @@ $(document).ready(function() {
         // load image if there is a pasted image
         if (blob !== null) {
             var reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 $("#upload-pic").prop("src", e.target.result);
                 $("#imageDiv").prop("hidden", false);
             };
