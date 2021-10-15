@@ -4,6 +4,7 @@ function showSuccMsg() {
     $('#status-msg').addClass("alert-success");
     $('#status-msg').html("Save successfully");
     $('#status-msg').prop('hidden', false);
+    clearInput();
 }
 
 function showErrMsg() {
