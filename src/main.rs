@@ -169,7 +169,7 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
         .unwrap()
         .with_timezone(&FixedOffset::east(8 * 3600));
     let date = parsed_date.format("%Y-%m-%d").to_string();
-    let time = parsed_date.format("%H:%M:%S").to_string();
+    let time = parsed_date.format("%H:%M").to_string();
     let path = gen_page(&date, &page_str);
 
     let mut data = fs::read_to_string(&path).expect("Unable to read file");
