@@ -160,6 +160,9 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
         println!("request: {:?}", req);
         return Ok(());
     }
+    if !fs::read_to_string("./db/dev").is_err() {
+        git_pull();
+    }
     let date_str = req.date.to_string();
     let page_str = req.page.to_string();
     let parsed_date = DateTime::parse_from_rfc3339(&date_str)
@@ -388,7 +391,7 @@ pub async fn run_server(port: u16) {
         .untuple_one()
         .and(warp::body::json())
         .map(|update: Update| {
-            println!("update: {:?}", update);
+            //println!("update: {:?}", update);
             process_update(&update).unwrap();
             warp::reply::with_status("ok", http::status::StatusCode::OK).into_response()
         });

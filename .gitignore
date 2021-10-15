@@ -3,6 +3,7 @@ ob-web
 ob
 db/accounts.json
 db/tokens
+db/dev
 nohup.out
 update.sh
 *.Identifier
