@@ -16,7 +16,7 @@ Here are the principles of this project:
 
 1. The UI is designed to be more suitable for a mobile device. On PC/Mac, the Obsidian native application is more convenient than Web Applications. 
 
-2. We won't do complicated edit on mobile end, in most scenarios, we create simple note and memos in daily life, but we can use `link` in Obsidian to build connections between notes.
+2. We won't do complicated editing operations on the mobile end, in most scenarios, we create simple note and memos in daily life, but we can use `link` in Obsidian to build connections between notes.
 
 3. Keep everything simple, plain Markdown is preferable. Git as database and no other deps.
 
