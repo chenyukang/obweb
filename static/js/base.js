@@ -65,20 +65,7 @@ function Login() {
     });
 };
 
-
-function highlight(keyword) {
-    var markInstance = new Mark($("#page-content").get(0));
-    var options = {};
-    if (keyword != "" && keyword != undefined) {
-        markInstance.unmark({
-            done: function() {
-                markInstance.mark(keyword, options);
-            }
-        });
-    }
-}
-
-function fetchPage(url) {
+function fetchPage(url, callback = null) {
     var date = new Date();
     let begin_date = new Date(date.setDate(date.getDate() - 1000));
     $('#status-sp').prop('hidden', false);
@@ -92,7 +79,6 @@ function fetchPage(url) {
             "If-Modified-Since": begin_date.toISOString(),
         },
         success: function(response) {
-            //console.log(response);
             $('#status-sp').prop('hidden', true);
             if (response != "no-page") {
                 localStorage.setItem('page-content', response);
@@ -104,17 +90,16 @@ function fetchPage(url) {
                 }
 
                 $('#page-content').html(renderMdToHtml(response));
-                var keyword = $('#searchInput');
-                if (keyword != null) {
-                    highlight(keyword.val());
-                }
+                hljs.highlightAll();
 
                 $('#pageNavBar').prop('hidden', false);
                 $('#fileName').prop('hidden', false);
                 $('#page-content').prop('hidden', false);
-                hljs.highlightAll();
+                if (callback != null) {
+                    callback();
+                }
             } else {
-                $('#page-content').html("<h3>No Page</h3>" + " " + local_date)
+                $('#page-content').html("<h3>No Page</h3>")
             }
         },
         error: function(err) {

@@ -25,6 +25,24 @@ function search() {
     });
 }
 
+function highlight(keyword) {
+    var markInstance = new Mark($("#page-content").get(0));
+    var options = {};
+    if (keyword != "" && keyword != undefined) {
+        markInstance.unmark({
+            done: function() {
+                markInstance.mark(keyword, options);
+            }
+        });
+    }
+}
+
+function highlightResult() {
+    var keyword = $('#searchInput');
+    if (keyword != null) {
+        highlight(keyword.val());
+    }
+}
 
 function searchParams() {
     var urlParams;
@@ -49,7 +67,7 @@ $(document).ready(function() {
     $(".pageContent").on("click", "a", function(e) {
         var url = e.target.innerText;
         if (url.endsWith(".md")) {
-            fetchPage(url);
+            fetchPage(url, highlightResult);
         }
     });
 

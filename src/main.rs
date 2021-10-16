@@ -44,6 +44,11 @@ struct SearchQuery {
     keyword: String,
 }
 
+#[derive(Debug, Deserialize)]
+struct Mark {
+    index: usize,
+}
+
 fn verify_user(user: &User) -> bool {
     let accounts = fs::read_to_string("./db/accounts.json").unwrap();
     let users: Vec<User> = serde_json::from_str(&accounts).unwrap();
@@ -325,6 +330,18 @@ fn search_query(req: &SearchQuery) -> Result<String, &'static str> {
     Ok(res)
 }
 
+fn mark_done(req: &Mark) -> Result<String, &'static str> {
+    std::thread::spawn(|| git_pull());
+    let todo = fs::read_to_string("./ob/Unsort/todo.md").unwrap();
+    let todos: Vec<&str> = todo.split("---").collect();
+    let mut elems: Vec<String> = todos.iter().map(|&x| String::from(x)).collect();
+    elems[req.index] = elems[req.index].replace("- [ ] ", "- [x] ");
+    let conent = elems.join("---");
+    fs::write("./ob/Unsort/todo.md", conent).expect("Unable to write file");
+    std::thread::spawn(|| git_sync());
+    Ok(String::from("done"))
+}
+
 #[derive(Debug)]
 struct Unauthorized;
 
@@ -461,6 +478,21 @@ pub async fn run_server(port: u16) {
             }
         });
     let routes = routes.or(search);
+
+    let mark = warp::path!("api" / "mark")
+        .and(warp::post())
+        .and(auth_validation())
+        .untuple_one()
+        .and(warp::query::<Mark>())
+        .map(|mark: Mark| {
+            let res = mark_done(&mark);
+            if res.is_ok() {
+                format!("{}", res.unwrap())
+            } else {
+                format!("failed")
+            }
+        });
+    let routes = routes.or(mark);
 
     let log = warp::log("obweb::api");
     let routes = routes.with(log);
