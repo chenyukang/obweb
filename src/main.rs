@@ -199,14 +199,14 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
                 }
                 links_text += format!("[[{}]]", link).as_str();
             }
-            content = format!("{}\nLinks: {}", content, links_text);
+            content = format!("{}\nLinks: {}\n", content, links_text);
         }
         let append = if page_str == "todo" {
             format!("- [ ] {}", text)
         } else {
             text
         };
-        content += format!("\n\n{}", append).as_str();
+        content += format!("\n{}", append).as_str();
         if req.image.len() > 0 {
             let image_buf = process_image(&req.image.to_string());
             let image_name = format!("ob-web-{}-{}.png", date, time).replace(":", "-");
@@ -222,7 +222,7 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
         content = format!("{}\n\n---\n", content);
         content = format!("{}\n{}", content, data);
     } else {
-        content = data + "\n" + content.as_str() + "\n";
+        content = data + "\n" + content.as_str();
     }
 
     fs::write(&path, content).expect("Unable to write file");

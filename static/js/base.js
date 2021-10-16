@@ -227,7 +227,7 @@ function preprocessLink(response) {
 function renderMdToHtml(response) {
     var result = preprocessImage(response);
     result = preprocessLink(result);
-    var converter = new showdown.Converter();
+    var converter = new showdown.Converter({ simpleLineBreaks: true, tasklists: true });
     return converter.makeHtml(result);
 }
 
