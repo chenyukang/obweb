@@ -161,7 +161,6 @@ function savePage() {
 function editPage() {
     var content = document.getElementById('page-content');
     content.innerText = localStorage.getItem('page-content').replace(/ /g, '\u00a0');;
-    console.log(localStorage.getItem('page-content'));
     content.setAttribute('contenteditable', 'true');
     content.style.backgroundColor = '#fffcc0';
     var button = document.getElementById('editBtn');
@@ -229,7 +228,6 @@ $(document).ready(function() {
 
     $("body").on("click", "img", function(e) {
         var rato = $(this).width() / $(this).parent().width();
-        console.log(rato);
         if (rato <= 0.6) {
             $(this).css('width', '100%');
             $(this).css('height', '100%');

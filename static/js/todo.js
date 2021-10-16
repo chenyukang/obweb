@@ -4,7 +4,6 @@ function markDone(index) {
         url: "/api/mark?index=" + index,
         type: 'POST',
         success: function(response) {
-            console.log(response);
             if (response == "done") {
                 fetchPage('Unsort/todo.md', adjustTodo);
             }
@@ -28,7 +27,6 @@ function adjustTodo() {
     });
 
     $('input:checkbox:not(:checked)').change(function() {
-        console.log($(this));
         if ($(this).is(':checked')) {
             markDone($(this).prop("id"));
         }
