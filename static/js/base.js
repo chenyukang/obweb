@@ -197,12 +197,12 @@ function preprocessLink(response) {
         result += prev;
         var start = left.indexOf("[[") + 2;
         var end = left.indexOf("]]", start);
-        var link = left.substring(start, end).trim();
+        var link = left.substring(start, end);
         left = left.substring(end + 2);
         if (prev.indexOf("```") != -1 && left.indexOf("```") != -1)
-            result += link;
+            result += "[[" + link + "]]";
         else
-            result += "[" + link + "]" + "(" + "/static/search.html?page=" + encodeURI(link) + ")";
+            result += "[" + link.trim() + "]" + "(" + "/static/search.html?page=" + encodeURI(link.trim()) + ")";
         last = end + 2;
     }
     result += left;
@@ -212,7 +212,15 @@ function preprocessLink(response) {
 function renderMdToHtml(response) {
     var result = preprocessImage(response);
     result = preprocessLink(result);
-    var converter = new showdown.Converter({ simpleLineBreaks: true, tasklists: true });
+    var converter = new showdown.Converter({
+        simpleLineBreaks: true,
+        tasklists: true,
+        headerLevelStart: 2,
+        simplifiedAutoLink: true,
+        strikethrough: true,
+        emoji: true
+    });
+    converter.setFlavor('github');
     return converter.makeHtml(result);
 }
 
