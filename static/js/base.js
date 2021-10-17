@@ -5,8 +5,7 @@ function getCookie(name) {
 }
 
 function showLoginModal() {
-    var modal = document.getElementById('loginModal');
-    if (modal == null) {
+    if ($('#loginModal').length == 0) {
         window.location.href = '/obweb';
     }
     $('#loginModal').modal('show');
@@ -138,13 +137,11 @@ function updatePage(file, content) {
 function setSearchDefault() {
     $('#pageNavbar').prop('hidden', true);
     $('#fileName').prop('hidden', true);
-    var content = document.getElementById('page-content');
-    content.setAttribute('contenteditable', 'false');
-    content.style.backgroundColor = 'white';
+    $('#page-content').prop('contenteditable', false);
+    $('#page-content').css('backgroundColor', 'white');
 
-    var button = document.getElementById('editBtn');
-    button.innerText = 'Edit';
-    button.setAttribute('onclick', 'editPage()');
+    $('#editBtn').text('Edit');
+    $('#editBtn').attr('onclick', 'editPage()');
 }
 
 function savePage() {
@@ -161,11 +158,10 @@ function savePage() {
 function editPage() {
     var content = document.getElementById('page-content');
     content.innerText = localStorage.getItem('page-content').replace(/ /g, '\u00a0');;
-    content.setAttribute('contenteditable', 'true');
-    content.style.backgroundColor = '#fffcc0';
-    var button = document.getElementById('editBtn');
-    button.innerText = 'Save';
-    button.setAttribute('onclick', 'savePage()');
+    $('#page-content').prop('contenteditable', true);
+    $('#page-content').css('backgroundColor', '#fffcc0');
+    $('#editBtn').text('Save');
+    $('#editBtn').attr('onclick', 'savePage()');
 }
 
 function preprocessImage(response) {
