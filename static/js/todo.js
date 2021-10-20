@@ -14,24 +14,7 @@ function markDone(index) {
     });
 }
 
-function adjustTodo() {
-    $('input:checkbox').each(function(index) {
-        $(this).prop("id", index);
-    })
 
-    $("input:checkbox:not(:checked)").each(function() {
-        var parent = $(this).parent();
-        $(this).prop("disabled", false);
-        parent.css("color", "red");
-        parent.css("font-weight", "bold");
-    });
-
-    $('input:checkbox:not(:checked)').change(function() {
-        if ($(this).is(':checked')) {
-            markDone($(this).prop("id"));
-        }
-    });
-}
 
 $(document).ready(function() {
     fetchPage('Unsort/todo.md', adjustTodo);

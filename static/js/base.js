@@ -1,3 +1,5 @@
+"use strict";
+
 function getCookie(name) {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
@@ -14,7 +16,7 @@ function showLoginModal() {
 // Try to verify token in cookie, 
 // if it's not valid we need to show up login modal
 function tryLogin() {
-    var token = getCookie('token');
+    let token = getCookie('token');
     if (token == null) {
         showLoginModal();
     } else {
@@ -41,7 +43,7 @@ function tryLogin() {
 }
 
 function Login() {
-    var data = JSON.stringify({
+    let data = JSON.stringify({
         username: $('#username').val(),
         password: $('#password').val(),
     });
@@ -54,7 +56,7 @@ function Login() {
         data: data,
         success: function(response) {
             if (response != "failed") {
-                var storage = window.localStorage;
+                let storage = window.localStorage;
                 $('#loginModal').modal('hide');
             }
         },
@@ -65,7 +67,7 @@ function Login() {
 };
 
 function fetchPage(url, callback = null) {
-    var date = new Date();
+    let date = new Date();
     let begin_date = new Date(date.setDate(date.getDate() - 1000));
     $('#status-sp').prop('hidden', false);
     $.ajax({
@@ -83,7 +85,7 @@ function fetchPage(url, callback = null) {
                 localStorage.setItem('page-content', response);
                 localStorage.setItem('file', url);
 
-                var fileName = $('#fileName')[0];
+                let fileName = $('#fileName')[0];
                 if (fileName != null) {
                     $(fileName).text(url);
                 }
@@ -108,6 +110,25 @@ function fetchPage(url, callback = null) {
     });
 }
 
+function adjustTodo() {
+    $('input:checkbox').each(function(index) {
+        $(this).prop("id", index);
+    })
+
+    $("input:checkbox:not(:checked)").each(function() {
+        let parent = $(this).parent();
+        $(this).prop("disabled", false);
+        parent.css("color", "red");
+        parent.css("font-weight", "bold");
+    });
+
+    $('input:checkbox:not(:checked)').change(function() {
+        if ($(this).is(':checked')) {
+            markDone($(this).prop("id"));
+        }
+    });
+}
+
 function updatePage(file, content) {
     $('#status-sp').prop('hidden', false);
     $.ajax({
@@ -125,6 +146,7 @@ function updatePage(file, content) {
             localStorage.setItem('page-content', content);
             localStorage.setItem('file', file);
             $('#page-content').html(renderMdToHtml(content));
+            adjustTodo();
         },
         error: function(err) {
             $('#status-sp').prop('hidden', true);
@@ -146,8 +168,8 @@ function setSearchDefault() {
 
 function savePage() {
     setSearchDefault();
-    var text = document.getElementById('page-content').innerText.replace(/\u00a0/g, ' ');
-    var prev_content = localStorage.getItem('page-content');
+    let text = document.getElementById('page-content').innerText.replace(/\u00a0/g, ' ');
+    let prev_content = localStorage.getItem('page-content');
     if (prev_content != text) {
         updatePage(localStorage.getItem('file'), text);
     } else {
@@ -156,7 +178,7 @@ function savePage() {
 }
 
 function editPage() {
-    var content = document.getElementById('page-content');
+    let content = document.getElementById('page-content');
     content.innerText = localStorage.getItem('page-content').replace(/ /g, '\u00a0');;
     $('#page-content').prop('contenteditable', true);
     $('#page-content').css('backgroundColor', '#fffcc0');
@@ -165,16 +187,16 @@ function editPage() {
 }
 
 function preprocessImage(response) {
-    var result = ""
-    var left = response;
-    var last = 0;
+    let result = ""
+    let left = response;
+    let last = 0;
     while (left.indexOf("![[") != -1) {
-        var prev = left.substring(0, left.indexOf("![["));
+        let prev = left.substring(0, left.indexOf("![["));
         result += prev;
-        var start = left.indexOf("![[") + 3;
-        var end = left.indexOf("]]", start);
-        var image = left.substring(start, end);
-        var image_url = image.split("|")[0].trim();
+        let start = left.indexOf("![[") + 3;
+        let end = left.indexOf("]]", start);
+        let image = left.substring(start, end);
+        let image_url = image.split("|")[0].trim();
         result += "![img](/static/images/" + encodeURI(image_url) + ")";
         left = left.substring(end + 2);
         last = end + 2;
@@ -184,15 +206,15 @@ function preprocessImage(response) {
 }
 
 function preprocessLink(response) {
-    var result = ""
-    var left = response;
-    var last = 0;
+    let result = ""
+    let left = response;
+    let last = 0;
     while (left.indexOf("[[") != -1) {
-        var prev = left.substring(0, left.indexOf("[["));
+        let prev = left.substring(0, left.indexOf("[["));
         result += prev;
-        var start = left.indexOf("[[") + 2;
-        var end = left.indexOf("]]", start);
-        var link = left.substring(start, end);
+        let start = left.indexOf("[[") + 2;
+        let end = left.indexOf("]]", start);
+        let link = left.substring(start, end);
         left = left.substring(end + 2);
         if (prev.indexOf("```") != -1 && left.indexOf("```") != -1)
             result += "[[" + link + "]]";
@@ -205,9 +227,9 @@ function preprocessLink(response) {
 }
 
 function renderMdToHtml(response) {
-    var result = preprocessImage(response);
+    let result = preprocessImage(response);
     result = preprocessLink(result);
-    var converter = new showdown.Converter({
+    let converter = new showdown.Converter({
         simpleLineBreaks: true,
         tasklists: true,
         headerLevelStart: 2,
@@ -221,9 +243,8 @@ function renderMdToHtml(response) {
 
 
 $(document).ready(function() {
-
     $("body").on("click", "img", function(e) {
-        var rato = $(this).width() / $(this).parent().width();
+        let rato = $(this).width() / $(this).parent().width();
         if (rato <= 0.6) {
             $(this).css('width', '100%');
             $(this).css('height', '100%');

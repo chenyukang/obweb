@@ -1,3 +1,5 @@
+"use strict";
+
 function showSuccMsg() {
     $('#status-sp').prop('hidden', true);
     $('#status-msg').removeClass("alert-danger");
@@ -16,8 +18,8 @@ function showErrMsg() {
 }
 
 function handleSubmit() {
-    var elem = document.getElementById("upload-pic");
-    var data = JSON.stringify({
+    let elem = document.getElementById("upload-pic");
+    let data = JSON.stringify({
         date: new Date().toISOString(),
         links: $('#links').val(),
         page: $('#page').val(),
@@ -32,14 +34,14 @@ function handleSubmit() {
         datatype: 'json',
         contentType: "Application/json",
         data: data,
-        success: function (response) {
+        success: function(response) {
             if (response == "ok") {
                 showSuccMsg();
             } else {
                 showErrMsg();
             }
         },
-        error: function (err) {
+        error: function(err) {
             showErrMsg();
             console.log("There was an error saving the entry: ", err);
         }
@@ -69,7 +71,7 @@ function fileSelected(e) {
     img.file = file
 
     const reader = new FileReader();
-    reader.onload = function (e) {
+    reader.onload = function(e) {
         $("#upload-pic").prop("src", e.target.result);
         $("#imageDiv").prop("hidden", false);
     }
@@ -83,7 +85,6 @@ function enableBtn() {
 function clearInput() {
     $('#content').val('');
     window.localStorage.removeItem("content");
-    console.log("finished clear input");
 }
 
 function removePic() {
@@ -116,7 +117,6 @@ function doubletapTimeout() {
         doubletap1Function_();
     }
     clearTimeout(doubletapTimer_);
-    doubleTapTimer_ = 0;
     waitForDoubleTap = false;
 }
 
@@ -134,14 +134,14 @@ function tap(singleTapFunc, doubleTapFunc) {
     }
 }
 
-$(document).ready(function () {
+$(document).ready(function() {
     tryLogin();
 
-    $('#loginBtn').on('click', function () {
+    $('#loginBtn').on('click', function() {
         Login();
     });
 
-    $('#submit-btn').on('click', function (event) {
+    $('#submit-btn').on('click', function(event) {
         $("#submit-btn").prop('disabled', true);
         $("#status-msg").prop('hidden', true);
         $('#status-sp').prop('hidden', false);
@@ -151,30 +151,30 @@ $(document).ready(function () {
 
     $('#content').on('keyup', event => {
         if (event.key == '[' || event.key == ']') {
-            var content = $('#content').val();
+            let content = $('#content').val();
             content = content.replaceAll("【", "[").replaceAll("】", "]");
             $('#content').val(content);
         }
     });
 
-    $('#content').on('input', function (event) {
+    $('#content').on('input', function(event) {
         $("#submit-btn").prop('disabled', false);
     });
 
-    $('#content').on('change', function () {
+    $('#content').on('change', function() {
         window.localStorage.setItem("content", $('#content').val());
     });
 
-    $('#submit-btn').on('mouseover', function () {
+    $('#submit-btn').on('mouseover', function() {
         enableBtn();
     });
 
-    $('#links').on('change', function () {
+    $('#links').on('change', function() {
         window.localStorage.setItem("links", $('#links').val());
         enableBtn();
     });
 
-    $('#page').on('change', function () {
+    $('#page').on('change', function() {
         window.localStorage.setItem("page", $('#page').val());
         enableBtn();
     });
@@ -183,25 +183,25 @@ $(document).ready(function () {
         $('#content').val(window.localStorage.getItem("content"));
     }
 
-    var links = window.localStorage.getItem("links");
+    let links = window.localStorage.getItem("links");
     if (links != null) {
-        links.split(",").forEach(function (link) {
+        links.split(",").forEach(function(link) {
             $('#links').tagsinput('add', link);
         });
     };
 
-    var page = window.localStorage.getItem("page");
+    let page = window.localStorage.getItem("page");
     if (page != null) {
         $('#page').tagsinput('add', page);
     };
 
-    document.getElementById('content').onpaste = function (event) {
-        var items = (event.clipboardData || event.originalEvent.clipboardData).items;
+    document.getElementById('content').onpaste = function(event) {
+        let items = (event.clipboardData || event.originalEvent.clipboardData).items;
         JSON.stringify(items);
         // will give you the mime types
         // find pasted image among pasted items
-        var blob = null;
-        for (var i = 0; i < items.length; i++) {
+        let blob = null;
+        for (let i = 0; i < items.length; i++) {
             if (items[i].type.indexOf("image") === 0) {
                 blob = items[i].getAsFile();
                 break;
@@ -209,8 +209,8 @@ $(document).ready(function () {
         }
         // load image if there is a pasted image
         if (blob !== null) {
-            var reader = new FileReader();
-            reader.onload = function (e) {
+            let reader = new FileReader();
+            reader.onload = function(e) {
                 $("#upload-pic").prop("src", e.target.result);
                 $("#imageDiv").prop("hidden", false);
             };
