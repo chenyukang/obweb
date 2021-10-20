@@ -33,17 +33,7 @@ Maybe you need to do some trivial tweaks. Any PR is welcome to make it better an
 
 ## Deployment
 
-1. Initialize login accounts
-
-Create `db/accounts.json` with your customed accounts:
-```json
-[{
-    "username": "user name",
-    "password": "password"
-}]
-```
-
-2. Initialize Obsidian repo
+1. Initialize Obsidian repo
 
 There is a plugin [Obsidian Git](https://github.com/denolehov/obsidian-git) to help you sync you Obsidian vault with remote repository.
 
@@ -56,25 +46,26 @@ cd ob
 git config user.email "you@example.com"
 git config user.name "Your Name"
 ```
-
 Obweb assume your Obsidian vault has `Daily` and `Unsort` directories to store daily memos and unsorted notes.
 
-3. Compile and run
+2. Compile and run
+
+Make sure you have installed [Rust and Cargo](http://rust-lang.org), and then run:
+
+```bash
+./bin/debug
+```
+It will requires you to initialize user and password in the first time. 
+
+Now you can access it on your browser [http://localhost:8005/obweb](http://localhost:8005/obweb/).
 
 You may start with Docker:
 
 ```bash
 docker-compose up
 ```
-Now you can access it on your browser [http://localhost:8005/obweb](http://localhost:8005/obweb/).
 
-Otherwise, make sure you have installed [Rust and Cargo](http://rust-lang.org), and then run:
-
-```bash
-./bin/debug
-```
-
-4. Post configuration
+3. Post configuration
 
 If you have your own domain, you can config it to a custom domain. You may want to add some other security enhancement such as HTTPS, request frequency limit, etc.
 
