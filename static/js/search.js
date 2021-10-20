@@ -60,7 +60,6 @@ function searchParams() {
     return urlParams;
 }
 
-
 $(document).ready(function() {
     $(".pageContent").on("click", "a", function(e) {
         let url = e.target.innerText;

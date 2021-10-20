@@ -1,4 +1,4 @@
-var date = new Date();
+let date = new Date();
 
 function padding(value, n) {
     return String(value).padStart(n, '0');
@@ -24,7 +24,7 @@ function currentDaily() {
 
 function getDaily(date) {
     $('#status-sp').prop('hidden', false);
-    var date_str = dateStr(date);
+    let date_str = dateStr(date);
     $.ajax({
         statusCode: {
             500: function() {
