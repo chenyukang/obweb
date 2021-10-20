@@ -6,6 +6,7 @@ use clap::App;
 use dialoguer::Password;
 use dialoguer::{theme::ColorfulTheme, Input};
 use glob::glob;
+use path_clean;
 use rand::Rng;
 use serde::Deserialize;
 use std::fs;
@@ -38,13 +39,14 @@ struct Update {
 }
 
 #[derive(Debug, Deserialize)]
-struct DailyQuery {
-    date: String,
+struct SearchQuery {
+    keyword: String,
 }
 
 #[derive(Debug, Deserialize)]
-struct SearchQuery {
-    keyword: String,
+struct PageQuery {
+    path: String,
+    rand: bool,
 }
 
 #[derive(Debug, Deserialize)]
@@ -145,6 +147,7 @@ fn gen_page(date: &String, page: &String) -> String {
     } else {
         format!("./ob/Unsort/{}.md", page)
     };
+    let path = ensure_path(&path).unwrap();
     if !Path::new(&path).exists() {
         File::create(&path).unwrap();
     }
@@ -158,7 +161,7 @@ fn process_image(data: &String) -> Vec<u8> {
     decode(image).unwrap()
 }
 
-fn process_request(req: &Request) -> Result<(), &'static str> {
+fn page_post(req: &Request) -> Result<(), &'static str> {
     if !fs::read_to_string("./db/debug").is_err() {
         println!("request: {:?}", req);
         return Ok(());
@@ -233,16 +236,18 @@ fn process_request(req: &Request) -> Result<(), &'static str> {
     Ok(())
 }
 
-fn daily_query(req: &DailyQuery) -> Result<String, &'static str> {
-    std::thread::spawn(|| git_pull());
-    let path = format!("./ob/Daily/{}.md", req.date.to_string());
-    println!("path : {:?}", path);
-    let p = Path::new(&path);
-    if Path::exists(&p) {
-        return Ok(fs::read_to_string(&path).expect("Unable to read file"));
-    } else {
-        return Err("No such file");
+fn ensure_path(path: &String) -> Result<String, &'static str> {
+    let cleaned_path = path_clean::clean(path);
+    if !(cleaned_path.starts_with("ob/") && cleaned_path.ends_with(".md")) {
+        return Err("Invalid path");
     }
+    Ok(cleaned_path)
+}
+
+fn file_query(query: &PageQuery) -> Result<(String, String), &'static str> {
+    let path = ensure_path(&format!("./ob/{}", query.path))?;
+    let data = fs::read_to_string(&path).unwrap();
+    return Ok((query.path.clone(), data));
 }
 
 fn rand_query() -> Result<(String, String), &'static str> {
@@ -272,8 +277,16 @@ fn rand_query() -> Result<(String, String), &'static str> {
     }
 }
 
-fn process_update(update: &Update) -> Result<(), &'static str> {
-    let path = format!("./ob/{}", update.file.to_string());
+fn page_query(query: &PageQuery) -> Result<(String, String), &'static str> {
+    if query.rand {
+        rand_query()
+    } else {
+        file_query(&query)
+    }
+}
+
+fn page_update(update: &Update) -> Result<(), &'static str> {
+    let path = ensure_path(&format!("./ob/{}", update.file.to_string()))?;
     fs::write(path, update.content.to_string()).expect("Unable to write file");
     std::thread::spawn(|| git_sync());
     Ok(())
@@ -372,7 +385,7 @@ pub async fn run_server(port: u16) {
         .and(warp::body::json())
         .map(|request: Request| {
             println!("request: {:?}", request.date);
-            if process_request(&request).is_ok() {
+            if page_post(&request).is_ok() {
                 format!("ok")
             } else {
                 format!("failed")
@@ -392,14 +405,6 @@ pub async fn run_server(port: u16) {
         .and(warp::fs::dir("./ob/Pics"));
     let routes = routes.or(images);
 
-    let page = warp::path("api")
-        .and(warp::path("page"))
-        .and(warp::get())
-        .and(auth_validation())
-        .untuple_one()
-        .and(warp::fs::dir("./ob/"));
-    let routes = routes.or(page);
-
     let update = warp::path!("api" / "page")
         .and(warp::post())
         .and(auth_validation())
@@ -407,7 +412,7 @@ pub async fn run_server(port: u16) {
         .and(warp::body::json())
         .map(|update: Update| {
             //println!("update: {:?}", update);
-            process_update(&update).unwrap();
+            page_update(&update).unwrap();
             warp::reply::with_status("ok", http::status::StatusCode::OK).into_response()
         });
     let routes = routes.or(update);
@@ -437,30 +442,16 @@ pub async fn run_server(port: u16) {
         .map(|| warp::reply::reply().into_response());
     let routes = routes.or(verify);
 
-    let daily = warp::path!("api" / "daily")
+    let page = warp::path!("api" / "page")
         .and(warp::get())
         .and(auth_validation())
         .untuple_one()
-        .and(warp::query::<DailyQuery>())
-        .map(|daily: DailyQuery| {
-            let res = daily_query(&daily);
-            if res.is_ok() {
-                format!("{}", res.unwrap())
-            } else {
-                format!("no-page")
-            }
-        });
-    let routes = routes.or(daily);
-
-    let rand = warp::path!("api" / "rand")
-        .and(warp::get())
-        .and(auth_validation())
-        .untuple_one()
-        .map(|| {
-            let res = rand_query();
+        .and(warp::query::<PageQuery>())
+        .map(|query: PageQuery| {
+            let res = page_query(&query);
             warp::reply::json(&res.unwrap())
         });
-    let routes = routes.or(rand);
+    let routes = routes.or(page);
 
     let search = warp::path!("api" / "search")
         .and(warp::get())

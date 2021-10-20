@@ -672,6 +672,7 @@ dependencies = [
  "http",
  "httparse",
  "log",
+ "path-clean",
  "pretty_env_logger",
  "rand 0.7.3",
  "rust-argon2",
@@ -707,6 +708,12 @@ checksum = "addaa943333a514159c80c97ff4a93306530d965d27e139188283cd13e06a799"
 dependencies = [
  "memchr",
 ]
+
+[[package]]
+name = "path-clean"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ecba01bf2678719532c5e3059e0b5f0811273d94b397088b82e3bd0a78c78fdd"
 
 [[package]]
 name = "percent-encoding"

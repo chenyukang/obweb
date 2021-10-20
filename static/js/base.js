@@ -61,31 +61,34 @@ function Login() {
     });
 };
 
-function fetchPage(url, callback = null) {
+function fetchPage(url, rand_query = false, callback = null) {
     let date = new Date();
     let begin_date = new Date(date.setDate(date.getDate() - 1000));
     $('#status-sp').prop('hidden', false);
     $.ajax({
-        url: "/api/page/" + url,
+        url: `/api/page?path=${url}&rand=${rand_query}`,
         crossDomain: true,
         type: 'GET',
         datatype: 'json',
         contentType: "Application/json",
         headers: {
+            // Important since warp will cache the unmodified files
             "If-Modified-Since": begin_date.toISOString(),
         },
         success: function(response) {
             $('#status-sp').prop('hidden', true);
             if (response != "no-page") {
-                localStorage.setItem('page-content', response);
-                localStorage.setItem('file', url);
+                let content = response[1]
+                let file = response[0]
+                localStorage.setItem('page-content', content);
+                localStorage.setItem('file', file);
 
                 let fileName = $('#fileName')[0];
                 if (fileName != null) {
                     $(fileName).text(url);
                 }
 
-                $('#page-content').html(renderMdToHtml(response));
+                $('#page-content').html(renderMdToHtml(content));
                 hljs.highlightAll();
 
                 $('#pageNavBar').prop('hidden', false);

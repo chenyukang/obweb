@@ -14,8 +14,6 @@ function markDone(index) {
     });
 }
 
-
-
 $(document).ready(function() {
-    fetchPage('Unsort/todo.md', adjustTodo);
+    fetchPage('Unsort/todo.md', false, adjustTodo);
 });

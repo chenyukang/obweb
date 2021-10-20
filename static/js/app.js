@@ -26,7 +26,6 @@ function handleSubmit() {
         text: $('#content').val(),
         image: (elem.src.indexOf("data:image") === 0 ? elem.src : ""),
     });
-    //console.log(data);
     $.ajax({
         url: "/api/entry",
         crossDomain: true,
@@ -131,8 +130,6 @@ function tap(singleTapFunc, doubleTapFunc) {
 }
 
 $(document).ready(function() {
-
-
     $('#loginBtn').on('click', function() {
         Login();
     });

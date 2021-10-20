@@ -64,7 +64,7 @@ $(document).ready(function() {
     $(".pageContent").on("click", "a", function(e) {
         let url = e.target.innerText;
         if (url.endsWith(".md")) {
-            fetchPage(url, highlightResult);
+            fetchPage(url, false, highlightResult);
         }
     });
 
