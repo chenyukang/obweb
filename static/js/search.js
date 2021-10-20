@@ -1,6 +1,6 @@
 function search() {
     setSearchDefault();
-    var input = $('#searchInput').val();
+    let input = $('#searchInput').val();
     $('#status-sp').prop('hidden', false);
     $.ajax({
         url: "/api/search?keyword=" + input,
@@ -26,8 +26,8 @@ function search() {
 }
 
 function highlight(keyword) {
-    var markInstance = new Mark($("#page-content").get(0));
-    var options = {};
+    let markInstance = new Mark($("#page-content").get(0));
+    let options = {};
     if (keyword != "" && keyword != undefined) {
         markInstance.unmark({
             done: function() {
@@ -38,16 +38,16 @@ function highlight(keyword) {
 }
 
 function highlightResult() {
-    var keyword = $('#searchInput');
+    let keyword = $('#searchInput');
     if (keyword != null) {
         highlight(keyword.val());
     }
 }
 
 function searchParams() {
-    var urlParams;
+    let urlParams;
     (window.onpopstate = function() {
-        var match,
+        let match,
             pl = /\+/g, // Regex for replacing addition symbol with a space
             search = /([^&=]+)=?([^&]*)/g,
             decode = function(s) { return decodeURIComponent(s.replace(pl, " ")); },
@@ -62,25 +62,23 @@ function searchParams() {
 
 
 $(document).ready(function() {
-    tryLogin();
-
     $(".pageContent").on("click", "a", function(e) {
-        var url = e.target.innerText;
+        let url = e.target.innerText;
         if (url.endsWith(".md")) {
             fetchPage(url, highlightResult);
         }
     });
 
-    var keyword = searchParams()["page"];
-    if ($('#searchInput').val() == "" && keyword != undefined) {
-        document.getElementById("searchInput").value = keyword;
-    }
-    search();
-
-    document.getElementById("searchInput").addEventListener("keyup", function(event) {
-        if (event.keyCode === 13) {
-            event.preventDefault();
+    $('#searchInput').on('keyup', function(event) {
+        if (event.keyCode == 13) {
             search();
         }
     });
+
+    let keyword = searchParams()["page"];
+    if ($('#searchInput').val() == "" && keyword != undefined) {
+        document.getElementById("searchInput").value = keyword;
+    }
+
+    tryLogin(search);
 });

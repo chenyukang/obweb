@@ -15,7 +15,7 @@ function showLoginModal() {
 
 // Try to verify token in cookie, 
 // if it's not valid we need to show up login modal
-function tryLogin() {
+function tryLogin(callback = null) {
     let token = getCookie('token');
     if (token == null) {
         showLoginModal();
@@ -33,6 +33,9 @@ function tryLogin() {
                     $('#loginModal').modal('hide');
                 } else {
                     showLoginModal();
+                }
+                if (callback != null) {
+                    callback();
                 }
             },
             error: function(err) {
