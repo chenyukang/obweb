@@ -26,6 +26,7 @@ pub struct Request {
 struct User {
     username: String,
     password: String,
+    finger: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -53,7 +54,7 @@ fn verify_user(user: &User) -> bool {
     let accounts = fs::read_to_string("./db/accounts.json").unwrap();
     let users: Vec<User> = serde_json::from_str(&accounts).unwrap();
     for u in users {
-        if u.username == user.username && u.password == user.password {
+        if u.username == user.username && u.password == user.password && u.finger == user.finger {
             return true;
         }
     }
@@ -79,10 +80,11 @@ fn hash(password: &[u8]) -> String {
     base64::encode(&res)
 }
 
-fn gen_token(password: &str) -> String {
+fn gen_token(password: &str, finger: &str) -> String {
     let path = Path::new("./db/tokens");
     let mut prev_data = String::new();
-    let token = hash(password.as_bytes());
+    let key = format!("{}:{}", password, finger);
+    let token = hash(&key.as_bytes());
     if !Path::new(&path).exists() {
         File::create(&path).unwrap();
     } else {
@@ -419,7 +421,7 @@ pub async fn run_server(port: u16) {
         .and(warp::body::json())
         .map(|user: User| {
             if verify_user(&user) {
-                let token = gen_token(&user.password);
+                let token = gen_token(&user.password, &user.finger);
                 warp::reply::with_header(
                     token.clone(),
                     "set-cookie",

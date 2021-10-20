@@ -13,6 +13,32 @@ function showLoginModal() {
     $('#loginModal').modal('show');
 }
 
+// Initialize the agent at application startup.
+const fpPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.onload = resolve
+        script.onerror = () => reject('Failed to load the script')
+        script.async = true
+        script.src = 'https://cdn.jsdelivr.net/npm/' +
+            '@fingerprintjs/fingerprintjs@3/dist/fp.min.js'
+        document.head.appendChild(script)
+    })
+    .then(() => FingerprintJS.load())
+
+var fingerToken;
+
+fpPromise
+    .then(fp => fp.get())
+    .then(result => {
+        // This is the visitor identifier:
+        console.log(result);
+        const visitorId = result.visitorId
+        console.log(visitorId)
+        fingerToken = visitorId;
+    })
+    .catch(error => console.error(error));
+
+
 // Try to verify token in cookie, 
 // if it's not valid we need to show up login modal
 function tryLogin(callback = null) {
@@ -49,6 +75,7 @@ function Login() {
     let data = JSON.stringify({
         username: $('#username').val(),
         password: $('#password').val(),
+        finger: fingerToken
     });
     $.ajax({
         url: "/api/login",
@@ -243,7 +270,6 @@ function renderMdToHtml(response) {
     converter.setFlavor('github');
     return converter.makeHtml(result);
 }
-
 
 $(document).ready(function() {
     $("body").on("click", "img", function(e) {
