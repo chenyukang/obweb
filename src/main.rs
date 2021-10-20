@@ -423,7 +423,7 @@ pub async fn run_server(port: u16) {
                 warp::reply::with_header(
                     token.clone(),
                     "set-cookie",
-                    format!("token={}; Path=/; Max-Age=1209600", token),
+                    format!("token={}; Path=/; HttpOnly; Max-Age=1209600", token),
                 )
                 .into_response()
             } else {

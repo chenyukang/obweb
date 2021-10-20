@@ -1,11 +1,5 @@
 "use strict";
 
-function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-}
-
 function showLoginModal() {
     if ($('#loginModal').length == 0) {
         window.location.href = '/obweb';
@@ -16,33 +10,31 @@ function showLoginModal() {
 // Try to verify token in cookie, 
 // if it's not valid we need to show up login modal
 function tryLogin(callback = null) {
-    let token = getCookie('token');
-    if (token == null) {
-        showLoginModal();
-    } else {
-        $.ajax({
-            statusCode: {
-                500: function() {
-                    showLoginModal();
-                }
+    $.ajax({
+        statusCode: {
+            500: function() {
+                showLoginModal();
             },
-            url: "/api/verify",
-            type: 'GET',
-            success: function(response) {
-                if (response != "failed") {
-                    $('#loginModal').modal('hide');
-                } else {
-                    showLoginModal();
-                }
-                if (callback != null) {
-                    callback();
-                }
-            },
-            error: function(err) {
-                console.log("TryLogin error: ", err);
+            400: function() {
+                showLoginModal();
             }
-        });
-    }
+        },
+        url: "/api/verify",
+        type: 'GET',
+        success: function(response) {
+            if (response != "failed") {
+                $('#loginModal').modal('hide');
+            } else {
+                showLoginModal();
+            }
+            if (callback != null) {
+                callback();
+            }
+        },
+        error: function(err) {
+            console.log("TryLogin error: ", err);
+        }
+    });
 }
 
 function Login() {
