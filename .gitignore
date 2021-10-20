@@ -2,6 +2,7 @@ target/
 ob-web
 ob
 db/accounts.json
+db/account
 db/tokens
 db/dev
 nohup.out

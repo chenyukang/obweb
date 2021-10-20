@@ -2,15 +2,18 @@ use argon2::{self, Config};
 use base64::decode;
 use chrono::prelude::*;
 use chrono::DateTime;
+use clap::App;
+use dialoguer::Password;
+use dialoguer::{theme::ColorfulTheme, Input};
 use glob::glob;
 use rand::Rng;
 use serde::Deserialize;
-use std::env;
 use std::fs;
 use std::fs::File;
 use std::net::Ipv4Addr;
 use std::path::Path;
 use std::process::Command;
+use uuid::Uuid;
 use warp::{reject, Filter, Rejection, Reply};
 
 #[derive(Deserialize, Debug)]
@@ -50,14 +53,10 @@ struct Mark {
 }
 
 fn verify_user(user: &User) -> bool {
-    let accounts = fs::read_to_string("./db/accounts.json").unwrap();
-    let users: Vec<User> = serde_json::from_str(&accounts).unwrap();
-    for u in users {
-        if u.username == user.username && u.password == user.password {
-            return true;
-        }
-    }
-    false
+    let hash = fs::read_to_string("./db/account").unwrap();
+    let combine = format!("{}:{}", user.username, user.password);
+    let matche = argon2::verify_encoded(&hash, &combine.as_bytes()).unwrap();
+    matche
 }
 
 fn verify_token(token: &str) -> bool {
@@ -75,14 +74,13 @@ fn hash(password: &[u8]) -> String {
     let salt = rand::thread_rng().gen::<[u8; 32]>();
     let config = Config::default();
     //println!("{:?} {:?}", salt, config);
-    let res = argon2::hash_encoded(password, &salt, &config).unwrap();
-    base64::encode(&res)
+    argon2::hash_encoded(password, &salt, &config).unwrap()
 }
 
-fn gen_token(password: &str) -> String {
+fn gen_token() -> String {
     let path = Path::new("./db/tokens");
     let mut prev_data = String::new();
-    let token = hash(password.as_bytes());
+    let token = Uuid::new_v4().to_string();
     if !Path::new(&path).exists() {
         File::create(&path).unwrap();
     } else {
@@ -419,7 +417,7 @@ pub async fn run_server(port: u16) {
         .and(warp::body::json())
         .map(|user: User| {
             if verify_user(&user) {
-                let token = gen_token(&user.password);
+                let token = gen_token();
                 warp::reply::with_header(
                     token.clone(),
                     "set-cookie",
@@ -501,12 +499,41 @@ pub async fn run_server(port: u16) {
     warp::serve(routes).run((Ipv4Addr::UNSPECIFIED, port)).await
 }
 
+fn init_password() {
+    let username: String = Input::with_theme(&ColorfulTheme::default())
+        .with_prompt("UserName:")
+        .interact_text()
+        .unwrap();
+    let password = Password::new()
+        .with_prompt("Password:")
+        .with_confirmation("Confirm password", "Password mismatching")
+        .interact()
+        .unwrap();
+
+    let combine = format!("{}:{}", username, password);
+    let hashed = hash(&combine.as_bytes());
+    fs::write("./db/account", hashed).unwrap();
+}
+
 fn main() {
-    let port_key = "FUNCTIONS_CUSTOMHANDLER_PORT";
-    let _port: u16 = match env::var(port_key) {
-        Ok(val) => val.parse().expect("Custom Handler port is not a number!"),
-        Err(_) => 8005,
+    let matches = App::new("Obweb")
+        .version("0.1")
+        .author("yukang <moorekang@gmail.com>")
+        .about("Obsidian Web")
+        .arg("-c, --config            'Config username and password'")
+        .arg("-p, --port=[PORT]       'Listen port'")
+        .get_matches();
+
+    let port = match matches.value_of("port") {
+        Some(port) => port.parse::<u16>().unwrap(),
+        None => 8005,
     };
 
-    run_server(_port);
+    let config = matches.occurrences_of("config");
+    if config > 0 as u64 || fs::metadata("./db/account").is_err() {
+        println!("Value for config!");
+        init_password();
+    }
+
+    run_server(port);
 }
