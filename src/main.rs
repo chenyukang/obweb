@@ -72,11 +72,11 @@ fn verify_token(token: &str) -> bool {
     false
 }
 
-fn hash(password: &[u8]) -> String {
+fn hash(payload: &[u8]) -> String {
     let salt = rand::thread_rng().gen::<[u8; 32]>();
     let config = Config::default();
     //println!("{:?} {:?}", salt, config);
-    let res = argon2::hash_encoded(password, &salt, &config).unwrap();
+    let res = argon2::hash_encoded(payload, &salt, &config).unwrap();
     base64::encode(&res)
 }
 
