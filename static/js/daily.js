@@ -23,42 +23,8 @@ function currentDaily() {
 }
 
 function getDaily(date) {
-    $('#status-sp').prop('hidden', false);
     let date_str = dateStr(date);
-    $.ajax({
-        statusCode: {
-            500: function() {
-                window.location.href = '/obweb';
-            }
-        },
-        url: "/api/daily?date=" + date_str,
-        crossDomain: true,
-        type: 'GET',
-        datatype: 'json',
-        contentType: "Application/json",
-        success: function(response) {
-            $('#status-sp').prop('hidden', true);
-            localStorage.setItem('page-content', response);
-            localStorage.setItem('file', 'Daily/' + date_str + '.md');
-            //console.log(date);
-            if (response != "no-page") {
-                header = "## " + date_str;
-                if (response.indexOf(header) == -1) {
-                    response = header + "\n\n---\n" + response;
-                }
-                $('#page-content').html(renderMdToHtml(response));
-                $('#page-content').prop('hidden', false);
-            } else {
-                $('#page-content').html("<h3>No Page</h3>" + " " + date_str);
-                $('#page-content').prop('hidden', false);
-            }
-        },
-        error: function(err) {
-            $('#status-sp').prop('hidden', true);
-            console.log(err);
-            return err;
-        }
-    });
+    fetchPage(`Daily/${date_str}.md`);
 }
 
 $(document).ready(function() {
