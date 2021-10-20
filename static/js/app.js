@@ -48,10 +48,6 @@ function handleSubmit() {
     });
 };
 
-function test() {
-    console.log("test");
-}
-
 function checkFormValidity() {
     return document.getElementById('journal-entry').checkValidity();
 };
@@ -135,7 +131,7 @@ function tap(singleTapFunc, doubleTapFunc) {
 }
 
 $(document).ready(function() {
-    tryLogin();
+
 
     $('#loginBtn').on('click', function() {
         Login();
@@ -195,7 +191,7 @@ $(document).ready(function() {
         $('#page').tagsinput('add', page);
     };
 
-    document.getElementById('content').onpaste = function(event) {
+    $('#content')[0].onpaste = function(event) {
         let items = (event.clipboardData || event.originalEvent.clipboardData).items;
         JSON.stringify(items);
         // will give you the mime types
@@ -216,5 +212,7 @@ $(document).ready(function() {
             };
             reader.readAsDataURL(blob);
         }
-    }
+    };
+
+    tryLogin();
 });
