@@ -85,7 +85,7 @@ function fetchPage(url, rand_query = false, callback = null) {
 
                 let fileName = $('#fileName')[0];
                 if (fileName != null) {
-                    $(fileName).text(url);
+                    $(fileName).text(file);
                 }
 
                 $('#page-content').html(renderMdToHtml(content));
