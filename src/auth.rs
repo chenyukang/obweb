@@ -14,18 +14,27 @@ pub struct User {
     password: String,
 }
 
+static ACCOUNT_DB: &'static str = "./db/account";
+static TOKENS_DB: &'static str = "./db/tokens";
+
 pub fn verify_user(user: &User) -> bool {
-    let hash = fs::read_to_string("./db/account").unwrap();
-    let combine = format!("{}:{}", user.username, user.password);
-    argon2::verify_encoded(&hash, &combine.as_bytes()).unwrap()
+    let hash = fs::read_to_string(ACCOUNT_DB);
+    if hash.is_ok() {
+        let combine = format!("{}:{}", user.username, user.password);
+        argon2::verify_encoded(&hash.unwrap(), &combine.as_bytes()).unwrap()
+    } else {
+        // If ACCOUNT_DB haven't initialized, create it, and then return true
+        // This will only happen when the first time user login
+        write_user_pass(&user.username, &user.password);
+        true
+    }
 }
 
 pub fn verify_token(token: &str) -> Option<bool> {
-    let account = "./db/account";
-    if !Path::new(account).exists() {
+    if !Path::new(ACCOUNT_DB).exists() {
         return None;
     }
-    let data = fs::read_to_string("./db/tokens").unwrap();
+    let data = fs::read_to_string(TOKENS_DB).unwrap();
     let tokens: Vec<&str> = data.split("\n").collect();
     Some(tokens.iter().any(|&t| t == token))
 }
@@ -38,7 +47,7 @@ pub fn hash(password: &[u8]) -> String {
 }
 
 pub fn gen_token() -> String {
-    let path = Path::new("./db/tokens");
+    let path = Path::new(TOKENS_DB);
     let mut prev_data = String::new();
     if !Path::new(&path).exists() {
         File::create(&path).unwrap();
@@ -70,8 +79,11 @@ pub fn init_password() {
         .with_confirmation("Confirm password", "Password mismatching")
         .interact()
         .unwrap();
+    write_user_pass(&username, &password)
+}
 
+fn write_user_pass(username: &str, password: &str) {
     let combine = format!("{}:{}", username, password);
     let hashed = hash(&combine.as_bytes());
-    fs::write("./db/account", hashed).unwrap();
+    fs::write(ACCOUNT_DB, hashed).unwrap();
 }

@@ -4,6 +4,7 @@ use chrono::DateTime;
 use clap::App;
 use glob::glob;
 use path_clean;
+use rand::seq::SliceRandom;
 use serde::Deserialize;
 use std::fs;
 use std::fs::File;
@@ -51,7 +52,7 @@ fn ensure_path(path: &String) -> Result<String, &'static str> {
     Ok(cleaned_path)
 }
 
-fn gen_page(date: &String, page: &String) -> String {
+fn gen_path(date: &String, page: &String) -> String {
     let path = if page.is_empty() {
         format!("./ob/Daily/{}.md", date)
     } else {
@@ -86,7 +87,7 @@ fn page_post(req: &Request) -> Result<(), &'static str> {
         .with_timezone(&FixedOffset::east(8 * 3600));
     let date = parsed_date.format("%Y-%m-%d").to_string();
     let time = parsed_date.format("%H:%M").to_string();
-    let path = gen_page(&date, &page_str);
+    let path = gen_path(&date, &page_str);
 
     let mut data = fs::read_to_string(&path).expect("Unable to read file");
     if data.len() == 0 && page_str.is_empty() {
@@ -146,44 +147,31 @@ fn page_post(req: &Request) -> Result<(), &'static str> {
     Ok(())
 }
 
-fn file_query(query: &PageQuery) -> Result<(String, String), &'static str> {
-    let path = ensure_path(&format!("./ob/{}", query.path))?;
-    let data = fs::read_to_string(&path).unwrap();
-    return Ok((query.path.clone(), data));
-}
-
-fn rand_query() -> Result<(String, String), &'static str> {
-    use rand::seq::SliceRandom;
-    std::thread::spawn(|| git::git_pull());
-
-    let mut files = vec![];
-    for entry in glob("./ob/**/*.md").expect("failed") {
-        match entry {
-            Ok(path) => {
-                //println!("{:?}", path.display());
-                files.push(format!("{}", path.display()));
-            }
-            Err(e) => println!("{:?}", e),
-        }
-    }
-    loop {
-        let path = files.choose(&mut rand::thread_rng()).unwrap();
-        //println!("path : {:?}", path);
-        let content = fs::read_to_string(&path).unwrap_or(String::new());
-        if content.len() <= 4 {
-            // too short content tend to be meannless in random reading
-            continue;
-        } else {
-            return Ok((path.to_string().replace("ob/", ""), content));
-        }
-    }
-}
-
 fn page_query(query: &PageQuery) -> Result<(String, String), &'static str> {
+    std::thread::spawn(|| git::git_pull());
     if query.rand {
-        rand_query()
+        let mut files = vec![];
+        for entry in glob("./ob/**/*.md").expect("failed") {
+            match entry {
+                Ok(path) => {
+                    files.push(format!("{}", path.display()));
+                }
+                Err(e) => println!("{:?}", e),
+            }
+        }
+        loop {
+            let path = files.choose(&mut rand::thread_rng()).unwrap();
+            //println!("path : {:?}", path);
+            let content = fs::read_to_string(&path).unwrap_or(String::new());
+            if content.len() > 4 {
+                // too short content tend to be meannless in random reading
+                return Ok((path.to_string().replace("ob/", ""), content));
+            }
+        }
     } else {
-        file_query(&query)
+        let path = ensure_path(&format!("./ob/{}", query.path))?;
+        let data = fs::read_to_string(&path).unwrap();
+        return Ok((query.path.clone(), data));
     }
 }
 

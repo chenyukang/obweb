@@ -1,26 +1,32 @@
 "use strict";
 
-function showLoginModal() {
+function showLoginModal(init = false) {
     if ($('#loginModal').length == 0) {
         window.location.href = '/obweb';
     }
     $('#loginModal').modal('show');
+    if (init) {
+        $('#loginBtn').text("Initialize Account");
+    }
 }
 
 // Try to verify token in cookie, 
 // if it's not valid we need to show up login modal
 function tryLogin(callback = null) {
     $.ajax({
+        url: "/api/verify",
+        type: 'GET',
         statusCode: {
             500: function() {
                 showLoginModal();
             },
             400: function() {
                 showLoginModal();
+            },
+            404: function() {
+                showLoginModal(true);
             }
         },
-        url: "/api/verify",
-        type: 'GET',
         success: function(response) {
             if (response != "failed") {
                 $('#loginModal').modal('hide');
@@ -74,6 +80,11 @@ function fetchPage(url, rand_query = false, callback = null) {
         headers: {
             // Important since warp will cache the unmodified files
             "If-Modified-Since": begin_date.toISOString(),
+        },
+        statusCode: {
+            400: function() {
+                showLoginModal();
+            }
         },
         success: function(response) {
             $('#status-sp').prop('hidden', true);
