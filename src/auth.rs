@@ -39,7 +39,7 @@ pub fn verify_token(token: &str) -> Option<bool> {
     Some(tokens.iter().any(|&t| t == token))
 }
 
-pub fn hash(password: &[u8]) -> String {
+fn hash(password: &[u8]) -> String {
     let salt = rand::thread_rng().gen::<[u8; 32]>();
     let config = Config::default();
     //println!("{:?} {:?}", salt, config);
