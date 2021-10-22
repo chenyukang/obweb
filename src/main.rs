@@ -410,7 +410,7 @@ fn main() {
     };
 
     let config = matches.occurrences_of("config");
-    if config > 0 as u64 || fs::metadata("./db/account").is_err() {
+    if config > 0 as u64 {
         auth::init_password();
     }
 
