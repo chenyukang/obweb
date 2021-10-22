@@ -1,22 +1,18 @@
-use argon2::{self, Config};
 use base64::decode;
 use chrono::prelude::*;
 use chrono::DateTime;
 use clap::App;
-use dialoguer::Password;
-use dialoguer::{theme::ColorfulTheme, Input};
 use glob::glob;
 use path_clean;
-use rand::Rng;
 use serde::Deserialize;
 use std::fs;
 use std::fs::File;
 use std::net::Ipv4Addr;
 use std::path::Path;
-use std::process::Command;
-use uuid::Uuid;
 use warp::{reject, Filter, Rejection, Reply};
 
+mod auth;
+mod git;
 #[derive(Deserialize, Debug)]
 pub struct Request {
     pub date: String,
@@ -25,13 +21,6 @@ pub struct Request {
     pub image: String,
     pub page: String,
 }
-
-#[derive(Debug, Deserialize)]
-struct User {
-    username: String,
-    password: String,
-}
-
 #[derive(Debug, Deserialize)]
 struct Update {
     file: String,
@@ -54,91 +43,12 @@ struct Mark {
     index: usize,
 }
 
-fn verify_user(user: &User) -> bool {
-    let hash = fs::read_to_string("./db/account").unwrap();
-    let combine = format!("{}:{}", user.username, user.password);
-    let matche = argon2::verify_encoded(&hash, &combine.as_bytes()).unwrap();
-    matche
-}
-
-fn verify_token(token: &str) -> bool {
-    let data = fs::read_to_string("./db/tokens").unwrap();
-    let tokens: Vec<&str> = data.split("\n").collect();
-    for t in tokens {
-        if t == token {
-            return true;
-        }
+fn ensure_path(path: &String) -> Result<String, &'static str> {
+    let cleaned_path = path_clean::clean(path);
+    if !(cleaned_path.starts_with("ob/") && cleaned_path.ends_with(".md")) {
+        return Err("Invalid path");
     }
-    false
-}
-
-fn hash(password: &[u8]) -> String {
-    let salt = rand::thread_rng().gen::<[u8; 32]>();
-    let config = Config::default();
-    //println!("{:?} {:?}", salt, config);
-    argon2::hash_encoded(password, &salt, &config).unwrap()
-}
-
-fn gen_token() -> String {
-    let path = Path::new("./db/tokens");
-    let mut prev_data = String::new();
-    let token = Uuid::new_v4().to_string();
-    if !Path::new(&path).exists() {
-        File::create(&path).unwrap();
-    } else {
-        let data = fs::read_to_string(path).unwrap();
-        let mut tokens: Vec<&str> = data.split("\n").collect();
-        let len = tokens.len();
-        let max_len = 4;
-        if len > max_len {
-            tokens = tokens.into_iter().skip(len - max_len).collect();
-        }
-        prev_data = tokens.join("\n").clone();
-        if !prev_data.is_empty() {
-            prev_data.push('\n');
-        }
-    }
-    //println!("write token: {:?}", token);
-    fs::write(path, format!("{}{}", prev_data, token)).unwrap();
-    token
-}
-
-fn git_pull() {
-    let child = Command::new("git")
-        .current_dir("./ob")
-        .args(&["pull", "--rebase"])
-        .spawn()
-        .expect("failed to execute child");
-    let output = child.wait_with_output().expect("failed to wait on child");
-    println!("{:?}", output);
-}
-
-fn git_sync() {
-    let child = Command::new("git")
-        .current_dir("./ob")
-        .args(&["add", "."])
-        .spawn()
-        .expect("failed to execute child");
-    let output = child.wait_with_output().expect("failed to wait on child");
-    println!("{:?}", output);
-
-    let child = Command::new("git")
-        .current_dir("./ob")
-        .args(&["commit", "-am'ob-web'"])
-        .spawn()
-        .expect("failed to execute child");
-    let output = child.wait_with_output().expect("failed to wait on child");
-    println!("{:?}", output);
-
-    git_pull();
-
-    let child = Command::new("git")
-        .current_dir("./ob")
-        .args(&["push"])
-        .spawn()
-        .expect("failed to execute child");
-    let output = child.wait_with_output().expect("failed to wait on child");
-    println!("{:?}", output);
+    Ok(cleaned_path)
 }
 
 fn gen_page(date: &String, page: &String) -> String {
@@ -167,7 +77,7 @@ fn page_post(req: &Request) -> Result<(), &'static str> {
         return Ok(());
     }
     if !fs::read_to_string("./db/dev").is_err() {
-        git_pull();
+        git::git_pull();
     }
     let date_str = req.date.to_string();
     let page_str = req.page.to_string();
@@ -232,16 +142,8 @@ fn page_post(req: &Request) -> Result<(), &'static str> {
     }
 
     fs::write(&path, content).expect("Unable to write file");
-    std::thread::spawn(|| git_sync());
+    std::thread::spawn(|| git::git_sync());
     Ok(())
-}
-
-fn ensure_path(path: &String) -> Result<String, &'static str> {
-    let cleaned_path = path_clean::clean(path);
-    if !(cleaned_path.starts_with("ob/") && cleaned_path.ends_with(".md")) {
-        return Err("Invalid path");
-    }
-    Ok(cleaned_path)
 }
 
 fn file_query(query: &PageQuery) -> Result<(String, String), &'static str> {
@@ -252,7 +154,7 @@ fn file_query(query: &PageQuery) -> Result<(String, String), &'static str> {
 
 fn rand_query() -> Result<(String, String), &'static str> {
     use rand::seq::SliceRandom;
-    std::thread::spawn(|| git_pull());
+    std::thread::spawn(|| git::git_pull());
 
     let mut files = vec![];
     for entry in glob("./ob/**/*.md").expect("failed") {
@@ -288,12 +190,12 @@ fn page_query(query: &PageQuery) -> Result<(String, String), &'static str> {
 fn page_update(update: &Update) -> Result<(), &'static str> {
     let path = ensure_path(&format!("./ob/{}", update.file.to_string()))?;
     fs::write(path, update.content.to_string()).expect("Unable to write file");
-    std::thread::spawn(|| git_sync());
+    std::thread::spawn(|| git::git_sync());
     Ok(())
 }
 
 fn search_query(req: &SearchQuery) -> Result<String, &'static str> {
-    std::thread::spawn(|| git_pull());
+    std::thread::spawn(|| git::git_pull());
 
     let mut res = String::new();
     let mut files = vec![];
@@ -342,14 +244,14 @@ fn search_query(req: &SearchQuery) -> Result<String, &'static str> {
 }
 
 fn mark_done(req: &Mark) -> Result<String, &'static str> {
-    std::thread::spawn(|| git_pull());
+    std::thread::spawn(|| git::git_pull());
     let todo = fs::read_to_string("./ob/Unsort/todo.md").unwrap();
     let todos: Vec<&str> = todo.split("---").collect();
     let mut elems: Vec<String> = todos.iter().map(|&x| String::from(x)).collect();
     elems[req.index] = elems[req.index].replace("- [ ] ", "- [x] ");
     let conent = elems.join("---");
     fs::write("./ob/Unsort/todo.md", conent).expect("Unable to write file");
-    std::thread::spawn(|| git_sync());
+    std::thread::spawn(|| git::git_sync());
     Ok(String::from("done"))
 }
 
@@ -366,7 +268,10 @@ fn auth_validation() -> impl Filter<Extract = ((),), Error = Rejection> + Copy {
             let v = val.trim().to_owned();
             if v.starts_with("token=") {
                 let token = v.replace("token=", "");
-                if verify_token(&token) {
+                let res = auth::verify_token(&token);
+                if res.is_none() {
+                    return Err(warp::reject::not_found());
+                } else if res.unwrap() {
                     return Ok(());
                 }
             }
@@ -420,9 +325,9 @@ pub async fn run_server(port: u16) {
     let login = warp::path!("api" / "login")
         .and(warp::post())
         .and(warp::body::json())
-        .map(|user: User| {
-            if verify_user(&user) {
-                let token = gen_token();
+        .map(|user: auth::User| {
+            if auth::verify_user(&user) {
+                let token = auth::gen_token();
                 warp::reply::with_header(
                     token.clone(),
                     "set-cookie",
@@ -490,22 +395,6 @@ pub async fn run_server(port: u16) {
     warp::serve(routes).run((Ipv4Addr::UNSPECIFIED, port)).await
 }
 
-fn init_password() {
-    let username: String = Input::with_theme(&ColorfulTheme::default())
-        .with_prompt("UserName:")
-        .interact_text()
-        .unwrap();
-    let password = Password::new()
-        .with_prompt("Password:")
-        .with_confirmation("Confirm password", "Password mismatching")
-        .interact()
-        .unwrap();
-
-    let combine = format!("{}:{}", username, password);
-    let hashed = hash(&combine.as_bytes());
-    fs::write("./db/account", hashed).unwrap();
-}
-
 fn main() {
     let matches = App::new("Obweb")
         .version("0.1")
@@ -522,7 +411,7 @@ fn main() {
 
     let config = matches.occurrences_of("config");
     if config > 0 as u64 || fs::metadata("./db/account").is_err() {
-        init_password();
+        auth::init_password();
     }
 
     run_server(port);
