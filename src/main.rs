@@ -126,10 +126,10 @@ fn page_post(req: &Request) -> Result<(), &'static str> {
         content += format!("\n{}", append).as_str();
         if req.image.len() > 0 {
             let image_buf = process_image(&req.image.to_string());
-            let image_name = format!("ob-web-{}-{}.png", date, time).replace(":", "-");
+            let time_stamp = Local::now().format("%Y-%m-%d-%H-%M-%S").to_string();
+            let image_name = format!("obweb-{}.png", time_stamp);
             let image_path = format!("./ob/Pics/{}", image_name);
-            let image_path = Path::new(&image_path);
-            fs::write(image_path, &image_buf).unwrap();
+            fs::write(&image_path, &image_buf).unwrap();
             content = format!("{}\n\n![[{} | #x-small]]\n", content, image_name);
         }
     }
