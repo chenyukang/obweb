@@ -3,7 +3,7 @@ use std::process::Command;
 pub fn git_pull() {
     let child = Command::new("git")
         .current_dir("./ob")
-        .args(&["pull", "--rebase"])
+        .args(&["pull", "origin", "main", "--rebase"])
         .spawn()
         .expect("failed to execute child");
     let output = child.wait_with_output().expect("failed to wait on child");

@@ -88,28 +88,27 @@ function fetchPage(url, rand_query = false, callback = null) {
         },
         success: function(response) {
             $('#status-sp').prop('hidden', true);
-            if (response != "no-page") {
-                let content = response[1]
-                let file = response[0]
+            let file = response[0]
+            let content = response[1]
+            $('#fileName').prop('hidden', false);
+            $('#page-content').prop('hidden', false);
+            let fileName = $('#fileName')[0];
+            if (fileName != null) {
+                $(fileName).text(file);
+            }
+            if (file != "NoPage") {
                 localStorage.setItem('page-content', content);
                 localStorage.setItem('file', file);
-
-                let fileName = $('#fileName')[0];
-                if (fileName != null) {
-                    $(fileName).text(file);
-                }
-
                 $('#page-content').html(renderMdToHtml(content));
                 hljs.highlightAll();
 
                 $('#pageNavBar').prop('hidden', false);
-                $('#fileName').prop('hidden', false);
-                $('#page-content').prop('hidden', false);
                 if (callback != null) {
                     callback();
                 }
             } else {
-                $('#page-content').html("<h3>No Page</h3>")
+                $('#page-content').html("<h3>No Page</h3>");
+                $(fileName).text(url);
             }
         },
         error: function(err) {

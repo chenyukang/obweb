@@ -170,6 +170,9 @@ fn page_query(query: &PageQuery) -> Result<(String, String), &'static str> {
         }
     } else {
         let path = ensure_path(&format!("./ob/{}", query.path))?;
+        if !Path::new(&path).exists() {
+            return Ok((String::from("NoPage"), String::new()));
+        }
         let data = fs::read_to_string(&path).unwrap();
         return Ok((query.path.clone(), data));
     }
