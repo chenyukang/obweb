@@ -10,7 +10,7 @@
 
 I use Obsidian for knowledge management and Flomo for daily thoughts or memos.
 
-But Obsidian don't have a mobile version for Android and flomo don't work well with Obsidian. I decided to create a Web interface for Obsidian, so I can use it on my mobile devices and work in a mixed way of Obsidian and flomo.
+But Flomo don't work well with Obsidian. I decided to create a Web interface for Obsidian, so I can use it on my mobile devices and work in a mixed way of Obsidian and flomo.
 
 Here are the principles of this project:
 
