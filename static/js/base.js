@@ -50,14 +50,12 @@ function Login() {
     });
     $.ajax({
         url: "/api/login",
-        crossDomain: true,
         type: 'POST',
         datatype: 'json',
         contentType: "Application/json",
         data: data,
         success: function(response) {
             if (response != "failed") {
-                let storage = window.localStorage;
                 $('#loginModal').modal('hide');
             }
         },

@@ -293,6 +293,9 @@ pub async fn run_server(port: u16) {
     let root = warp::path!("obweb").and(warp::fs::file("./static/index.html"));
     let routes = routes.or(pages).or(root);
 
+    let front = warp::path("front").and(warp::fs::dir("./front/public/"));
+    let routes = routes.or(front);
+
     let images = warp::path("static")
         .and(warp::path("images"))
         .and(warp::get())

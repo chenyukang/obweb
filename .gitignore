@@ -8,3 +8,4 @@ db/dev
 nohup.out
 update.sh
 *.Identifier
+__sapper__
