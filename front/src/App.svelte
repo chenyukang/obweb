@@ -24,7 +24,7 @@
         {#if cur_page == "index"}
             <Index />
         {:else}
-            <Page bind:this={page} cur_page={cur_page} cur_time={cur_time}/>
+            <Page bind:this={page} bind:cur_page={cur_page} cur_time={cur_time}/>
         {/if}
     </div>
 </main>

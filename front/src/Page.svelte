@@ -13,23 +13,20 @@
     let in_edit = false;
 
     export const refresh = (cur) => {
-        //cur_page = cur
-        console.log("refresh ...", cur_page);
         if (cur_page == "day") {
             getDaily(date);
         } else if (cur_page == "rand") {
             fetchPage("", true);
         } else if (cur_page == "todo") {
-            fetchPage("Unsort/todo.md", false, adjustTodo);
+            fetchPage("Unsort/todo.md", false);
         } else if (cur_page == "find") {
-            searchInit();
             search();
         }
     };
 
     $: {
+        console.log(cur_time);
         if (cur_page) {
-            console.log(cur_time);
             refresh(cur_page);
         }
     }
@@ -88,7 +85,7 @@
             type: "POST",
             success: function (response) {
                 if (response == "done") {
-                    fetchPage("Unsort/todo.md", adjustTodo);
+                    fetchPage("Unsort/todo.md", false);
                 }
             },
             error: function (err) {
@@ -114,12 +111,13 @@
                 markDone(jq(this).prop("id"));
             }
         });
+        console.log("adjustTodo finished ...");
     }
 
     function preprocessLink(response) {
         let result = "";
-        let left = response;
         let last = 0;
+        let left = response;
         while (left.indexOf("[[") != -1) {
             let prev = left.substring(0, left.indexOf("[["));
             result += prev;
@@ -130,14 +128,7 @@
             if (prev.indexOf("```") != -1 && left.indexOf("```") != -1)
                 result += "[[" + link + "]]";
             else
-                result +=
-                    "[" +
-                    link.trim() +
-                    "]" +
-                    "(" +
-                    "/static/search.html?page=" +
-                    encodeURI(link.trim()) +
-                    ")";
+                result += "[" + link.trim() + "](/##)";
             last = end + 2;
         }
         result += left;
@@ -175,9 +166,8 @@
                 localStorage.setItem("page-content", content);
                 localStorage.setItem("file", file);
                 jq("#page-content").html(renderMdToHtml(content));
-                setSearchDefault();
-                adjustTodo();
-            },
+                setPageDefault();
+            },            
             error: function (err) {
                 show_status = false;
                 console.log(err);
@@ -186,7 +176,7 @@
         });
     }
 
-    function fetchPage(url, rand_query = false, callback = null) {
+    function fetchPage(url, rand_query = false) {
         let date = new Date();
         let begin_date = new Date(date.setDate(date.getDate() - 1000));
         show_status = true;
@@ -214,11 +204,7 @@
                     localStorage.setItem("file", file);
                     jq(fileName).text(file);
                     jq("#page-content").html(renderMdToHtml(content));
-                    hljs.highlightAll();
-
-                    if (callback != null) {
-                        callback();
-                    }
+                    setPageDefault();
                 } else {
                     jq("#page-content").html("<h3>No Page</h3>");
                     jq(fileName).text(url);
@@ -231,11 +217,18 @@
         });
     }
 
-    function searchInit() {
-        jq(".pageContent").on("click", "a", function (e) {
+    function hookInit() {
+        jq(".pageContent").off('click').on("click", "a", function (e) {
             let url = e.target.innerText;
             if (url.endsWith(".md")) {
-                fetchPage(url, false, highlightResult);
+                fetchPage(url, false);
+            } else if (e.target.href == null || e.target.href.indexOf("##") != -1) {
+                e.preventDefault();
+                search_input = url;
+                if (cur_page == "find")
+                    search();
+                else
+                    cur_page = "find";
             }
         });
 
@@ -244,21 +237,19 @@
                 search();
             }
         });
-
-        let keyword = searchParams()["page"];
-        if (jq("#searchInput").val() == "" && keyword != undefined) {
-            document.getElementById("searchInput").value = keyword;
-        }
-
-        search_input = "";
     }
 
-    function setSearchDefault() {
+    function setPageDefault() {
         jq("#page-content").prop("contenteditable", false);
         jq("#page-content").css("backgroundColor", "white");
-
         jq("#editBtn").text("Edit");
+        hljs.highlightAll();
+        adjustTodo();
+        hookInit();
         in_edit = false;
+        if(search_input != "" && cur_page == "find") {
+            highlight(search_input);
+        }
     }
 
     function savePage() {
@@ -267,10 +258,11 @@
             .innerText.replace(/\u00a0/g, " ");
         let prev_content = localStorage.getItem("page-content");
         if (prev_content != text) {
-            updatePage(localStorage.getItem("file"), text);
+            updatePage(localStorage.getItem("file"), text);            
         } else {
-            setSearchDefault();
             jq("#page-content").html(renderMdToHtml(prev_content));
+            setPageDefault();
+            console.log("same ....");
         }
     }
 
@@ -285,12 +277,11 @@
             jq("#page-content").prop("contenteditable", true);
             jq("#page-content").css("backgroundColor", "#fffcc0");
             jq("#editBtn").text("Save");
-            in_edit = true;
+            in_edit = true;            
         }
     }
 
-    function search() {
-        setSearchDefault();
+    function search() {     
         show_status = true;
         jq.ajax({
             url: "/api/search?keyword=" + search_input,
@@ -301,9 +292,9 @@
                 show_status = false;
                 if (response != "no-page") {
                     jq("#page-content").html(renderMdToHtml(response));
-                    show_search_nav = false;
                     jq("#page-content").prop("hidden", false);
-                    searchInit();
+                    setPageDefault();                    
+                    show_search_nav = false;
                 } else {
                     jq("#page-content").html(
                         "<h3>No Page</h3>" + " " + local_date
@@ -329,33 +320,8 @@
         }
     }
 
-    function highlightResult() {
-        if(search_input != "") {
-            highlight(search_input);
-        }
-    }
-
-    function searchParams() {
-        let urlParams;
-        (window.onpopstate = function () {
-            let match,
-                pl = /\+/g, // Regex for replacing addition symbol with a space
-                search = /([^&=]+)=?([^&]*)/g,
-                decode = function (s) {
-                    return decodeURIComponent(s.replace(pl, " "));
-                },
-                query = window.location.search.substring(1);
-
-            urlParams = {};
-            while ((match = search.exec(query)))
-                urlParams[decode(match[1])] = decode(match[2]);
-        })();
-        return urlParams;
-    }
-
     onMount(async () => {
-        //refresh("day");
-        searchInit();
+        setPageDefault();
     });
 </script>
 
