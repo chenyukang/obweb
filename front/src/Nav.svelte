@@ -6,6 +6,7 @@
 
     const dispatch = createEventDispatcher();
     function handleNav(event) {
+        event.preventDefault();
         let page = event.target.innerText.toLowerCase();
         cur_page = page;
         if (cur_page == "obweb") {

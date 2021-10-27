@@ -303,6 +303,7 @@
                     jq("#page-content").html(renderMdToHtml(response));
                     show_search_nav = false;
                     jq("#page-content").prop("hidden", false);
+                    searchInit();
                 } else {
                     jq("#page-content").html(
                         "<h3>No Page</h3>" + " " + local_date
