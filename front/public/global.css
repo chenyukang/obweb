@@ -5,3 +5,20 @@
     width: 50%;
     /* height: 50%; */
 }
+
+.highlight {
+    background-color: yellow;
+}
+
+mark {
+    background: orange;
+    color: black;
+}
+
+.pageContent {
+    margin-top: 20px;
+    border: 1px outset green;
+    text-align: left;
+    word-wrap: break-word;
+    padding: 8px;
+}
