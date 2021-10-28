@@ -111,7 +111,6 @@
                 markDone(jq(this).prop("id"));
             }
         });
-        console.log("adjustTodo finished ...");
     }
 
     function preprocessLink(response) {
@@ -167,7 +166,7 @@
                 localStorage.setItem("file", file);
                 jq("#page-content").html(renderMdToHtml(content));
                 setPageDefault();
-            },            
+            },
             error: function (err) {
                 show_status = false;
                 console.log(err);
@@ -258,11 +257,10 @@
             .innerText.replace(/\u00a0/g, " ");
         let prev_content = localStorage.getItem("page-content");
         if (prev_content != text) {
-            updatePage(localStorage.getItem("file"), text);            
+            updatePage(localStorage.getItem("file"), text);
         } else {
             jq("#page-content").html(renderMdToHtml(prev_content));
             setPageDefault();
-            console.log("same ....");
         }
     }
 
@@ -277,11 +275,11 @@
             jq("#page-content").prop("contenteditable", true);
             jq("#page-content").css("backgroundColor", "#fffcc0");
             jq("#editBtn").text("Save");
-            in_edit = true;            
+            in_edit = true;
         }
     }
 
-    function search() {     
+    function search() {
         show_status = true;
         jq.ajax({
             url: "/api/search?keyword=" + search_input,
@@ -293,7 +291,7 @@
                 if (response != "no-page") {
                     jq("#page-content").html(renderMdToHtml(response));
                     jq("#page-content").prop("hidden", false);
-                    setPageDefault();                    
+                    setPageDefault();
                     show_search_nav = false;
                 } else {
                     jq("#page-content").html(

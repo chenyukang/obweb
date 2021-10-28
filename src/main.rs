@@ -163,7 +163,7 @@ fn page_query(query: &PageQuery) -> Result<(String, String), &'static str> {
             let path = files.choose(&mut rand::thread_rng()).unwrap();
             //println!("path : {:?}", path);
             let content = fs::read_to_string(&path).unwrap_or(String::new());
-            if content.len() > 4 {
+            if content.len() > 4 && !path.contains(".excalidraw.") {
                 // too short content tend to be meannless in random reading
                 return Ok((path.to_string().replace("ob/", ""), content));
             }
@@ -219,7 +219,7 @@ fn search_query(req: &SearchQuery) -> Result<String, &'static str> {
     });
 
     let max_len = if search_key.len() == 0 {
-        6
+        10
     } else {
         files.len()
     };

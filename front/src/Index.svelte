@@ -5,29 +5,31 @@
 
     let content = "";
     let tag = [];
-    let page = [];
+    let page = "";
     let image = "";
-    let show_image = false;
 
+    let show_image = false;
     let status_visible = false;
     let succ_visible = false;
     let err_visible = false;
 
     onMount(async () => {
         addImageHook();
-        restoreTags();
+        restoreLinkTags();
+        if(content && content.length() > 0){
+            jq("#submit-btn").prop("disabled", false);
+        }
     });
 
-    function restoreTags() {
+    function restoreLinkTags() {
         content = window.localStorage.getItem("content");
+        page = window.localStorage.getItem("page");
         let stored_tags = window.localStorage.getItem("tag");
         if (stored_tags != null) {
-            tag = stored_tags.trim().split(",").filter(w => w.length > 0);
-        }
-
-        let stored_page = window.localStorage.getItem("page");
-        if (stored_page != null) {
-            page = stored_page.trim().split(",").filter(w => w.length > 0);
+            tag = stored_tags
+                .trim()
+                .split(",")
+                .filter((w) => w.length > 0);
         }
     }
 
@@ -69,8 +71,7 @@
         window.localStorage.setItem("tag", tag);
     }
 
-    function handlePage(event) {
-        page = event.detail.tags;
+    function handlePage(_event) {
         window.localStorage.setItem("page", page);
     }
 
@@ -80,11 +81,10 @@
         let data = JSON.stringify({
             date: new Date().toISOString(),
             links: tag.join(","),
-            page: page.length > 0 ? page[0] : "",
+            page: page,
             text: content,
             image: image,
         });
-        console.log(data);
         jq.ajax({
             url: "/api/entry",
             crossDomain: true,
@@ -95,6 +95,7 @@
             success: function (response) {
                 if (response == "ok") {
                     clearAll(event);
+                    restoreLinkTags();
                     showSuccMsg();
                 } else {
                     showErrMsg();
@@ -108,7 +109,6 @@
     }
 
     function fileSelected(event) {
-        console.log(event.target);
         const file = event.target.files[0];
         if (!file) {
             return;
@@ -143,14 +143,12 @@
     function clearAll(event) {
         event.preventDefault();
         status_visible = false;
-        window.localStorage.removeItem("links");
-        window.localStorage.removeItem("page");
+        jq("#submit-btn").prop("disabled", true);
         clearInput();
         removePic();
     }
 
     function handlePaste(event) {
-        console.log(event);
         let items = (event.clipboardData || event.originalEvent.clipboardData)
             .items;
         JSON.stringify(items);
@@ -175,7 +173,6 @@
     }
 </script>
 
-
 <div class="tab-content">
     <form name="entry" role="form">
         <div class="form-group row">
@@ -196,10 +193,12 @@
         <div class="form-group row">
             <div class="col-md-2" />
             <div class="col-md-8">
-                <Tags
-                    on:tags={handleTags}
-                    tags={tag}
-                    placeholder="Tags"
+                <input
+                    type="text"
+                    bind:value={page}
+                    on:input={handlePage}
+                    class="form-control"
+                    placeholder="Link"
                 />
             </div>
         </div>
@@ -208,9 +207,14 @@
             <div class="col-md-2" />
             <div class="col-md-8">
                 <Tags
-                    on:tags={handlePage}
-                    tags={page}
-                    placeholder="Link"
+                    on:tags={handleTags}
+                    tags={tag}
+                    addKeys={[9]}
+                    maxTags={5}
+                    allowPaste={true}
+                    allowDrop={true}
+                    onlyUnique={true}
+                    placeholder="Tags"
                 />
             </div>
         </div>
@@ -226,10 +230,6 @@
                     accept="image/*"
                 />
                 <label for="fileElem">Photo</label>
-                <button
-                    on:click={clearAll}
-                    class="btn btn-danger btn-sm">Reset</button
-                >
                 <button
                     on:click={handleSave}
                     class="btn btn-success float-right"
@@ -247,10 +247,7 @@
         <div class="col-md-8" id="status-sp">
             <div class="text-center">
                 {#if status_visible}
-                    <div
-                        class="spinner-border text-success"
-                        role="status"
-                    >
+                    <div class="spinner-border text-success" role="status">
                         <span class="sr-only">Sending</span>
                     </div>
                 {/if}
@@ -296,7 +293,6 @@
         {/if}
     </div>
 </div>
-
 
 <style>
     .visually-hidden {

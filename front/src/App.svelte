@@ -2,7 +2,7 @@
     import Login from "./Login.svelte";
     import Nav from "./Nav.svelte";
     import Index from "./Index.svelte";
-    import Page from "./Page.svelte";    
+    import Page from "./Page.svelte";
 
     let cur_page = "index";
     let cur_time = Date.now();
@@ -10,7 +10,6 @@
 
     const refresh = (event) => {
         cur_page = event.detail;
-        console.log(cur_page);
         cur_time = Date.now();
     };
 </script>
