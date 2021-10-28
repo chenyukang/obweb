@@ -75,6 +75,14 @@
         window.localStorage.setItem("page", page);
     }
 
+    function handleReset(event) {
+        initDefault(event);
+        tag = [];
+        page = null;
+        window.localStorage.removeItem("tag");
+        window.localStorage.removeItem("page");
+    }
+
     function handleSave(event) {
         event.preventDefault();
         status_visible = true;
@@ -94,7 +102,7 @@
             data: data,
             success: function (response) {
                 if (response == "ok") {
-                    clearAll(event);
+                    initDefault(event);
                     restoreLinkTags();
                     showSuccMsg();
                 } else {
@@ -140,7 +148,7 @@
         image = "";
     }
 
-    function clearAll(event) {
+    function initDefault(event) {
         event.preventDefault();
         status_visible = false;
         jq("#submit-btn").prop("disabled", true);
@@ -209,7 +217,6 @@
                 <Tags
                     on:tags={handleTags}
                     tags={tag}
-                    addKeys={[9]}
                     maxTags={5}
                     allowPaste={true}
                     allowDrop={true}
@@ -230,6 +237,14 @@
                     accept="image/*"
                 />
                 <label for="fileElem">Photo</label>
+                <button
+                    on:click={handleReset}
+                    class="btn btn-warning"
+                    id="reset-btn"
+                    type="submit"
+                    style="margin-left: 4px;"
+                    >Reset</button
+                >
                 <button
                     on:click={handleSave}
                     class="btn btn-success float-right"

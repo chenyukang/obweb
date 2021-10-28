@@ -8,7 +8,6 @@
     let file = "";
     let content = "";
     let show_status = false;
-    let show_search_nav = false;
     let search_input = "";
     let in_edit = false;
 
@@ -126,8 +125,7 @@
             left = left.substring(end + 2);
             if (prev.indexOf("```") != -1 && left.indexOf("```") != -1)
                 result += "[[" + link + "]]";
-            else
-                result += "[" + link.trim() + "](/##)";
+            else result += "[" + link.trim() + "](/##)";
             last = end + 2;
         }
         result += left;
@@ -195,18 +193,20 @@
             },
             success: function (response) {
                 show_status = false;
-                show_search_nav = true;
                 file = response[0];
                 content = response[1];
                 if (file != "NoPage") {
                     localStorage.setItem("page-content", content);
                     localStorage.setItem("file", file);
-                    jq(fileName).text(file);
+                    jq("#fileName").text(file);
+                    jq("#fileName").prop("hidden", false);
+                    jq("#pageNavBar").prop("hidden", false);
                     jq("#page-content").html(renderMdToHtml(content));
+                    jq("#page-content").prop("hidden", false);
                     setPageDefault();
                 } else {
                     jq("#page-content").html("<h3>No Page</h3>");
-                    jq(fileName).text(url);
+                    jq("#fileName").text(url);
                 }
             },
             error: function (err) {
@@ -217,19 +217,22 @@
     }
 
     function hookInit() {
-        jq(".pageContent").off('click').on("click", "a", function (e) {
-            let url = e.target.innerText;
-            if (url.endsWith(".md")) {
-                fetchPage(url, false);
-            } else if (e.target.href == null || e.target.href.indexOf("##") != -1) {
-                e.preventDefault();
-                search_input = url;
-                if (cur_page == "find")
-                    search();
-                else
-                    cur_page = "find";
-            }
-        });
+        jq(".pageContent")
+            .off("click")
+            .on("click", "a", function (e) {
+                let url = e.target.innerText;
+                if (url.endsWith(".md")) {
+                    fetchPage(url, false);
+                } else if (
+                    e.target.href == null ||
+                    e.target.href.indexOf("##") != -1
+                ) {
+                    e.preventDefault();
+                    search_input = url;
+                    if (cur_page == "find") search();
+                    else cur_page = "find";
+                }
+            });
 
         jq("#searchInput").on("keyup", function (event) {
             if (event.keyCode == 13) {
@@ -246,7 +249,7 @@
         adjustTodo();
         hookInit();
         in_edit = false;
-        if(search_input != "" && cur_page == "find") {
+        if (search_input != "" && cur_page == "find") {
             highlight(search_input);
         }
     }
@@ -291,8 +294,9 @@
                 if (response != "no-page") {
                     jq("#page-content").html(renderMdToHtml(response));
                     jq("#page-content").prop("hidden", false);
+                    jq("#fileName").prop("hidden", true);
+                    jq("#pageNavBar").prop("hidden", true);
                     setPageDefault();
-                    show_search_nav = false;
                 } else {
                     jq("#page-content").html(
                         "<h3>No Page</h3>" + " " + local_date
@@ -345,34 +349,6 @@
                 >
             </div>
         </div>
-        {#if show_status}
-            <div class="row">
-                <div class="col-md-2" />
-                <div class="col-md-6" id="status-sp">
-                    <div class="text-center">
-                        <div class="spinner-border text-success" role="status">
-                            <span class="sr-only">Sending</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {/if}
-        <div class="row">
-            <div class="col-md-2" />
-            <div class="col-md-6">
-                <div class="text-center" style="margin-top: 20px;">
-                    <h4>
-                        <span class="badge badge-secondary" id="fileName" />
-                    </h4>
-                </div>
-            </div>
-            <div class="col-md-2" />
-        </div>
-        <div class="row">
-            <div class="col-md-10">
-                <div class="pageContent" id="page-content" />
-            </div>
-        </div>
     {:else if cur_page == "rand" || cur_page == "todo"}
         <div class="row card sticky-top" style="margin-top: 20px; border: 0;">
             <div class="col-md-10 text-right">
@@ -385,120 +361,87 @@
                 >
             </div>
         </div>
-        {#if show_status}
-            <div class="row">
-                <div class="col-md-2" />
-                <div class="col-md-6" id="status-sp">
-                    <div class="text-center">
-                        <div class="spinner-border text-success" role="status">
-                            <span class="sr-only">Sending</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {/if}
-        <div class="row">
-            <div class="col-md-2" />
-            <div class="col-md-6">
-                <div class="text-center" style="margin-top: 20px;">
-                    <h4>
-                        <span class="badge badge-secondary" id="fileName" />
-                    </h4>
-                </div>
-            </div>
-            <div class="col-md-2" />
-        </div>
+    {:else if (cur_page = "find")}
         <div class="row">
             <div class="col-md-10">
-                <div class="pageContent" id="page-content" />
+                <div class="input-group" style="margin-top: 30px">
+                    <input
+                        type="text"
+                        bind:value={search_input}
+                        class="form-control"
+                        placeholder="search ..."
+                        id="searchInput"
+                    />
+                    <div class="input-group-append">
+                        <button
+                            class="btn btn-secondary"
+                            type="button"
+                            id="searchBtn"
+                            style="margin-left: 5px"
+                            on:click={search}
+                        >
+                            <i class="fa fa-search" />
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
-    {:else if (cur_page = "find")}
-        <div id="search">
-            <div class="row">
-                <div class="col-md-10">
-                    <div class="input-group" style="margin-top: 30px">
-                        <input
-                            type="text"
-                            bind:value={search_input}
-                            class="form-control"
-                            placeholder="search ..."
-                            id="searchInput"
-                        />
-                        <div class="input-group-append">
-                            <button
-                                class="btn btn-secondary"
-                                type="button"
-                                id="searchBtn"
-                                style="margin-left: 5px"
-                                on:click={search}
-                            >
-                                <i class="fa fa-search" />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {#if show_status}
-                <div class="row">
-                    <div class="col-md-2" />
-                    <div
-                        class="col-md-8"
-                        hidden="true"
-                        id="status-sp"
-                        style="margin-top: 20px;"
-                    >
-                        <div class="text-center">
-                            <div
-                                class="spinner-border text-success"
-                                role="status"
-                            >
-                                <span class="sr-only">sending</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            {/if}
 
-            {#if show_search_nav}
-                <div
-                    class="row card sticky-top"
-                    style="margin-top: 20px; border: 0;"
+        <div class="row card sticky-top" style="margin-top: 20px; border: 0;">
+            <div class="col-md-10 text-right" hidden="true" id="pageNavBar">
+                <button
+                    type="button"
+                    class="btn btn-info"
+                    style="float: left"
+                    id="backBtn"
+                    on:click={search}>Back</button
                 >
-                    <div class="col-md-10 text-right" id="pageNavBar">
-                        <button
-                            type="button"
-                            class="btn btn-info"
-                            style="float: left"
-                            id="backBtn"
-                            on:click={search}>Back</button
-                        >
-                        <button
-                            type="button"
-                            class="btn btn-warning"
-                            id="editBtn"
-                            on:click={editPage}>Edit</button
-                        >
-                    </div>
-                </div>
-            {/if}
-            <div class="row">
-                <div class="col-md-2" />
-                <div class="col-md-6">
-                    <div class="text-center" style="margin-top: 20px;">
-                        <h4>
-                            <span class="badge badge-secondary" id="fileName" />
-                        </h4>
-                    </div>
-                </div>
-                <div class="col-md-2" />
+                <button
+                    type="button"
+                    class="btn btn-warning"
+                    id="editBtn"
+                    on:click={editPage}>Edit</button
+                >
             </div>
+        </div>
+    {/if}
 
-            <div class="row">
-                <div class="col-md-10">
-                    <div class="pageContent" hidden="true" id="page-content" />
+    {#if show_status}
+        <div class="row">
+            <div class="col-md-2" />
+            <div
+                class="col-md-6"
+                id="status-sp"
+                style="margin-top: 20px;"
+            >
+                <div class="text-center">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="sr-only"></span>
+                    </div>
                 </div>
             </div>
         </div>
     {/if}
+
+    <div class="row">
+        <div class="col-md-2" />
+        <div class="col-md-6">
+            <div class="text-center" style="margin-top: 20px;">
+                <h4>
+                    <span
+                        class="badge badge-secondary"
+                        hidden="true"
+                        id="fileName"
+                    />
+                </h4>
+            </div>
+        </div>
+        <div class="col-md-2" />
+    </div>
+
+    <div class="row">
+        <div class="col-md-10">
+            <div class="pageContent" hidden="true" id="page-content" />
+        </div>
+    </div>
 </div>
