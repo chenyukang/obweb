@@ -3,6 +3,7 @@
     import Nav from "./Nav.svelte";
     import Index from "./Index.svelte";
     import Page from "./Page.svelte";
+    import Footer from "./Footer.svelte";
 
     let cur_page = "index";
     let cur_time = Date.now();
@@ -26,4 +27,6 @@
             <Page bind:this={page} bind:cur_page={cur_page} cur_time={cur_time}/>
         {/if}
     </div>
+
+    <!-- <Footer on:message={refresh}/> -->
 </main>

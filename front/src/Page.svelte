@@ -221,15 +221,14 @@
             .off("click")
             .on("click", "a", function (e) {
                 let url = e.target.innerText;
-                if (url.endsWith(".md")) {
-                    fetchPage(url, false);
-                } else if (
-                    e.target.href == null ||
-                    e.target.href.indexOf("##") != -1
-                ) {
+                console.log(e.target);
+                if (e.target.href && e.target.href.indexOf("#ob#") != -1) {
+                    fetchPage(url + ".md", false);
+                } else if (e.target.href == null ||e.target.href.indexOf("##") != -1) {
                     e.preventDefault();
                     search_input = url;
-                    if (cur_page == "find") search();
+                    if (cur_page == "find") 
+                        search();
                     else cur_page = "find";
                 }
             });
