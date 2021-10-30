@@ -3180,40 +3180,40 @@ var app = (function () {
     			attr_dev(input, "class", "form-control");
     			attr_dev(input, "placeholder", "search ...");
     			attr_dev(input, "id", "searchInput");
-    			add_location(input, file_1, 367, 20, 11642);
+    			add_location(input, file_1, 367, 20, 11664);
     			attr_dev(i, "class", "fa fa-search");
-    			add_location(i, file_1, 382, 28, 12270);
+    			add_location(i, file_1, 382, 28, 12292);
     			attr_dev(button0, "class", "btn btn-secondary");
     			attr_dev(button0, "type", "button");
     			attr_dev(button0, "id", "searchBtn");
     			set_style(button0, "margin-left", "5px");
-    			add_location(button0, file_1, 375, 24, 11970);
+    			add_location(button0, file_1, 375, 24, 11992);
     			attr_dev(div0, "class", "input-group-append");
-    			add_location(div0, file_1, 374, 20, 11913);
+    			add_location(div0, file_1, 374, 20, 11935);
     			attr_dev(div1, "class", "input-group");
     			set_style(div1, "margin-top", "30px");
-    			add_location(div1, file_1, 366, 16, 11571);
+    			add_location(div1, file_1, 366, 16, 11593);
     			attr_dev(div2, "class", "col-md-10");
-    			add_location(div2, file_1, 365, 12, 11531);
+    			add_location(div2, file_1, 365, 12, 11553);
     			attr_dev(div3, "class", "row");
-    			add_location(div3, file_1, 364, 8, 11501);
+    			add_location(div3, file_1, 364, 8, 11523);
     			attr_dev(button1, "type", "button");
     			attr_dev(button1, "class", "btn btn-info");
     			set_style(button1, "float", "left");
     			attr_dev(button1, "id", "backBtn");
-    			add_location(button1, file_1, 391, 16, 12588);
+    			add_location(button1, file_1, 391, 16, 12610);
     			attr_dev(button2, "type", "button");
     			attr_dev(button2, "class", "btn btn-warning");
     			attr_dev(button2, "id", "editBtn");
-    			add_location(button2, file_1, 398, 16, 12829);
+    			add_location(button2, file_1, 398, 16, 12851);
     			attr_dev(div4, "class", "col-md-10 text-right");
     			div4.hidden = "true";
     			attr_dev(div4, "id", "pageNavBar");
-    			add_location(div4, file_1, 390, 12, 12507);
+    			add_location(div4, file_1, 390, 12, 12529);
     			attr_dev(div5, "class", "row card sticky-top");
     			set_style(div5, "margin-top", "20px");
     			set_style(div5, "border", "0");
-    			add_location(div5, file_1, 389, 8, 12424);
+    			add_location(div5, file_1, 389, 8, 12446);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div3, anchor);
@@ -3286,13 +3286,13 @@ var app = (function () {
     			attr_dev(button, "class", "btn btn-warning");
     			set_style(button, "float", "center");
     			attr_dev(button, "id", "editBtn");
-    			add_location(button, file_1, 354, 16, 11192);
+    			add_location(button, file_1, 354, 16, 11214);
     			attr_dev(div0, "class", "col-md-10 text-right");
-    			add_location(div0, file_1, 353, 12, 11141);
+    			add_location(div0, file_1, 353, 12, 11163);
     			attr_dev(div1, "class", "row card sticky-top");
     			set_style(div1, "margin-top", "20px");
     			set_style(div1, "border", "0");
-    			add_location(div1, file_1, 352, 8, 11058);
+    			add_location(div1, file_1, 352, 8, 11080);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -3350,21 +3350,21 @@ var app = (function () {
     			attr_dev(button0, "type", "button");
     			attr_dev(button0, "class", "btn btn-info");
     			set_style(button0, "float", "left");
-    			add_location(button0, file_1, 333, 16, 10385);
+    			add_location(button0, file_1, 333, 16, 10407);
     			attr_dev(button1, "type", "button");
     			attr_dev(button1, "class", "btn btn-warning");
     			set_style(button1, "float", "center");
     			attr_dev(button1, "id", "editBtn");
-    			add_location(button1, file_1, 339, 16, 10596);
+    			add_location(button1, file_1, 339, 16, 10618);
     			attr_dev(button2, "type", "button");
     			attr_dev(button2, "class", "btn btn-info");
-    			add_location(button2, file_1, 346, 16, 10844);
+    			add_location(button2, file_1, 346, 16, 10866);
     			attr_dev(div0, "class", "col-md-10 text-right");
-    			add_location(div0, file_1, 332, 12, 10334);
+    			add_location(div0, file_1, 332, 12, 10356);
     			attr_dev(div1, "class", "row card sticky-top");
     			set_style(div1, "margin-top", "20px");
     			set_style(div1, "border", "0");
-    			add_location(div1, file_1, 331, 8, 10251);
+    			add_location(div1, file_1, 331, 8, 10273);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -3424,20 +3424,20 @@ var app = (function () {
     			div1 = element("div");
     			span = element("span");
     			attr_dev(div0, "class", "col-md-2");
-    			add_location(div0, file_1, 410, 12, 13124);
+    			add_location(div0, file_1, 410, 12, 13146);
     			attr_dev(span, "class", "sr-only");
-    			add_location(span, file_1, 418, 24, 13428);
+    			add_location(span, file_1, 418, 24, 13450);
     			attr_dev(div1, "class", "spinner-border text-success");
     			attr_dev(div1, "role", "status");
-    			add_location(div1, file_1, 417, 20, 13348);
+    			add_location(div1, file_1, 417, 20, 13370);
     			attr_dev(div2, "class", "text-center");
-    			add_location(div2, file_1, 416, 16, 13302);
+    			add_location(div2, file_1, 416, 16, 13324);
     			attr_dev(div3, "class", "col-md-6");
     			attr_dev(div3, "id", "status-sp");
     			set_style(div3, "margin-top", "20px");
-    			add_location(div3, file_1, 411, 12, 13161);
+    			add_location(div3, file_1, 411, 12, 13183);
     			attr_dev(div4, "class", "row");
-    			add_location(div4, file_1, 409, 8, 13094);
+    			add_location(div4, file_1, 409, 8, 13116);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div4, anchor);
@@ -3513,31 +3513,31 @@ var app = (function () {
     			div6 = element("div");
     			div5 = element("div");
     			attr_dev(div0, "class", "col-md-2");
-    			add_location(div0, file_1, 426, 8, 13583);
+    			add_location(div0, file_1, 426, 8, 13605);
     			attr_dev(span, "class", "badge badge-secondary");
     			span.hidden = "true";
     			attr_dev(span, "id", "fileName");
-    			add_location(span, file_1, 430, 20, 13744);
-    			add_location(h4, file_1, 429, 16, 13719);
+    			add_location(span, file_1, 430, 20, 13766);
+    			add_location(h4, file_1, 429, 16, 13741);
     			attr_dev(div1, "class", "text-center");
     			set_style(div1, "margin-top", "20px");
-    			add_location(div1, file_1, 428, 12, 13651);
+    			add_location(div1, file_1, 428, 12, 13673);
     			attr_dev(div2, "class", "col-md-6");
-    			add_location(div2, file_1, 427, 8, 13616);
+    			add_location(div2, file_1, 427, 8, 13638);
     			attr_dev(div3, "class", "col-md-2");
-    			add_location(div3, file_1, 438, 8, 13967);
+    			add_location(div3, file_1, 438, 8, 13989);
     			attr_dev(div4, "class", "row");
-    			add_location(div4, file_1, 425, 4, 13557);
+    			add_location(div4, file_1, 425, 4, 13579);
     			attr_dev(div5, "class", "pageContent");
     			div5.hidden = "true";
     			attr_dev(div5, "id", "page-content");
-    			add_location(div5, file_1, 443, 12, 14070);
+    			add_location(div5, file_1, 443, 12, 14092);
     			attr_dev(div6, "class", "col-md-10");
-    			add_location(div6, file_1, 442, 8, 14034);
+    			add_location(div6, file_1, 442, 8, 14056);
     			attr_dev(div7, "class", "row");
-    			add_location(div7, file_1, 441, 4, 14008);
+    			add_location(div7, file_1, 441, 4, 14030);
     			attr_dev(div8, "class", "tab-content");
-    			add_location(div8, file_1, 329, 0, 10189);
+    			add_location(div8, file_1, 329, 0, 10211);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -3799,7 +3799,7 @@ var app = (function () {
     				if (file != "NoPage") {
     					localStorage.setItem("page-content", content);
     					localStorage.setItem("file", file);
-    					jq("#fileName").text(file);
+    					jq("#fileName").text(file.replaceAll(".md", ""));
     					jq("#fileName").prop("hidden", false);
     					jq("#pageNavBar").prop("hidden", false);
     					jq("#page-content").html(renderMdToHtml(content));

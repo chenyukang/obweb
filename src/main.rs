@@ -225,7 +225,7 @@ fn search_query(req: &SearchQuery) -> Result<String, &'static str> {
     };
 
     for (f, _) in files[..max_len].iter() {
-        let link = format!("\n- [{}](#)", &f);
+        let link = format!("\n- [{}](#)", f);
         let link = link.replace("ob/", "");
         if !res.contains(&link) {
             res += &link;

@@ -198,7 +198,7 @@
                 if (file != "NoPage") {
                     localStorage.setItem("page-content", content);
                     localStorage.setItem("file", file);
-                    jq("#fileName").text(file);
+                    jq("#fileName").text(file.replaceAll(".md", ""));
                     jq("#fileName").prop("hidden", false);
                     jq("#pageNavBar").prop("hidden", false);
                     jq("#page-content").html(renderMdToHtml(content));
