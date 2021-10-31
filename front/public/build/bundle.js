@@ -1053,7 +1053,7 @@ var app = (function () {
     }
 
     // (322:16) {#if typeof tag === 'string'}
-    function create_if_block_3$2(ctx) {
+    function create_if_block_3$1(ctx) {
     	let t_value = /*tag*/ ctx[10] + "";
     	let t;
 
@@ -1074,7 +1074,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_3$2.name,
+    		id: create_if_block_3$1.name,
     		type: "if",
     		source: "(322:16) {#if typeof tag === 'string'}",
     		ctx
@@ -1084,7 +1084,7 @@ var app = (function () {
     }
 
     // (327:16) {#if !disable}
-    function create_if_block_2$2(ctx) {
+    function create_if_block_2$1(ctx) {
     	let span;
     	let mounted;
     	let dispose;
@@ -1120,7 +1120,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_2$2.name,
+    		id: create_if_block_2$1.name,
     		type: "if",
     		source: "(327:16) {#if !disable}",
     		ctx
@@ -1136,13 +1136,13 @@ var app = (function () {
     	let t1;
 
     	function select_block_type(ctx, dirty) {
-    		if (typeof /*tag*/ ctx[10] === 'string') return create_if_block_3$2;
+    		if (typeof /*tag*/ ctx[10] === 'string') return create_if_block_3$1;
     		return create_else_block$1;
     	}
 
     	let current_block_type = select_block_type(ctx);
     	let if_block0 = current_block_type(ctx);
-    	let if_block1 = !/*disable*/ ctx[6] && create_if_block_2$2(ctx);
+    	let if_block1 = !/*disable*/ ctx[6] && create_if_block_2$1(ctx);
 
     	const block = {
     		c: function create() {
@@ -1178,7 +1178,7 @@ var app = (function () {
     				if (if_block1) {
     					if_block1.p(ctx, dirty);
     				} else {
-    					if_block1 = create_if_block_2$2(ctx);
+    					if_block1 = create_if_block_2$1(ctx);
     					if_block1.c();
     					if_block1.m(span, t1);
     				}
@@ -2298,8 +2298,8 @@ var app = (function () {
     const { console: console_1$2 } = globals;
     const file$2 = "src/Index.svelte";
 
-    // (264:16) {#if status_visible}
-    function create_if_block_3$1(ctx) {
+    // (269:16) {#if status_visible}
+    function create_if_block_1$1(ctx) {
     	let div;
     	let span;
 
@@ -2309,10 +2309,10 @@ var app = (function () {
     			span = element("span");
     			span.textContent = "Sending";
     			attr_dev(span, "class", "sr-only");
-    			add_location(span, file$2, 265, 24, 7555);
+    			add_location(span, file$2, 270, 24, 7807);
     			attr_dev(div, "class", "spinner-border text-success");
     			attr_dev(div, "role", "status");
-    			add_location(div, file$2, 264, 20, 7475);
+    			add_location(div, file$2, 269, 20, 7727);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -2325,80 +2325,16 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_3$1.name,
-    		type: "if",
-    		source: "(264:16) {#if status_visible}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (277:16) {#if succ_visible}
-    function create_if_block_2$1(ctx) {
-    	let div;
-
-    	const block = {
-    		c: function create() {
-    			div = element("div");
-    			div.textContent = "Save Successfully";
-    			attr_dev(div, "class", "alert alert-success");
-    			attr_dev(div, "role", "alert");
-    			attr_dev(div, "id", "status-msg");
-    			add_location(div, file$2, 277, 20, 7866);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block_2$1.name,
-    		type: "if",
-    		source: "(277:16) {#if succ_visible}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (286:16) {#if err_visible}
-    function create_if_block_1$1(ctx) {
-    	let div;
-
-    	const block = {
-    		c: function create() {
-    			div = element("div");
-    			div.textContent = "Save Failed";
-    			attr_dev(div, "class", "alert alert-danger");
-    			attr_dev(div, "role", "alert");
-    			attr_dev(div, "id", "status-msg");
-    			add_location(div, file$2, 286, 20, 8167);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
     		id: create_if_block_1$1.name,
     		type: "if",
-    		source: "(286:16) {#if err_visible}",
+    		source: "(269:16) {#if status_visible}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (301:8) {#if show_image}
+    // (295:8) {#if show_image}
     function create_if_block$2(ctx) {
     	let div;
     	let button;
@@ -2417,16 +2353,16 @@ var app = (function () {
     			span.textContent = "×";
     			t1 = space();
     			img = element("img");
-    			add_location(span, file$2, 303, 20, 8673);
+    			add_location(span, file$2, 297, 20, 8568);
     			attr_dev(button, "class", "close");
-    			add_location(button, file$2, 302, 16, 8609);
+    			add_location(button, file$2, 296, 16, 8504);
     			if (!src_url_equal(img.src, img_src_value = /*image*/ ctx[3])) attr_dev(img, "src", img_src_value);
     			set_style(img, "display", "block");
     			attr_dev(img, "alt", "");
     			attr_dev(img, "class", "svelte-1kw4yi");
-    			add_location(img, file$2, 305, 16, 8736);
+    			add_location(img, file$2, 299, 16, 8631);
     			attr_dev(div, "class", "col-md-4");
-    			add_location(div, file$2, 301, 12, 8570);
+    			add_location(div, file$2, 295, 12, 8465);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -2436,7 +2372,7 @@ var app = (function () {
     			append_dev(div, img);
 
     			if (!mounted) {
-    				dispose = listen_dev(button, "click", /*removePic*/ ctx[15], false, false, false);
+    				dispose = listen_dev(button, "click", /*removePic*/ ctx[16], false, false, false);
     				mounted = true;
     			}
     		},
@@ -2456,7 +2392,7 @@ var app = (function () {
     		block,
     		id: create_if_block$2.name,
     		type: "if",
-    		source: "(301:8) {#if show_image}",
+    		source: "(295:8) {#if show_image}",
     		ctx
     	});
 
@@ -2464,7 +2400,7 @@ var app = (function () {
     }
 
     function create_fragment$3(ctx) {
-    	let div22;
+    	let div23;
     	let form;
     	let div2;
     	let div0;
@@ -2505,15 +2441,18 @@ var app = (function () {
     	let div14;
     	let div13;
     	let t16;
-    	let div19;
+    	let div20;
     	let div16;
     	let t17;
+    	let div19;
     	let div18;
     	let div17;
     	let t18;
+    	let div17_class_value;
+    	let div17_hidden_value;
     	let t19;
+    	let div22;
     	let div21;
-    	let div20;
     	let t20;
     	let current;
     	let mounted;
@@ -2531,15 +2470,13 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	tags.$on("tags", /*handleTags*/ ctx[10]);
-    	let if_block0 = /*status_visible*/ ctx[5] && create_if_block_3$1(ctx);
-    	let if_block1 = /*succ_visible*/ ctx[6] && create_if_block_2$1(ctx);
-    	let if_block2 = /*err_visible*/ ctx[7] && create_if_block_1$1(ctx);
-    	let if_block3 = /*show_image*/ ctx[4] && create_if_block$2(ctx);
+    	tags.$on("tags", /*handleTags*/ ctx[11]);
+    	let if_block0 = /*status_visible*/ ctx[5] && create_if_block_1$1(ctx);
+    	let if_block1 = /*show_image*/ ctx[4] && create_if_block$2(ctx);
 
     	const block = {
     		c: function create() {
-    			div22 = element("div");
+    			div23 = element("div");
     			form = element("form");
     			div2 = element("div");
     			div0 = element("div");
@@ -2584,107 +2521,110 @@ var app = (function () {
     			div13 = element("div");
     			if (if_block0) if_block0.c();
     			t16 = space();
-    			div19 = element("div");
+    			div20 = element("div");
     			div16 = element("div");
     			t17 = space();
+    			div19 = element("div");
     			div18 = element("div");
     			div17 = element("div");
-    			if (if_block1) if_block1.c();
-    			t18 = space();
-    			if (if_block2) if_block2.c();
+    			t18 = text(/*alertMsg*/ ctx[7]);
     			t19 = space();
+    			div22 = element("div");
     			div21 = element("div");
-    			div20 = element("div");
     			t20 = space();
-    			if (if_block3) if_block3.c();
+    			if (if_block1) if_block1.c();
     			attr_dev(div0, "class", "col-md-2");
-    			add_location(div0, file$2, 186, 12, 5008);
+    			add_location(div0, file$2, 191, 12, 5260);
     			attr_dev(label0, "for", "");
-    			add_location(label0, file$2, 188, 16, 5084);
-    			add_location(br, file$2, 188, 32, 5100);
+    			add_location(label0, file$2, 193, 16, 5336);
+    			add_location(br, file$2, 193, 32, 5352);
     			attr_dev(textarea, "rows", "8");
     			attr_dev(textarea, "class", "form-control");
-    			add_location(textarea, file$2, 189, 16, 5123);
+    			add_location(textarea, file$2, 194, 16, 5375);
     			attr_dev(div1, "class", "col-md-8");
-    			add_location(div1, file$2, 187, 12, 5045);
+    			add_location(div1, file$2, 192, 12, 5297);
     			attr_dev(div2, "class", "form-group row");
-    			add_location(div2, file$2, 185, 8, 4967);
+    			add_location(div2, file$2, 190, 8, 5219);
     			attr_dev(div3, "class", "col-md-2");
-    			add_location(div3, file$2, 201, 12, 5476);
+    			add_location(div3, file$2, 206, 12, 5728);
     			attr_dev(input0, "type", "text");
     			attr_dev(input0, "class", "form-control");
     			attr_dev(input0, "placeholder", "Link");
-    			add_location(input0, file$2, 203, 16, 5552);
+    			add_location(input0, file$2, 208, 16, 5804);
     			attr_dev(div4, "class", "col-md-8");
-    			add_location(div4, file$2, 202, 12, 5513);
+    			add_location(div4, file$2, 207, 12, 5765);
     			attr_dev(div5, "class", "form-group row");
-    			add_location(div5, file$2, 200, 8, 5435);
+    			add_location(div5, file$2, 205, 8, 5687);
     			attr_dev(div6, "class", "col-md-2");
-    			add_location(div6, file$2, 214, 12, 5854);
+    			add_location(div6, file$2, 219, 12, 6106);
     			attr_dev(div7, "class", "col-md-8");
-    			add_location(div7, file$2, 215, 12, 5891);
+    			add_location(div7, file$2, 220, 12, 6143);
     			attr_dev(div8, "class", "form-group row");
-    			add_location(div8, file$2, 213, 8, 5813);
+    			add_location(div8, file$2, 218, 8, 6065);
     			attr_dev(div9, "class", "col-md-2");
-    			add_location(div9, file$2, 229, 12, 6309);
+    			add_location(div9, file$2, 234, 12, 6561);
     			attr_dev(input1, "type", "file");
     			attr_dev(input1, "id", "fileElem");
     			attr_dev(input1, "class", "visually-hidden svelte-1kw4yi");
     			attr_dev(input1, "accept", "image/*");
-    			add_location(input1, file$2, 231, 16, 6385);
+    			add_location(input1, file$2, 236, 16, 6637);
     			attr_dev(label1, "for", "fileElem");
     			attr_dev(label1, "class", "svelte-1kw4yi");
-    			add_location(label1, file$2, 238, 16, 6619);
+    			add_location(label1, file$2, 243, 16, 6871);
     			attr_dev(button0, "class", "btn btn-warning");
     			attr_dev(button0, "id", "reset-btn");
     			attr_dev(button0, "type", "submit");
     			set_style(button0, "margin-left", "4px");
-    			add_location(button0, file$2, 239, 16, 6671);
+    			add_location(button0, file$2, 244, 16, 6923);
     			attr_dev(button1, "class", "btn btn-success float-right");
     			attr_dev(button1, "id", "submit-btn");
     			attr_dev(button1, "type", "submit");
     			set_style(button1, "margin-left", "4px");
     			button1.disabled = true;
-    			add_location(button1, file$2, 247, 16, 6950);
+    			add_location(button1, file$2, 252, 16, 7202);
     			attr_dev(div10, "class", "col-md-8");
-    			add_location(div10, file$2, 230, 12, 6346);
+    			add_location(div10, file$2, 235, 12, 6598);
     			attr_dev(div11, "class", "row");
     			set_style(div11, "margin-top", "20px");
-    			add_location(div11, file$2, 228, 8, 6254);
+    			add_location(div11, file$2, 233, 8, 6506);
     			attr_dev(form, "name", "entry");
     			attr_dev(form, "role", "form");
-    			add_location(form, file$2, 184, 4, 4927);
+    			add_location(form, file$2, 189, 4, 5179);
     			attr_dev(div12, "class", "col-md-2");
-    			add_location(div12, file$2, 260, 8, 7309);
+    			add_location(div12, file$2, 265, 8, 7561);
     			attr_dev(div13, "class", "text-center");
-    			add_location(div13, file$2, 262, 12, 7392);
+    			add_location(div13, file$2, 267, 12, 7644);
     			attr_dev(div14, "class", "col-md-8");
     			attr_dev(div14, "id", "status-sp");
-    			add_location(div14, file$2, 261, 8, 7342);
+    			add_location(div14, file$2, 266, 8, 7594);
     			attr_dev(div15, "class", "row");
-    			add_location(div15, file$2, 259, 4, 7283);
+    			add_location(div15, file$2, 264, 4, 7535);
     			attr_dev(div16, "class", "col-md-2");
-    			add_location(div16, file$2, 273, 8, 7717);
-    			attr_dev(div17, "class", "text-center");
-    			add_location(div17, file$2, 275, 12, 7785);
-    			attr_dev(div18, "class", "col-md-8");
-    			add_location(div18, file$2, 274, 8, 7750);
-    			attr_dev(div19, "class", "row");
-    			add_location(div19, file$2, 272, 4, 7691);
-    			attr_dev(div20, "class", "col-md-4");
-    			add_location(div20, file$2, 299, 8, 8508);
-    			attr_dev(div21, "class", "row");
-    			set_style(div21, "margin-top", "20px");
-    			add_location(div21, file$2, 298, 4, 8457);
-    			attr_dev(div22, "class", "tab-content svelte-1kw4yi");
-    			add_location(div22, file$2, 183, 0, 4897);
+    			add_location(div16, file$2, 278, 8, 7969);
+    			attr_dev(div17, "class", div17_class_value = "alert " + /*alertClass*/ ctx[8] + " svelte-1kw4yi");
+    			attr_dev(div17, "role", "alert");
+    			div17.hidden = div17_hidden_value = !/*msg_visible*/ ctx[6];
+    			add_location(div17, file$2, 281, 20, 8083);
+    			attr_dev(div18, "class", "text-center");
+    			add_location(div18, file$2, 280, 12, 8037);
+    			attr_dev(div19, "class", "col-md-8");
+    			add_location(div19, file$2, 279, 8, 8002);
+    			attr_dev(div20, "class", "row");
+    			add_location(div20, file$2, 277, 4, 7943);
+    			attr_dev(div21, "class", "col-md-4");
+    			add_location(div21, file$2, 293, 8, 8403);
+    			attr_dev(div22, "class", "row");
+    			set_style(div22, "margin-top", "20px");
+    			add_location(div22, file$2, 292, 4, 8352);
+    			attr_dev(div23, "class", "tab-content svelte-1kw4yi");
+    			add_location(div23, file$2, 188, 0, 5149);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, div22, anchor);
-    			append_dev(div22, form);
+    			insert_dev(target, div23, anchor);
+    			append_dev(div23, form);
     			append_dev(form, div2);
     			append_dev(div2, div0);
     			append_dev(div2, t0);
@@ -2719,40 +2659,39 @@ var app = (function () {
     			append_dev(div10, button0);
     			append_dev(div10, t12);
     			append_dev(div10, button1);
-    			append_dev(div22, t14);
-    			append_dev(div22, div15);
+    			append_dev(div23, t14);
+    			append_dev(div23, div15);
     			append_dev(div15, div12);
     			append_dev(div15, t15);
     			append_dev(div15, div14);
     			append_dev(div14, div13);
     			if (if_block0) if_block0.m(div13, null);
-    			append_dev(div22, t16);
-    			append_dev(div22, div19);
-    			append_dev(div19, div16);
-    			append_dev(div19, t17);
+    			append_dev(div23, t16);
+    			append_dev(div23, div20);
+    			append_dev(div20, div16);
+    			append_dev(div20, t17);
+    			append_dev(div20, div19);
     			append_dev(div19, div18);
     			append_dev(div18, div17);
-    			if (if_block1) if_block1.m(div17, null);
     			append_dev(div17, t18);
-    			if (if_block2) if_block2.m(div17, null);
-    			append_dev(div22, t19);
+    			append_dev(div23, t19);
+    			append_dev(div23, div22);
     			append_dev(div22, div21);
-    			append_dev(div21, div20);
-    			append_dev(div21, t20);
-    			if (if_block3) if_block3.m(div21, null);
+    			append_dev(div22, t20);
+    			if (if_block1) if_block1.m(div22, null);
     			current = true;
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(textarea, "input", /*textarea_input_handler*/ ctx[17]),
-    					listen_dev(textarea, "input", /*handleInput*/ ctx[8], false, false, false),
-    					listen_dev(textarea, "keyup", /*handleKeyup*/ ctx[9], false, false, false),
-    					listen_dev(textarea, "paste", /*handlePaste*/ ctx[16], false, false, false),
-    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[18]),
-    					listen_dev(input0, "input", /*handlePage*/ ctx[11], false, false, false),
-    					listen_dev(input1, "change", /*fileSelected*/ ctx[14], false, false, false),
-    					listen_dev(button0, "click", /*handleReset*/ ctx[12], false, false, false),
-    					listen_dev(button1, "click", /*handleSave*/ ctx[13], false, false, false)
+    					listen_dev(textarea, "input", /*textarea_input_handler*/ ctx[18]),
+    					listen_dev(textarea, "input", /*handleInput*/ ctx[9], false, false, false),
+    					listen_dev(textarea, "keyup", /*handleKeyup*/ ctx[10], false, false, false),
+    					listen_dev(textarea, "paste", /*handlePaste*/ ctx[17], false, false, false),
+    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[19]),
+    					listen_dev(input0, "input", /*handlePage*/ ctx[12], false, false, false),
+    					listen_dev(input1, "change", /*fileSelected*/ ctx[15], false, false, false),
+    					listen_dev(button0, "click", /*handleReset*/ ctx[13], false, false, false),
+    					listen_dev(button1, "click", /*handleSave*/ ctx[14], false, false, false)
     				];
 
     				mounted = true;
@@ -2773,7 +2712,7 @@ var app = (function () {
 
     			if (/*status_visible*/ ctx[5]) {
     				if (if_block0) ; else {
-    					if_block0 = create_if_block_3$1(ctx);
+    					if_block0 = create_if_block_1$1(ctx);
     					if_block0.c();
     					if_block0.m(div13, null);
     				}
@@ -2782,39 +2721,27 @@ var app = (function () {
     				if_block0 = null;
     			}
 
-    			if (/*succ_visible*/ ctx[6]) {
-    				if (if_block1) ; else {
-    					if_block1 = create_if_block_2$1(ctx);
+    			if (!current || dirty & /*alertMsg*/ 128) set_data_dev(t18, /*alertMsg*/ ctx[7]);
+
+    			if (!current || dirty & /*alertClass*/ 256 && div17_class_value !== (div17_class_value = "alert " + /*alertClass*/ ctx[8] + " svelte-1kw4yi")) {
+    				attr_dev(div17, "class", div17_class_value);
+    			}
+
+    			if (!current || dirty & /*msg_visible*/ 64 && div17_hidden_value !== (div17_hidden_value = !/*msg_visible*/ ctx[6])) {
+    				prop_dev(div17, "hidden", div17_hidden_value);
+    			}
+
+    			if (/*show_image*/ ctx[4]) {
+    				if (if_block1) {
+    					if_block1.p(ctx, dirty);
+    				} else {
+    					if_block1 = create_if_block$2(ctx);
     					if_block1.c();
-    					if_block1.m(div17, t18);
+    					if_block1.m(div22, null);
     				}
     			} else if (if_block1) {
     				if_block1.d(1);
     				if_block1 = null;
-    			}
-
-    			if (/*err_visible*/ ctx[7]) {
-    				if (if_block2) ; else {
-    					if_block2 = create_if_block_1$1(ctx);
-    					if_block2.c();
-    					if_block2.m(div17, null);
-    				}
-    			} else if (if_block2) {
-    				if_block2.d(1);
-    				if_block2 = null;
-    			}
-
-    			if (/*show_image*/ ctx[4]) {
-    				if (if_block3) {
-    					if_block3.p(ctx, dirty);
-    				} else {
-    					if_block3 = create_if_block$2(ctx);
-    					if_block3.c();
-    					if_block3.m(div21, null);
-    				}
-    			} else if (if_block3) {
-    				if_block3.d(1);
-    				if_block3 = null;
     			}
     		},
     		i: function intro(local) {
@@ -2827,12 +2754,10 @@ var app = (function () {
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div22);
+    			if (detaching) detach_dev(div23);
     			destroy_component(tags);
     			if (if_block0) if_block0.d();
     			if (if_block1) if_block1.d();
-    			if (if_block2) if_block2.d();
-    			if (if_block3) if_block3.d();
     			mounted = false;
     			run_all(dispose);
     		}
@@ -2859,21 +2784,19 @@ var app = (function () {
     	let image = "";
     	let show_image = false;
     	let status_visible = false;
-    	let succ_visible = false;
-    	let err_visible = false;
+    	let msg_visible = false;
+    	let alertMsg = "";
+    	let alertClass = "";
 
     	onMount(async () => {
     		addImageHook();
     		restoreLinkTags();
-
-    		if (content && content.length() > 0) {
-    			jq("#submit-btn").prop("disabled", false);
-    		}
+    		if (content && content.length > 0) jq("#submit-btn").prop("disabled", false);
     	});
 
     	function restoreLinkTags() {
     		$$invalidate(0, content = window.localStorage.getItem("content"));
-    		$$invalidate(2, page = window.localStorage.getItem("page"));
+    		$$invalidate(2, page = window.localStorage.getItem("page") || "");
     		let stored_tags = window.localStorage.getItem("tag");
 
     		if (stored_tags != null) {
@@ -2905,14 +2828,16 @@ var app = (function () {
     		}
     	}
 
-    	function showSuccMsg() {
-    		$$invalidate(5, status_visible = false);
-    		$$invalidate(6, succ_visible = true);
-    	}
+    	function showMsg(succ = true) {
+    		$$invalidate(6, msg_visible = true);
 
-    	function showErrMsg() {
-    		$$invalidate(5, status_visible = false);
-    		$$invalidate(7, err_visible = true);
+    		if (succ) {
+    			$$invalidate(7, alertMsg = "Save Successfully");
+    			$$invalidate(8, alertClass = "alert-success");
+    		} else {
+    			$$invalidate(7, alertMsg = "Save Failed");
+    			$$invalidate(8, alertClass = "alert-alert-danger");
+    		}
     	}
 
     	function handleTags(event) {
@@ -2927,7 +2852,7 @@ var app = (function () {
     	function handleReset(event) {
     		initDefault(event);
     		$$invalidate(1, tag = []);
-    		$$invalidate(2, page = null);
+    		$$invalidate(2, page = "");
     		window.localStorage.removeItem("tag");
     		window.localStorage.removeItem("page");
     	}
@@ -2935,6 +2860,7 @@ var app = (function () {
     	function handleSave(event) {
     		event.preventDefault();
     		$$invalidate(5, status_visible = true);
+    		$$invalidate(6, msg_visible = false);
 
     		let data = JSON.stringify({
     			date: new Date().toISOString(),
@@ -2943,6 +2869,8 @@ var app = (function () {
     			text: content,
     			image
     		});
+
+    		console.log(data);
 
     		jq.ajax({
     			url: "/api/entry",
@@ -2955,13 +2883,15 @@ var app = (function () {
     				if (response == "ok") {
     					initDefault(event);
     					restoreLinkTags();
-    					showSuccMsg();
+    					showMsg(true);
     				} else {
-    					showErrMsg();
+    					$$invalidate(5, status_visible = false);
+    					showMsg(false);
     				}
     			},
     			error(err) {
-    				showErrMsg();
+    				showMsg(false);
+    				$$invalidate(5, status_visible = false);
     				console.log("There was an error saving the entry: ", err);
     			}
     		});
@@ -3063,14 +2993,14 @@ var app = (function () {
     		image,
     		show_image,
     		status_visible,
-    		succ_visible,
-    		err_visible,
+    		msg_visible,
+    		alertMsg,
+    		alertClass,
     		restoreLinkTags,
     		addImageHook,
     		handleInput,
     		handleKeyup,
-    		showSuccMsg,
-    		showErrMsg,
+    		showMsg,
     		handleTags,
     		handlePage,
     		handleReset,
@@ -3089,8 +3019,9 @@ var app = (function () {
     		if ('image' in $$props) $$invalidate(3, image = $$props.image);
     		if ('show_image' in $$props) $$invalidate(4, show_image = $$props.show_image);
     		if ('status_visible' in $$props) $$invalidate(5, status_visible = $$props.status_visible);
-    		if ('succ_visible' in $$props) $$invalidate(6, succ_visible = $$props.succ_visible);
-    		if ('err_visible' in $$props) $$invalidate(7, err_visible = $$props.err_visible);
+    		if ('msg_visible' in $$props) $$invalidate(6, msg_visible = $$props.msg_visible);
+    		if ('alertMsg' in $$props) $$invalidate(7, alertMsg = $$props.alertMsg);
+    		if ('alertClass' in $$props) $$invalidate(8, alertClass = $$props.alertClass);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -3104,8 +3035,9 @@ var app = (function () {
     		image,
     		show_image,
     		status_visible,
-    		succ_visible,
-    		err_visible,
+    		msg_visible,
+    		alertMsg,
+    		alertClass,
     		handleInput,
     		handleKeyup,
     		handleTags,

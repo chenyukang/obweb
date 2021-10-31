@@ -7,23 +7,22 @@
     let tag = [];
     let page = "";
     let image = "";
-
     let show_image = false;
     let status_visible = false;
-    let succ_visible = false;
-    let err_visible = false;
+    let msg_visible = false;
+    let alertMsg = "";
+    let alertClass = "";
 
     onMount(async () => {
         addImageHook();
         restoreLinkTags();
-        if(content && content.length() > 0){
+        if(content && content.length > 0)
             jq("#submit-btn").prop("disabled", false);
-        }
     });
 
     function restoreLinkTags() {
         content = window.localStorage.getItem("content");
-        page = window.localStorage.getItem("page");
+        page = window.localStorage.getItem("page") || "";
         let stored_tags = window.localStorage.getItem("tag");
         if (stored_tags != null) {
             tag = stored_tags
@@ -56,14 +55,16 @@
         }
     }
 
-    function showSuccMsg() {
-        status_visible = false;
-        succ_visible = true;
-    }
-
-    function showErrMsg() {
-        status_visible = false;
-        err_visible = true;
+    function showMsg(succ = true)
+    {
+        msg_visible = true;
+        if(succ) {
+            alertMsg = "Save Successfully";
+            alertClass = "alert-success";
+        } else {
+            alertMsg = "Save Failed";
+            alertClass = "alert-alert-danger";
+        }
     }
 
     function handleTags(event) {
@@ -78,7 +79,7 @@
     function handleReset(event) {
         initDefault(event);
         tag = [];
-        page = null;
+        page = "";
         window.localStorage.removeItem("tag");
         window.localStorage.removeItem("page");
     }
@@ -86,6 +87,7 @@
     function handleSave(event) {
         event.preventDefault();
         status_visible = true;
+        msg_visible = false;
         let data = JSON.stringify({
             date: new Date().toISOString(),
             links: tag.join(","),
@@ -93,6 +95,7 @@
             text: content,
             image: image,
         });
+        console.log(data);
         jq.ajax({
             url: "/api/entry",
             crossDomain: true,
@@ -104,13 +107,15 @@
                 if (response == "ok") {
                     initDefault(event);
                     restoreLinkTags();
-                    showSuccMsg();
+                    showMsg(true);
                 } else {
-                    showErrMsg();
+                    status_visible = false;
+                    showMsg(false);
                 }
             },
             error: function (err) {
-                showErrMsg();
+                showMsg(false);
+                status_visible = false;
                 console.log("There was an error saving the entry: ", err);
             },
         });
@@ -274,24 +279,13 @@
         <div class="col-md-2" />
         <div class="col-md-8">
             <div class="text-center">
-                {#if succ_visible}
                     <div
-                        class="alert alert-success"
+                        class="alert {alertClass}"
                         role="alert"
-                        id="status-msg"
+                        hidden={!msg_visible}
                     >
-                        Save Successfully
+                    {alertMsg}
                     </div>
-                {/if}
-                {#if err_visible}
-                    <div
-                        class="alert alert-danger"
-                        role="alert"
-                        id="status-msg"
-                    >
-                        Save Failed
-                    </div>
-                {/if}
             </div>
         </div>
     </div>
