@@ -4,9 +4,9 @@
     const jq = window.$;
     let username = "";
     let password = "";
-    
+
     onMount(async () => {
-        //tryLogin();
+        tryLogin();
     });
 
     // Try to verify token in cookie,
@@ -32,10 +32,10 @@
         });
     }
 
-    
+
     function showLoginModal(init = false) {
         if (jq("#loginModal").length == 0) {
-            window.location.href = "/obweb";
+            window.location.href = "/obwebx";
         }
         jq("#loginModal").modal("show");
         if (init) {

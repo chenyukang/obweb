@@ -188,7 +188,7 @@
             },
             statusCode: {
                 400: function () {
-                    showLoginModal();
+                    window.location.href = "/obwebx";
                 },
             },
             success: function (response) {
@@ -227,7 +227,7 @@
                 } else if (e.target.href == null ||e.target.href.indexOf("##") != -1) {
                     e.preventDefault();
                     search_input = url;
-                    if (cur_page == "find") 
+                    if (cur_page == "find")
                         search();
                     else cur_page = "find";
                 }
