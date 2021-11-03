@@ -3071,7 +3071,7 @@ var app = (function () {
     const { console: console_1$1 } = globals;
     const file_1 = "src/Page.svelte";
 
-    // (363:34) 
+    // (374:34) 
     function create_if_block_3(ctx) {
     	let div3;
     	let div2;
@@ -3112,40 +3112,40 @@ var app = (function () {
     			attr_dev(input, "class", "form-control");
     			attr_dev(input, "placeholder", "search ...");
     			attr_dev(input, "id", "searchInput");
-    			add_location(input, file_1, 366, 20, 11725);
+    			add_location(input, file_1, 377, 20, 12090);
     			attr_dev(i, "class", "fa fa-search");
-    			add_location(i, file_1, 381, 28, 12353);
+    			add_location(i, file_1, 392, 28, 12718);
     			attr_dev(button0, "class", "btn btn-secondary");
     			attr_dev(button0, "type", "button");
     			attr_dev(button0, "id", "searchBtn");
     			set_style(button0, "margin-left", "5px");
-    			add_location(button0, file_1, 374, 24, 12053);
+    			add_location(button0, file_1, 385, 24, 12418);
     			attr_dev(div0, "class", "input-group-append");
-    			add_location(div0, file_1, 373, 20, 11996);
+    			add_location(div0, file_1, 384, 20, 12361);
     			attr_dev(div1, "class", "input-group");
     			set_style(div1, "margin-top", "30px");
-    			add_location(div1, file_1, 365, 16, 11654);
+    			add_location(div1, file_1, 376, 16, 12019);
     			attr_dev(div2, "class", "col-md-10");
-    			add_location(div2, file_1, 364, 12, 11614);
+    			add_location(div2, file_1, 375, 12, 11979);
     			attr_dev(div3, "class", "row");
-    			add_location(div3, file_1, 363, 8, 11584);
+    			add_location(div3, file_1, 374, 8, 11949);
     			attr_dev(button1, "type", "button");
     			attr_dev(button1, "class", "btn btn-info");
     			set_style(button1, "float", "left");
     			attr_dev(button1, "id", "backBtn");
-    			add_location(button1, file_1, 390, 16, 12671);
+    			add_location(button1, file_1, 401, 16, 13036);
     			attr_dev(button2, "type", "button");
     			attr_dev(button2, "class", "btn btn-warning");
     			attr_dev(button2, "id", "editBtn");
-    			add_location(button2, file_1, 397, 16, 12912);
+    			add_location(button2, file_1, 408, 16, 13277);
     			attr_dev(div4, "class", "col-md-10 text-right");
     			div4.hidden = "true";
     			attr_dev(div4, "id", "pageNavBar");
-    			add_location(div4, file_1, 389, 12, 12590);
+    			add_location(div4, file_1, 400, 12, 12955);
     			attr_dev(div5, "class", "row card sticky-top");
     			set_style(div5, "margin-top", "20px");
     			set_style(div5, "border", "0");
-    			add_location(div5, file_1, 388, 8, 12507);
+    			add_location(div5, file_1, 399, 8, 12872);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div3, anchor);
@@ -3193,14 +3193,14 @@ var app = (function () {
     		block,
     		id: create_if_block_3.name,
     		type: "if",
-    		source: "(363:34) ",
+    		source: "(374:34) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (351:55) 
+    // (362:55) 
     function create_if_block_2(ctx) {
     	let div1;
     	let div0;
@@ -3218,13 +3218,13 @@ var app = (function () {
     			attr_dev(button, "class", "btn btn-warning");
     			set_style(button, "float", "center");
     			attr_dev(button, "id", "editBtn");
-    			add_location(button, file_1, 353, 16, 11275);
+    			add_location(button, file_1, 364, 16, 11640);
     			attr_dev(div0, "class", "col-md-10 text-right");
-    			add_location(div0, file_1, 352, 12, 11224);
+    			add_location(div0, file_1, 363, 12, 11589);
     			attr_dev(div1, "class", "row card sticky-top");
     			set_style(div1, "margin-top", "20px");
     			set_style(div1, "border", "0");
-    			add_location(div1, file_1, 351, 8, 11141);
+    			add_location(div1, file_1, 362, 8, 11506);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -3248,14 +3248,14 @@ var app = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(351:55) ",
+    		source: "(362:55) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (330:4) {#if cur_page == "day"}
+    // (341:4) {#if cur_page == "day"}
     function create_if_block_1(ctx) {
     	let div1;
     	let div0;
@@ -3282,21 +3282,21 @@ var app = (function () {
     			attr_dev(button0, "type", "button");
     			attr_dev(button0, "class", "btn btn-info");
     			set_style(button0, "float", "left");
-    			add_location(button0, file_1, 332, 16, 10468);
+    			add_location(button0, file_1, 343, 16, 10833);
     			attr_dev(button1, "type", "button");
     			attr_dev(button1, "class", "btn btn-warning");
     			set_style(button1, "float", "center");
     			attr_dev(button1, "id", "editBtn");
-    			add_location(button1, file_1, 338, 16, 10679);
+    			add_location(button1, file_1, 349, 16, 11044);
     			attr_dev(button2, "type", "button");
     			attr_dev(button2, "class", "btn btn-info");
-    			add_location(button2, file_1, 345, 16, 10927);
+    			add_location(button2, file_1, 356, 16, 11292);
     			attr_dev(div0, "class", "col-md-10 text-right");
-    			add_location(div0, file_1, 331, 12, 10417);
+    			add_location(div0, file_1, 342, 12, 10782);
     			attr_dev(div1, "class", "row card sticky-top");
     			set_style(div1, "margin-top", "20px");
     			set_style(div1, "border", "0");
-    			add_location(div1, file_1, 330, 8, 10334);
+    			add_location(div1, file_1, 341, 8, 10699);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -3329,14 +3329,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(330:4) {#if cur_page == \\\"day\\\"}",
+    		source: "(341:4) {#if cur_page == \\\"day\\\"}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (408:4) {#if show_status}
+    // (419:4) {#if show_status}
     function create_if_block$1(ctx) {
     	let div4;
     	let div0;
@@ -3356,20 +3356,20 @@ var app = (function () {
     			div1 = element("div");
     			span = element("span");
     			attr_dev(div0, "class", "col-md-2");
-    			add_location(div0, file_1, 409, 12, 13207);
+    			add_location(div0, file_1, 420, 12, 13572);
     			attr_dev(span, "class", "sr-only");
-    			add_location(span, file_1, 417, 24, 13511);
+    			add_location(span, file_1, 428, 24, 13876);
     			attr_dev(div1, "class", "spinner-border text-success");
     			attr_dev(div1, "role", "status");
-    			add_location(div1, file_1, 416, 20, 13431);
+    			add_location(div1, file_1, 427, 20, 13796);
     			attr_dev(div2, "class", "text-center");
-    			add_location(div2, file_1, 415, 16, 13385);
+    			add_location(div2, file_1, 426, 16, 13750);
     			attr_dev(div3, "class", "col-md-6");
     			attr_dev(div3, "id", "status-sp");
     			set_style(div3, "margin-top", "20px");
-    			add_location(div3, file_1, 410, 12, 13244);
+    			add_location(div3, file_1, 421, 12, 13609);
     			attr_dev(div4, "class", "row");
-    			add_location(div4, file_1, 408, 8, 13177);
+    			add_location(div4, file_1, 419, 8, 13542);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div4, anchor);
@@ -3389,7 +3389,7 @@ var app = (function () {
     		block,
     		id: create_if_block$1.name,
     		type: "if",
-    		source: "(408:4) {#if show_status}",
+    		source: "(419:4) {#if show_status}",
     		ctx
     	});
 
@@ -3445,31 +3445,31 @@ var app = (function () {
     			div6 = element("div");
     			div5 = element("div");
     			attr_dev(div0, "class", "col-md-2");
-    			add_location(div0, file_1, 425, 8, 13666);
+    			add_location(div0, file_1, 436, 8, 14031);
     			attr_dev(span, "class", "badge badge-secondary");
     			span.hidden = "true";
     			attr_dev(span, "id", "fileName");
-    			add_location(span, file_1, 429, 20, 13827);
-    			add_location(h4, file_1, 428, 16, 13802);
+    			add_location(span, file_1, 440, 20, 14192);
+    			add_location(h4, file_1, 439, 16, 14167);
     			attr_dev(div1, "class", "text-center");
     			set_style(div1, "margin-top", "20px");
-    			add_location(div1, file_1, 427, 12, 13734);
+    			add_location(div1, file_1, 438, 12, 14099);
     			attr_dev(div2, "class", "col-md-6");
-    			add_location(div2, file_1, 426, 8, 13699);
+    			add_location(div2, file_1, 437, 8, 14064);
     			attr_dev(div3, "class", "col-md-2");
-    			add_location(div3, file_1, 437, 8, 14050);
+    			add_location(div3, file_1, 448, 8, 14415);
     			attr_dev(div4, "class", "row");
-    			add_location(div4, file_1, 424, 4, 13640);
+    			add_location(div4, file_1, 435, 4, 14005);
     			attr_dev(div5, "class", "pageContent");
     			div5.hidden = "true";
     			attr_dev(div5, "id", "page-content");
-    			add_location(div5, file_1, 442, 12, 14153);
+    			add_location(div5, file_1, 453, 12, 14518);
     			attr_dev(div6, "class", "col-md-10");
-    			add_location(div6, file_1, 441, 8, 14117);
+    			add_location(div6, file_1, 452, 8, 14482);
     			attr_dev(div7, "class", "row");
-    			add_location(div7, file_1, 440, 4, 14091);
+    			add_location(div7, file_1, 451, 4, 14456);
     			attr_dev(div8, "class", "tab-content");
-    			add_location(div8, file_1, 328, 0, 10272);
+    			add_location(div8, file_1, 339, 0, 10637);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -3721,6 +3721,9 @@ var app = (function () {
     			statusCode: {
     				400() {
     					window.location.href = "/obwebx";
+    				},
+    				500() {
+    					window.location.href = "/obwebx";
     				}
     			},
     			success(response) {
@@ -3817,6 +3820,14 @@ var app = (function () {
     			type: "GET",
     			datatype: "json",
     			contentType: "Application/json",
+    			statusCode: {
+    				400() {
+    					window.location.href = "/obwebx";
+    				},
+    				500() {
+    					window.location.href = "/obwebx";
+    				}
+    			},
     			success(response) {
     				$$invalidate(1, show_status = false);
 

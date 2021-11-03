@@ -190,6 +190,9 @@
                 400: function () {
                     window.location.href = "/obwebx";
                 },
+                500: function () {
+                    window.location.href = "/obwebx";
+                },
             },
             success: function (response) {
                 show_status = false;
@@ -288,6 +291,14 @@
             type: "GET",
             datatype: "json",
             contentType: "Application/json",
+            statusCode: {
+                400: function () {
+                    window.location.href = "/obwebx";
+                },
+                500: function () {
+                    window.location.href = "/obwebx";
+                },
+            },
             success: function (response) {
                 show_status = false;
                 if (response != "no-page") {
