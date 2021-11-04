@@ -12,6 +12,7 @@
     // Try to verify token in cookie,
     // if it's not valid we need to show up login modal
     function tryLogin(callback = null) {
+        console.log("tryLogin");
         jq.ajax({
             url: "/api/verify",
             type: "GET",
