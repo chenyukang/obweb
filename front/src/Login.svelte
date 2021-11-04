@@ -27,11 +27,10 @@
             },
             error: function (err) {
                 console.log("TryLogin error: ", err);
-                showLoginModal();
+                showLoginModal(err.status == 404);
             },
         });
     }
-
 
     function showLoginModal(init = false) {
         if (jq("#loginModal").length == 0) {
@@ -67,7 +66,6 @@
         });
     }
 </script>
-
 
 <div
     class="modal fade"
