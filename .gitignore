@@ -9,4 +9,4 @@ nohup.out
 update.sh
 *.Identifier
 __sapper__
-public/build
+front/public/build
