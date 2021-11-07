@@ -20,20 +20,14 @@
 <footer class="page-footer fixed-bottom font-small pt-5">
     <div class="container">
         <div class="row">
-            <div class="col-md-10">                
+            <div class="col-md-10">
                 <div style="float: center">
-                
-                    <button on:click={handleFooter} class="btn btn-sm"
-                    >Obweb</button>
-
-                    <button on:click={handleFooter} class="btn btn-primary btn-sm"
-                        >Day</button>
-                    <button on:click={handleFooter} class="btn btn-success btn-sm"
-                        >Find</button>
-                    <button on:click={handleFooter} class="btn btn-secondary btn-sm"
-                        >Rand</button>
-                    <button on:click={handleFooter} class="btn btn-info btn-sm"
-                        >Todo</button>
+                    <button on:click={handleFooter} class="btn btn-sm">Obweb</button>
+                    <button on:click={handleFooter} class="btn btn-primary btn-sm">Day</button>
+                    <button on:click={handleFooter} class="btn btn-success btn-sm">Find</button>
+                    <button on:click={handleFooter} class="btn btn-secondary btn-sm">Rand</button>
+                    <button on:click={handleFooter} class="btn btn-info btn-sm">Todo</button>
+                    <button on:click={handleFooter} class="btn btn-info btn-sm">Rss</button>
                 </div>
             </div>
         </div>

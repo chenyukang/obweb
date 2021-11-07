@@ -15,11 +15,13 @@
         if (cur_page == "day") {
             getDaily(date);
         } else if (cur_page == "rand") {
-            fetchPage("", true);
+            fetchPage("",  "rand");
         } else if (cur_page == "todo") {
-            fetchPage("Unsort/todo.md", false);
+            fetchPage("Unsort/todo.md");
         } else if (cur_page == "find") {
             search();
+        } else if (cur_page == "rss") {
+            fetchRss();
         }
     };
 
@@ -58,6 +60,7 @@
         let date_str = dateStr(date);
         fetchPage(`Daily/${date_str}.md`);
     }
+
     function preprocessImage(response) {
         let result = "";
         let left = response;
@@ -173,12 +176,12 @@
         });
     }
 
-    function fetchPage(url, rand_query = false) {
+    function fetchPage(url, query_type = "") {
         let date = new Date();
         let begin_date = new Date(date.setDate(date.getDate() - 1000));
         show_status = true;
         jq.ajax({
-            url: `/api/page?path=${url}&rand=${rand_query}`,
+            url: `/api/page?path=${url}&query_type=${query_type}`,
             type: "GET",
             datatype: "json",
             contentType: "Application/json",
@@ -226,12 +229,17 @@
                 let url = e.target.innerText;
                 console.log(e.target);
                 if (e.target.href && e.target.href.indexOf("#ob#") != -1) {
-                    fetchPage(url + ".md", false);
-                } else if (e.target.href == null ||e.target.href.indexOf("##") != -1) {
+                    fetchPage(url + ".md");
+                }
+                if (e.target.href && e.target.href.indexOf("#rss#") != -1) {
+                    fetchPage(url, "rss");
+                } else if (
+                    e.target.href == null ||
+                    e.target.href.indexOf("##") != -1
+                ) {
                     e.preventDefault();
                     search_input = url;
-                    if (cur_page == "find")
-                        search();
+                    if (cur_page == "find") search();
                     else cur_page = "find";
                 }
             });
@@ -320,6 +328,41 @@
         });
     }
 
+    function fetchRss() {
+        show_status = true;
+        jq.ajax({
+            url: "/api/rss",
+            type: "GET",
+            datatype: "json",
+            contentType: "Application/json",
+            statusCode: {
+                400: function () {
+                    window.location.href = "/obwebx";
+                },
+                500: function () {
+                    window.location.href = "/obwebx";
+                },
+            },
+            success: function (response) {
+                show_status = false;
+                if (response != "no-page") {
+                    jq("#page-content").html(renderMdToHtml(response));
+                    jq("#page-content").prop("hidden", false);
+                    jq("#fileName").prop("hidden", true);
+                    jq("#pageNavBar").prop("hidden", true);
+                } else {
+                    jq("#page-content").html(
+                        "<h3>No Page</h3>" + " " + local_date
+                    );
+                }
+            },
+            error: function (err) {
+                show_status = false;
+                return err;
+            },
+        });
+    }
+
     function highlight(keyword) {
         let markInstance = new Mark(jq("#page-content").get(0));
         let options = {};
@@ -371,7 +414,19 @@
                 >
             </div>
         </div>
-    {:else if (cur_page = "find")}
+    {:else if cur_page == "rss"}
+        <div class="row card sticky-top" style="margin-top: 20px; border: 0;">
+            <div class="col-md-10 text-right" hidden="true" id="pageNavBar">
+                <button
+                    type="button"
+                    class="btn btn-info"
+                    style="float: left"
+                    id="backBtn"
+                    on:click={fetchRss}>Back</button
+                >
+            </div>
+        </div>
+    {:else if cur_page == "find"}
         <div class="row">
             <div class="col-md-10">
                 <div class="input-group" style="margin-top: 30px">
@@ -419,14 +474,10 @@
     {#if show_status}
         <div class="row">
             <div class="col-md-2" />
-            <div
-                class="col-md-6"
-                id="status-sp"
-                style="margin-top: 20px;"
-            >
+            <div class="col-md-6" id="status-sp" style="margin-top: 20px;">
                 <div class="text-center">
                     <div class="spinner-border text-success" role="status">
-                        <span class="sr-only"></span>
+                        <span class="sr-only" />
                     </div>
                 </div>
             </div>

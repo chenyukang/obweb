@@ -34,9 +34,12 @@ struct SearchQuery {
 }
 
 #[derive(Debug, Deserialize)]
+struct RssQuery {}
+
+#[derive(Debug, Deserialize)]
 struct PageQuery {
     path: String,
-    rand: bool,
+    query_type: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -46,7 +49,10 @@ struct Mark {
 
 fn ensure_path(path: &String) -> Result<String, &'static str> {
     let cleaned_path = path_clean::clean(path);
-    if !(cleaned_path.starts_with("ob/") && cleaned_path.ends_with(".md")) {
+    println!("ensure_path: {:?}", cleaned_path);
+    if !((cleaned_path.starts_with("ob/") && cleaned_path.ends_with(".md"))
+        || (cleaned_path.starts_with("rss-reader/rss")))
+    {
         return Err("Invalid path");
     }
     Ok(cleaned_path)
@@ -149,7 +155,7 @@ fn page_post(req: &Request) -> Result<(), &'static str> {
 
 fn page_query(query: &PageQuery) -> Result<(String, String), &'static str> {
     std::thread::spawn(|| git::git_pull());
-    if query.rand {
+    if query.query_type == "rand" {
         let mut files = vec![];
         for entry in glob("./ob/**/*.md").expect("failed") {
             match entry {
@@ -168,6 +174,13 @@ fn page_query(query: &PageQuery) -> Result<(String, String), &'static str> {
                 return Ok((path.to_string().replace("ob/", ""), content));
             }
         }
+    } else if query.query_type == "rss" {
+        let path = ensure_path(&format!("./rss-reader/rss/{}.html", query.path))?;
+        if !Path::new(&path).exists() {
+            return Ok((String::from("NoPage"), String::new()));
+        }
+        let data = fs::read_to_string(&path).unwrap();
+        return Ok((query.path.clone(), data));
     } else {
         let path = ensure_path(&format!("./ob/{}", query.path))?;
         if !Path::new(&path).exists() {
@@ -226,6 +239,40 @@ fn search_query(req: &SearchQuery) -> Result<String, &'static str> {
 
     for (f, _) in files[..max_len].iter() {
         let link = format!("\n- [{}](#ob#)", f.replace(".md", "").replace("ob/", ""));
+        if !res.contains(&link) {
+            res += &link;
+        }
+    }
+    Ok(res)
+}
+
+fn rss_query() -> Result<String, &'static str> {
+    std::thread::spawn(|| git::git_pull());
+    let mut res = String::new();
+    let mut files = vec![];
+    for entry in glob("./rss-reader/rss/**/*.html").expect("failed") {
+        match entry {
+            Ok(path) => {
+                println!("{:?}", path.display());
+                files.push((format!("{}", path.display()), fs::metadata(path).unwrap()));
+            }
+            Err(e) => println!("{:?}", e),
+        }
+    }
+
+    files.sort_by(|(_, a), (_, b)| {
+        b.modified()
+            .unwrap()
+            .partial_cmp(&a.modified().unwrap())
+            .unwrap()
+    });
+
+    let max_len = usize::min(100 as usize, files.len());
+    for (f, _) in files[..max_len].iter() {
+        let link = format!(
+            "\n- [{}](#rss#)",
+            f.replace(".html", "").replace("rss-reader/rss", "")
+        );
         if !res.contains(&link) {
             res += &link;
         }
@@ -366,6 +413,21 @@ pub async fn run_server(port: u16) {
             }
         });
     let routes = routes.or(search);
+
+    let rss = warp::path!("api" / "rss")
+        .and(warp::get())
+        .and(auth_validation())
+        .untuple_one()
+        .and(warp::query::<RssQuery>())
+        .map(|_query: RssQuery| {
+            let res = rss_query();
+            if res.is_ok() {
+                format!("{}", res.unwrap())
+            } else {
+                format!("no-page")
+            }
+        });
+    let routes = routes.or(rss);
 
     let mark = warp::path!("api" / "mark")
         .and(warp::post())
