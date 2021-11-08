@@ -66,18 +66,25 @@ fn preprocess_image(content: &str) -> String {
 }
 
 fn fetch_page(url: &str) -> String {
+    println!("fetch_page: {:?}", url);
     let resp = reqwest::blocking::get(url);
     if resp.is_ok() {
-        let mut content = String::from("");
         let res = resp.unwrap().text().unwrap();
+        let mut content = res.clone();
         let document = Html::parse_document(&res);
         let article = extract(&document, "article");
         if article.is_some() {
             content = article.unwrap();
+        } else {
+            let body = extract(&document, "body");
+            if body.is_some() {
+                content = body.unwrap();
+            }
         }
         content = preprocess_image(&content);
         content
     } else {
+        println!("error: {:?}", resp);
         String::from("")
     }
 }
@@ -85,10 +92,11 @@ fn fetch_page(url: &str) -> String {
 fn main() {
     //let resp = reqwest::blocking::get("https://coderscat.com/atom.xml");
     //let resp = reqwest::blocking::get("https://draveness.me/feed.xml");
-    let resp = reqwest::blocking::get("https://coolshell.cn/feed");
+    //let resp = reqwest::blocking::get("https://coolshell.cn/feed");
     //let resp = reqwest::blocking::get("https://blog.rust-lang.org/feed.xml");
 
     //let resp = reqwest::blocking::get("https://blog.codinghorror.com/rss/");
+    let resp = reqwest::blocking::get("https://www.elidedbranches.com/rss.xml");
     let body = resp.unwrap().text();
     if body.is_ok() {
         let feed = parser::parse(body.unwrap().as_bytes()).unwrap();
@@ -118,7 +126,7 @@ fn main() {
                 content: content.clone(),
                 time: published_time.to_rfc2822(),
             };
-            println!("link: {}", link);
+            println!("link: {} {}", link, content.len());
             //let json = serde_json::to_string(&bentry);
             fs::write(&path, &content).unwrap();
         }
