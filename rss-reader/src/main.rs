@@ -1,3 +1,4 @@
+use clap::App;
 use feed_rs::parser;
 use http::Uri;
 use scraper::{Html, Selector};
@@ -6,10 +7,13 @@ use std::fs;
 
 /// An item within a feed
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-struct Bentry {
+struct Page {
     pub title: String,
-    pub content: String,
-    pub time: String,
+    pub publish_datetime: String,
+    pub link: String,
+    pub source: String,
+    pub website: String,
+    pub readed: bool,
 }
 
 fn extract(html: &Html, keyword: &str) -> Option<String> {
@@ -68,72 +72,114 @@ fn preprocess_image(content: &str) -> String {
 
 fn fetch_page(url: &str) -> String {
     println!("fetch_page: {:?}", url);
+    if url.is_empty() {
+        return String::default();
+    };
     let resp = reqwest::blocking::get(url);
     if resp.is_ok() {
         let res = resp.unwrap().text().unwrap();
         let document = Html::parse_document(&res);
         let article = extract(&document, "article");
-        let mut content = if article.is_some() {
-            article.unwrap()
+        if let Some(r) = article {
+            r
         } else {
             extract(&document, "body").unwrap_or(res.clone())
-        };
-        content = preprocess_image(&content);
-        content
+        }
     } else {
         println!("error: {:?}", resp);
         String::from("")
     }
 }
 
-fn fetch_feed(feed: &str) -> Option<i32> {
+fn fetch_feed(feed: &str, pages: &mut Vec<Page>) -> Option<i32> {
+    println!("fetch_feed: {:?}", feed);
     let resp = reqwest::blocking::get(feed);
+    if resp.is_err() {
+        return None;
+    }
     let body = resp.unwrap().text();
     if body.is_err() {
         return None;
     }
-    let feed = parser::parse(body.unwrap().as_bytes()).unwrap();
-    println!("title: {:?}", feed.title);
-    //println!("feed: {:?}", feed);
+    let feed_resp = parser::parse(body.unwrap().as_bytes()).unwrap();
+    println!("title: {:?}", feed_resp.title);
+    let website = if let Some(l) = feed_resp.links.get(0) {
+        l.href.clone()
+    } else {
+        String::default()
+    };
     let mut succ_count = 0;
-    for entry in feed.entries {
-        let entry_title = entry.title.unwrap();
-        let _published_time = entry.published.unwrap();
-        let link = if entry.links.len() > 0 {
-            let l = &entry.links[0];
+    for entry in feed_resp.entries {
+        let entry_title = entry.title.unwrap().content;
+        let published_time = entry.published.unwrap();
+        let link = if let Some(l) = entry.links.get(0) {
             l.href.clone()
         } else {
-            String::from("")
+            String::default()
         };
-        let mut content = String::new();
-        if entry.content.is_some() {
-            content = preprocess_image(&entry.content.unwrap().body.unwrap())
-        } else if link != "" {
-            content = fetch_page(&link)
+        println!("link: {}", link);
+        let page_exist = pages
+            .iter()
+            .any(|p| p.link == link && p.title == entry_title);
+
+        if page_exist {
+            println!("link: {} cached", link);
+            continue;
+        }
+        let mut content = if let Some(ct) = entry.content {
+            ct.body.unwrap()
+        } else {
+            fetch_page(&link)
         };
-        let path = format!("./rss/{}.html", entry_title.content);
-        println!("link: {} {}", link, content.len());
+
+        let path = format!("./rss/{}.html", entry_title);
+        content = preprocess_image(&content);
+        let page = Page {
+            link: link.clone(),
+            website: website.clone(),
+            publish_datetime: published_time.to_string(),
+            title: entry_title.clone(),
+            readed: false,
+            source: feed.to_string(),
+        };
+
         if content.len() > 0 {
             fs::write(&path, &content).unwrap();
+            pages.push(page.clone());
+            let dump_json = serde_json::to_string(&pages);
+            if dump_json.is_ok() {
+                let _ = fs::write("./db/pages.json", &dump_json.unwrap());
+            }
             succ_count += 1;
         } else {
-            println!("error: {}", entry_title.content);
+            println!("error: {}", entry_title);
         }
     }
     Some(succ_count)
 }
 
+fn update_rss() {
+    let page_buf = fs::read_to_string("./db/pages.json").unwrap_or(String::from("[]"));
+    let mut pages: Vec<Page> = serde_json::from_str(&page_buf).unwrap();
+    let rss_buf = fs::read_to_string("./db/config").unwrap();
+    let rss = rss_buf.split("\n").collect::<Vec<_>>();
+    for feed in rss {
+        let _ = fetch_feed(feed, &mut pages);
+    }
+}
+
 fn main() {
-    //let resp = reqwest::blocking::get("https://coderscat.com/atom.xml");
-    //let resp = reqwest::blocking::get("https://draveness.me/feed.xml");
-    //let resp = reqwest::blocking::get("https://coolshell.cn/feed");
-    //let resp = reqwest::blocking::get("https://blog.rust-lang.org/feed.xml");
+    let matches = App::new("Rss-reader")
+        .version("0.1")
+        .author("yukang <moorekang@gmail.com>")
+        .about("Rss Reader in Rust")
+        .arg("-u, --update    'Update and fetch rss'")
+        .get_matches();
 
-    // https://www.elidedbranches.com/rss.xml
-
-    //let feed = "https://blog.codinghorror.com/rss/";
-    let feed = "https://blog.janestreet.com/feed.xml";
-    let _ = fetch_feed(feed);
+    let update = matches.occurrences_of("update");
+    if update > 0 {
+        update_rss();
+    }
 }
 
 #[cfg(test)]
