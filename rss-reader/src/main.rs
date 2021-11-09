@@ -94,7 +94,7 @@ fn fetch_feed(feed: &str) -> Option<i32> {
     let mut succ_count = 0;
     for entry in feed.entries {
         let entry_title = entry.title.unwrap();
-        let published_time = entry.published.unwrap();
+        let _published_time = entry.published.unwrap();
         let link = if entry.links.len() > 0 {
             let l = &entry.links[0];
             l.href.clone()
@@ -108,12 +108,6 @@ fn fetch_feed(feed: &str) -> Option<i32> {
             content = fetch_page(&link)
         };
         let path = format!("./rss/{}.html", entry_title.content);
-        let _bentry = Bentry {
-            title: entry_title.content.clone(),
-            content: content.clone(),
-            time: published_time.to_rfc2822(),
-        };
-
         println!("link: {} {}", link, content.len());
         if content.len() > 0 {
             fs::write(&path, &content).unwrap();
