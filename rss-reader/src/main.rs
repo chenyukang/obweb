@@ -13,15 +13,16 @@ struct Bentry {
 }
 
 fn extract(html: &Html, keyword: &str) -> Option<String> {
-    let article_select = Selector::parse(keyword).unwrap();
+    let select = Selector::parse(keyword).unwrap();
     //If we have only one article class, use it
-    let articles = html
-        .select(&article_select)
+    let mut elems = html
+        .select(&select)
         .into_iter()
         .map(|it| it.html())
         .collect::<Vec<_>>();
-    if articles.len() == 1 as usize {
-        return Some(articles[0].clone());
+    elems.sort_by(|a, b| b.len().cmp(&a.len()));
+    if elems.len() > 0 {
+        return Some(elems[0].clone());
     }
     None
 }
@@ -70,10 +71,13 @@ fn fetch_page(url: &str) -> String {
     let resp = reqwest::blocking::get(url);
     if resp.is_ok() {
         let res = resp.unwrap().text().unwrap();
-        let mut content = res.clone();
         let document = Html::parse_document(&res);
-        content = extract(&document, "article").unwrap_or(content);
-        content = extract(&document, "body").unwrap_or(content);
+        let article = extract(&document, "article");
+        let mut content = if article.is_some() {
+            article.unwrap()
+        } else {
+            extract(&document, "body").unwrap_or(res.clone())
+        };
         content = preprocess_image(&content);
         content
     } else {
@@ -127,7 +131,8 @@ fn main() {
 
     // https://www.elidedbranches.com/rss.xml
 
-    let feed = "https://blog.codinghorror.com/rss/";
+    //let feed = "https://blog.codinghorror.com/rss/";
+    let feed = "https://blog.janestreet.com/feed.xml";
     let _ = fetch_feed(feed);
 }
 
@@ -150,17 +155,34 @@ mod tests {
     }
 
     #[test]
-    fn test_article_none() {
+    fn test_article_in_body() {
+        let html = r#"
+        <!DOCTYPE html>
+        <body>
+        <meta charset="utf-8">
+        <article>Hello, world!</article>
+        <h1 class="foo">Hello, <i>world!</i></h1>
+        </body>
+    "#;
+        let document = Html::parse_document(&html);
+        let article = extract(&document, "article");
+        assert!(article.is_some());
+        assert_eq!(article.unwrap(), "<article>Hello, world!</article>");
+    }
+
+    #[test]
+    fn test_articles() {
         let html = r#"
         <!DOCTYPE html>
         <meta charset="utf-8">
         <article>Hello, world!</article>
-        <article>Hello, world!</article>
+        <article>Hello, world now!</article>
         <h1 class="foo">Hello, <i>world!</i></h1>
     "#;
         let document = Html::parse_document(&html);
         let article = extract(&document, "article");
-        assert!(article.is_none());
+        assert!(!article.is_none());
+        assert_eq!(article.unwrap(), "<article>Hello, world now!</article>");
     }
 
     #[test]
@@ -176,5 +198,12 @@ mod tests {
         let converted_image = convert_image(img);
         assert!(converted_image.is_some());
         assert!(processed.contains(&converted_image.unwrap()));
+    }
+
+    #[test]
+    fn test_fetch_page() {
+        let url = "https://blog.janestreet.com/ocaml-4-03-everything-else/";
+        let content = fetch_page(url);
+        assert!(!content.contains("<body>"));
     }
 }
