@@ -82,48 +82,58 @@ fn fetch_page(url: &str) -> String {
     }
 }
 
+fn fetch_feed(feed: &str) -> Option<i32> {
+    let resp = reqwest::blocking::get(feed);
+    let body = resp.unwrap().text();
+    if body.is_err() {
+        return None;
+    }
+    let feed = parser::parse(body.unwrap().as_bytes()).unwrap();
+    println!("title: {:?}", feed.title);
+    println!("feed: {:?}", feed);
+    let mut succ_count = 0;
+    for entry in feed.entries {
+        let entry_title = entry.title.unwrap();
+        let published_time = entry.published.unwrap();
+        let link = if entry.links.len() > 0 {
+            let l = &entry.links[0];
+            l.href.clone()
+        } else {
+            String::from("")
+        };
+        let content = if entry.content.is_some() {
+            preprocess_image(&entry.content.unwrap().body.unwrap())
+        } else {
+            if link != "" {
+                fetch_page(&link)
+            } else {
+                String::from("")
+            }
+        };
+        let path = format!("./rss/{}.html", entry_title.content);
+        let _bentry = Bentry {
+            title: entry_title.content,
+            content: content.clone(),
+            time: published_time.to_rfc2822(),
+        };
+        println!("link: {} {}", link, content.len());
+        //let json = serde_json::to_string(&bentry);
+        fs::write(&path, &content).unwrap();
+        succ_count += 1;
+    }
+    Some(succ_count)
+}
+
 fn main() {
     //let resp = reqwest::blocking::get("https://coderscat.com/atom.xml");
     //let resp = reqwest::blocking::get("https://draveness.me/feed.xml");
     //let resp = reqwest::blocking::get("https://coolshell.cn/feed");
     //let resp = reqwest::blocking::get("https://blog.rust-lang.org/feed.xml");
 
-    //let resp = reqwest::blocking::get("https://blog.codinghorror.com/rss/");
-    let resp = reqwest::blocking::get("https://www.elidedbranches.com/rss.xml");
-    let body = resp.unwrap().text();
-    if body.is_ok() {
-        let feed = parser::parse(body.unwrap().as_bytes()).unwrap();
-        println!("title: {:?}", feed.title);
-        println!("feed: {:?}", feed);
-        for entry in feed.entries {
-            let entry_title = entry.title.unwrap();
-            let published_time = entry.published.unwrap();
-            let link = if entry.links.len() > 0 {
-                let l = &entry.links[0];
-                l.href.clone()
-            } else {
-                String::from("")
-            };
-            let content = if entry.content.is_some() {
-                preprocess_image(&entry.content.unwrap().body.unwrap())
-            } else {
-                if link != "" {
-                    fetch_page(&link)
-                } else {
-                    String::from("")
-                }
-            };
-            let path = format!("./rss/{}.html", entry_title.content);
-            let _bentry = Bentry {
-                title: entry_title.content,
-                content: content.clone(),
-                time: published_time.to_rfc2822(),
-            };
-            println!("link: {} {}", link, content.len());
-            //let json = serde_json::to_string(&bentry);
-            fs::write(&path, &content).unwrap();
-        }
-    }
+    // https://www.elidedbranches.com/rss.xml
+
+    let feed = "https://blog.codinghorror.com/rss/";
+    let _ = fetch_feed(feed);
 }
 
 #[cfg(test)]
