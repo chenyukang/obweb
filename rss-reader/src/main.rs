@@ -90,7 +90,7 @@ fn fetch_feed(feed: &str) -> Option<i32> {
     }
     let feed = parser::parse(body.unwrap().as_bytes()).unwrap();
     println!("title: {:?}", feed.title);
-    println!("feed: {:?}", feed);
+    //println!("feed: {:?}", feed);
     let mut succ_count = 0;
     for entry in feed.entries {
         let entry_title = entry.title.unwrap();
@@ -101,25 +101,26 @@ fn fetch_feed(feed: &str) -> Option<i32> {
         } else {
             String::from("")
         };
-        let content = if entry.content.is_some() {
-            preprocess_image(&entry.content.unwrap().body.unwrap())
-        } else {
-            if link != "" {
-                fetch_page(&link)
-            } else {
-                String::from("")
-            }
+        let mut content = String::new();
+        if entry.content.is_some() {
+            content = preprocess_image(&entry.content.unwrap().body.unwrap())
+        } else if link != "" {
+            content = fetch_page(&link)
         };
         let path = format!("./rss/{}.html", entry_title.content);
         let _bentry = Bentry {
-            title: entry_title.content,
+            title: entry_title.content.clone(),
             content: content.clone(),
             time: published_time.to_rfc2822(),
         };
+
         println!("link: {} {}", link, content.len());
-        //let json = serde_json::to_string(&bentry);
-        fs::write(&path, &content).unwrap();
-        succ_count += 1;
+        if content.len() > 0 {
+            fs::write(&path, &content).unwrap();
+            succ_count += 1;
+        } else {
+            println!("error: {}", entry_title.content);
+        }
     }
     Some(succ_count)
 }
