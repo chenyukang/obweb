@@ -25,8 +25,7 @@
     <div style="float: right">
         <button on:click={handleNav} class="btn btn-primary btn-sm">Day</button>
         <button on:click={handleNav} class="btn btn-success btn-sm">Find</button>
-        <button on:click={handleNav} class="btn btn-secondary btn-sm">Rand</button>
+        <button on:click={handleNav} class="btn btn-secondary btn-sm">Rss</button>
         <button on:click={handleNav} class="btn btn-info btn-sm">Todo</button>
-        <button on:click={handleNav} class="btn btn-info btn-sm">Rss</button>
     </div>
 </nav>

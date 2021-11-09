@@ -6,6 +6,7 @@ use glob::glob;
 use path_clean;
 use rand::seq::SliceRandom;
 use serde::Deserialize;
+use serde::Serialize;
 use std::fs;
 use std::fs::File;
 use std::net::Ipv4Addr;
@@ -153,7 +154,7 @@ fn page_post(req: &Request) -> Result<(), &'static str> {
     Ok(())
 }
 
-fn page_query(query: &PageQuery) -> Result<(String, String), &'static str> {
+fn page_query(query: &PageQuery) -> Result<warp::reply::Json, &'static str> {
     std::thread::spawn(|| git::git_pull());
     if query.query_type == "rand" {
         let mut files = vec![];
@@ -171,23 +172,35 @@ fn page_query(query: &PageQuery) -> Result<(String, String), &'static str> {
             let content = fs::read_to_string(&path).unwrap_or(String::new());
             if content.len() > 4 && !path.contains(".excalidraw.") {
                 // too short content tend to be meannless in random reading
-                return Ok((path.to_string().replace("ob/", ""), content));
+                return Ok(warp::reply::json(&(
+                    path.to_string().replace("ob/", ""),
+                    content,
+                )));
             }
         }
     } else if query.query_type == "rss" {
         let path = ensure_path(&format!("./rss-reader/rss/{}.html", query.path))?;
         if !Path::new(&path).exists() {
-            return Ok((String::from("NoPage"), String::new()));
+            return Ok(warp::reply::json(&(String::from("NoPage"), String::new())));
         }
         let data = fs::read_to_string(&path).unwrap();
-        return Ok((query.path.clone(), data));
+        let page_buf =
+            fs::read_to_string("./rss-reader/db/pages.json").unwrap_or(String::from("[]"));
+        let pages: Vec<Page> = serde_json::from_str(&page_buf).unwrap();
+        let page = pages.iter().find(|&p| p.title == query.path);
+        let link = if let Some(p) = page {
+            p.link.clone()
+        } else {
+            "".to_string()
+        };
+        return Ok(warp::reply::json(&(query.path.clone(), data, link)));
     } else {
         let path = ensure_path(&format!("./ob/{}", query.path))?;
         if !Path::new(&path).exists() {
-            return Ok((String::from("NoPage"), String::new()));
+            return Ok(warp::reply::json(&(String::from("NoPage"), String::new())));
         }
         let data = fs::read_to_string(&path).unwrap();
-        return Ok((query.path.clone(), data));
+        return Ok(warp::reply::json(&(path.to_string(), data)));
     }
 }
 
@@ -246,33 +259,34 @@ fn search_query(req: &SearchQuery) -> Result<String, &'static str> {
     Ok(res)
 }
 
+/// An item within a feed
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+struct Page {
+    pub title: String,
+    pub publish_datetime: String,
+    pub link: String,
+    pub source: String,
+    pub website: String,
+    pub readed: bool,
+}
+
 fn rss_query() -> Result<String, &'static str> {
     std::thread::spawn(|| git::git_pull());
     let mut res = String::new();
-    let mut files = vec![];
-    for entry in glob("./rss-reader/rss/**/*.html").expect("failed") {
-        match entry {
-            Ok(path) => {
-                println!("{:?}", path.display());
-                files.push((format!("{}", path.display()), fs::metadata(path).unwrap()));
-            }
-            Err(e) => println!("{:?}", e),
-        }
-    }
+    let page_buf = fs::read_to_string("./rss-reader/db/pages.json").unwrap_or(String::from("[]"));
+    let mut pages: Vec<Page> = serde_json::from_str(&page_buf).unwrap();
 
-    files.sort_by(|(_, a), (_, b)| {
-        b.modified()
+    pages.sort_by(|a, b| {
+        b.publish_datetime
+            .parse::<DateTime<Local>>()
             .unwrap()
-            .partial_cmp(&a.modified().unwrap())
+            .partial_cmp(&a.publish_datetime.parse::<DateTime<Local>>().unwrap())
             .unwrap()
     });
 
-    let max_len = usize::min(100 as usize, files.len());
-    for (f, _) in files[..max_len].iter() {
-        let link = format!(
-            "\n- [{}](#rss#)",
-            f.replace(".html", "").replace("rss-reader/rss", "")
-        );
+    let max_len = usize::min(100 as usize, pages.len());
+    for page in pages[..max_len].iter() {
+        let link = format!("\n- [{}](#rss#)", page.title);
         if !res.contains(&link) {
             res += &link;
         }
@@ -395,7 +409,7 @@ pub async fn run_server(port: u16) {
         .and(warp::query::<PageQuery>())
         .map(|query: PageQuery| {
             let res = page_query(&query);
-            warp::reply::json(&res.unwrap())
+            res.unwrap()
         });
     let routes = routes.or(page);
 

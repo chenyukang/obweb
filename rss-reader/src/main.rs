@@ -46,7 +46,7 @@ fn convert_image(uri: &str) -> Option<String> {
     None
 }
 
-fn preprocess_image(content: &str) -> String {
+fn preprocess_image(content: &str, website: &str) -> String {
     let html = Html::parse_document(content);
     let select = Selector::parse("img").unwrap();
     let imgs = html.select(&select);
@@ -54,15 +54,17 @@ fn preprocess_image(content: &str) -> String {
     for img in imgs {
         let node = img.value();
         let src = node.attr("src");
-        if src.is_some() {
-            let r = src.unwrap().parse::<Uri>();
+        if let Some(url) = src {
+            let full_url = if url.starts_with("http://") || url.starts_with("https://") {
+                url.to_string()
+            } else {
+                format!("{}/{}", website, url)
+            };
+            let r = full_url.parse::<Uri>();
             if r.is_ok() {
                 let data = convert_image(&r.unwrap().to_string());
-                if data.is_some() {
-                    result = result.replace(
-                        src.unwrap(),
-                        &format!("data:image/jpg;base64,{}", data.unwrap()),
-                    );
+                if let Some(d) = data {
+                    result = result.replace(&src.unwrap(), &format!("data:image/jpg;base64,{}", d));
                 }
             }
         }
@@ -133,7 +135,7 @@ fn fetch_feed(feed: &str, pages: &mut Vec<Page>) -> Option<i32> {
         };
 
         let path = format!("./rss/{}.html", entry_title);
-        content = preprocess_image(&content);
+        content = preprocess_image(&content, &website);
         let page = Page {
             link: link.clone(),
             website: website.clone(),
@@ -238,7 +240,7 @@ mod tests {
             "<img src=\"{}\" alt=\"moores-law\" style=\"width: 50%; height: 100%;\">",
             img
         );
-        let processed = preprocess_image(&html);
+        let processed = preprocess_image(&html, "");
         assert_eq!(processed.find(".png"), None);
         assert!(processed.find("base64").is_some());
         let converted_image = convert_image(img);

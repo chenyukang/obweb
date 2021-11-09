@@ -8,8 +8,10 @@
     let file = "";
     let content = "";
     let show_status = false;
+    let show_rsslink = false;
     let search_input = "";
     let in_edit = false;
+    let rsslink = "";
 
     export const refresh = (cur) => {
         if (cur_page == "day") {
@@ -180,6 +182,7 @@
         let date = new Date();
         let begin_date = new Date(date.setDate(date.getDate() - 1000));
         show_status = true;
+        show_rsslink = false;
         jq.ajax({
             url: `/api/page?path=${url}&query_type=${query_type}`,
             type: "GET",
@@ -201,6 +204,7 @@
                 show_status = false;
                 file = response[0];
                 content = response[1];
+                rsslink = response[2];
                 if (file != "NoPage") {
                     localStorage.setItem("page-content", content);
                     localStorage.setItem("file", file);
@@ -209,6 +213,10 @@
                     jq("#pageNavBar").prop("hidden", false);
                     jq("#page-content").html(renderMdToHtml(content));
                     jq("#page-content").prop("hidden", false);
+                    if (rsslink != undefined && rsslink != "") {
+                        jq("#rsslink").prop("hidden", false);
+                        show_rsslink = true;
+                    }
                     setPageDefault();
                 } else {
                     jq("#page-content").html("<h3>No Page</h3>");
@@ -294,6 +302,7 @@
 
     function search() {
         show_status = true;
+        show_rsslink = false;
         jq.ajax({
             url: "/api/search?keyword=" + search_input,
             type: "GET",
@@ -330,6 +339,7 @@
 
     function fetchRss() {
         show_status = true;
+        show_rsslink = false;
         jq.ajax({
             url: "/api/rss",
             type: "GET",
@@ -491,6 +501,7 @@
                 <h4>
                     <span
                         class="badge badge-secondary"
+                        style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;"
                         hidden="true"
                         id="fileName"
                     />
@@ -499,6 +510,14 @@
         </div>
         <div class="col-md-2" />
     </div>
+
+    {#if show_rsslink}
+    <div class="row">
+        <div class="col-md-10">
+        <a href={rsslink} id="rsslink">{rsslink}</a>
+        </div>
+    </div>
+    {/if}
 
     <div class="row">
         <div class="col-md-10">
