@@ -72,15 +72,8 @@ fn fetch_page(url: &str) -> String {
         let res = resp.unwrap().text().unwrap();
         let mut content = res.clone();
         let document = Html::parse_document(&res);
-        let article = extract(&document, "article");
-        if article.is_some() {
-            content = article.unwrap();
-        } else {
-            let body = extract(&document, "body");
-            if body.is_some() {
-                content = body.unwrap();
-            }
-        }
+        content = extract(&document, "article").unwrap_or(content);
+        content = extract(&document, "body").unwrap_or(content);
         content = preprocess_image(&content);
         content
     } else {
@@ -167,11 +160,16 @@ mod tests {
 
     #[test]
     fn test_process_image() {
-        let html = r#"
-        <img src="https://img.draveness.me/2020-10-24-16035525564314/moores-law.png" alt="moores-law" style="width: 50%; height: 100%;">
-        "#;
-        let processed = preprocess_image(html);
-        println!("processed: {:?}", processed);
+        let img = "https://coderscat.com/css/images/logo.png";
+        let html = format!(
+            "<img src=\"{}\" alt=\"moores-law\" style=\"width: 50%; height: 100%;\">",
+            img
+        );
+        let processed = preprocess_image(&html);
         assert_eq!(processed.find(".png"), None);
+        assert!(processed.find("base64").is_some());
+        let converted_image = convert_image(img);
+        assert!(converted_image.is_some());
+        assert!(processed.contains(&converted_image.unwrap()));
     }
 }
