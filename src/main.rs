@@ -50,7 +50,6 @@ struct Mark {
 
 fn ensure_path(path: &String) -> Result<String, &'static str> {
     let cleaned_path = path_clean::clean(path);
-    println!("ensure_path: {:?}", cleaned_path);
     if !((cleaned_path.starts_with("ob/") && cleaned_path.ends_with(".md"))
         || (cleaned_path.starts_with("rss-reader/rss")))
     {

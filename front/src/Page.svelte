@@ -184,7 +184,7 @@
         show_status = true;
         show_rsslink = false;
         jq.ajax({
-            url: `/api/page?path=${url}&query_type=${query_type}`,
+            url: `/api/page?path=${encodeURIComponent(url)}&query_type=${query_type}`,
             type: "GET",
             datatype: "json",
             contentType: "Application/json",
@@ -238,7 +238,8 @@
             .off("click")
             .on("click", "a", function (e) {
                 let url = e.target.innerText;
-                console.log(e.target);
+                //console.log("url : ", url);
+                //console.log(e.target);
                 if (e.target.href && e.target.href.indexOf("#ob#") != -1) {
                     fetchPage(url + ".md");
                 }
@@ -262,8 +263,8 @@
         });
 
         window.onscroll = function () {
-            console.log(window.pageYOffset);
-            console.log(file);
+            //console.log(window.pageYOffset);
+            //console.log(file);
             localStorage.setItem("pos_" + file, window.pageYOffset);
         };
     }
