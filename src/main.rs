@@ -214,7 +214,7 @@ fn page_query(query: &PageQuery) -> Result<warp::reply::Json, &'static str> {
 }
 
 fn page_update(update: &Update) -> Result<(), &'static str> {
-    let path = ensure_path(&format!("./ob/{}", update.file.to_string()))?;
+    let path = ensure_path(&update.file.to_string())?;
     fs::write(path, update.content.to_string()).expect("Unable to write file");
     std::thread::spawn(|| git::git_sync());
     Ok(())
@@ -222,8 +222,6 @@ fn page_update(update: &Update) -> Result<(), &'static str> {
 
 fn search_query(req: &SearchQuery) -> Result<String, &'static str> {
     std::thread::spawn(|| git::git_pull());
-
-    let mut res = String::new();
     let mut files = vec![];
     let search_key = req.keyword.to_ascii_lowercase();
 
@@ -259,14 +257,14 @@ fn search_query(req: &SearchQuery) -> Result<String, &'static str> {
         files.len()
     };
 
-    for (f, _) in files[..max_len].iter() {
-        let f = f.replace(".md", "").replace("ob/", "");
-        let link = format!("\n- [{}](#ob/{})", f, f);
-        if !res.contains(&link) {
-            res += &link;
-        }
-    }
-    Ok(res)
+    let res: Vec<String> = files[..max_len]
+        .iter()
+        .map(|(f, _)| {
+            let f = f.replace(".md", "").replace("ob/", "");
+            format!("<li><a href=\"#ob/{}\">{}</a></li>", f, f)
+        })
+        .collect();
+    Ok(res.join(""))
 }
 
 /// An item within a feed
