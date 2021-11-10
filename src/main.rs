@@ -178,17 +178,27 @@ fn page_query(query: &PageQuery) -> Result<warp::reply::Json, &'static str> {
             }
         }
     } else if query.query_type == "rss" {
+        let db = "./rss-reader/db/pages.json";
         let path = ensure_path(&format!("./rss-reader/rss/{}.html", query.path))?;
         if !Path::new(&path).exists() {
             return Ok(warp::reply::json(&(String::from("NoPage"), String::new())));
         }
         let data = fs::read_to_string(&path).unwrap();
-        let page_buf =
-            fs::read_to_string("./rss-reader/db/pages.json").unwrap_or(String::from("[]"));
-        let pages: Vec<Page> = serde_json::from_str(&page_buf).unwrap();
-        let page = pages.iter().find(|&p| p.title == query.path);
+        let page_buf = fs::read_to_string(db).unwrap_or(String::from("[]"));
+        let mut pages: Vec<Page> = serde_json::from_str(&page_buf).unwrap();
+        let page = pages.iter_mut().find(|p| p.title == query.path);
         let link = if let Some(p) = page {
-            p.link.clone()
+            let link = p.link.clone();
+            if !p.readed {
+                p.readed = true;
+                println!("set {} readed ...", p.link);
+                let dump_json = serde_json::to_string(&pages);
+                if dump_json.is_ok() {
+                    let res = fs::write(db, &dump_json.unwrap());
+                    println!("set readed result: {:?}", res);
+                }
+            }
+            link
         } else {
             "".to_string()
         };
@@ -250,7 +260,8 @@ fn search_query(req: &SearchQuery) -> Result<String, &'static str> {
     };
 
     for (f, _) in files[..max_len].iter() {
-        let link = format!("\n- [{}](#ob#)", f.replace(".md", "").replace("ob/", ""));
+        let f = f.replace(".md", "").replace("ob/", "");
+        let link = format!("\n- [{}](#ob/{})", f, f);
         if !res.contains(&link) {
             res += &link;
         }
@@ -271,7 +282,6 @@ struct Page {
 
 fn rss_query() -> Result<String, &'static str> {
     std::thread::spawn(|| git::git_pull());
-    let mut res = String::new();
     let page_buf = fs::read_to_string("./rss-reader/db/pages.json").unwrap_or(String::from("[]"));
     let mut pages: Vec<Page> = serde_json::from_str(&page_buf).unwrap();
 
@@ -284,13 +294,17 @@ fn rss_query() -> Result<String, &'static str> {
     });
 
     let max_len = usize::min(100 as usize, pages.len());
-    for page in pages[..max_len].iter() {
-        let link = format!("\n- [{}](#rss#)", page.title);
-        if !res.contains(&link) {
-            res += &link;
-        }
-    }
-    Ok(res)
+    let res: Vec<String> = pages[..max_len]
+        .iter()
+        .map(|page| {
+            let class = if page.readed { "visited" } else { "" };
+            format!(
+                "<li><a  class=\"{}\" href=\"#rss/{}\">{}</a></li>",
+                class, page.title, page.title
+            )
+        })
+        .collect();
+    Ok(res.join(""))
 }
 
 fn mark_done(req: &Mark) -> Result<String, &'static str> {

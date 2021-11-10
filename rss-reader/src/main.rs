@@ -1,3 +1,4 @@
+use chrono::prelude::*;
 use clap::App;
 use feed_rs::parser;
 use http::Uri;
@@ -113,7 +114,9 @@ fn fetch_feed(feed: &str, pages: &mut Vec<Page>) -> Option<i32> {
     let mut succ_count = 0;
     for entry in feed_resp.entries {
         let entry_title = entry.title.unwrap().content.replace("/", "|");
-        let published_time = entry.published.unwrap();
+        let published_time = entry
+            .published
+            .unwrap_or(entry.updated.unwrap_or(Utc::now()));
         let link = if let Some(l) = entry.links.get(0) {
             l.href.clone()
         } else {

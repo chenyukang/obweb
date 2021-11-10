@@ -238,12 +238,13 @@
             .off("click")
             .on("click", "a", function (e) {
                 let url = e.target.innerText;
-                //console.log("url : ", url);
+                console.log("url : ", url);
                 //console.log(e.target);
-                if (e.target.href && e.target.href.indexOf("#ob#") != -1) {
+                if (e.target.href && e.target.href.indexOf("#ob/") != -1) {
+                    e.preventDefault();
                     fetchPage(url + ".md");
                 }
-                if (e.target.href && e.target.href.indexOf("#rss#") != -1) {
+                if (e.target.href && e.target.href.indexOf("#rss/") != -1) {
                     fetchPage(url, "rss");
                 } else if (
                     e.target.href == null ||

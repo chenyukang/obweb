@@ -15,6 +15,12 @@ mark {
     color: black;
 }
 
+.visited {
+    color: rgb(204, 190, 192);
+    background-color: transparent;
+    text-decoration: none;
+}
+
 .pageContent {
     margin-top: 20px;
     border: 1px outset green;
