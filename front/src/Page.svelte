@@ -264,8 +264,6 @@
         });
 
         window.onscroll = function () {
-            //console.log(window.pageYOffset);
-            //console.log(file);
             localStorage.setItem("pos_" + file, window.pageYOffset);
         };
     }
@@ -539,7 +537,7 @@
     {#if show_rsslink}
         <div class="row">
             <div class="col-md-10">
-                <a href={rsslink} id="rsslink">{rsslink}</a>
+                <a href={rsslink} id="rsslink" target="blank">{rsslink}</a>
             </div>
         </div>
     {/if}
