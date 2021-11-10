@@ -165,7 +165,7 @@ fn fetch_feed(feed: &str, pages: &mut Vec<Page>) -> Option<i32> {
 pub fn update_rss() {
     let page_buf = fs::read_to_string("./db/pages.json").unwrap_or(String::from("[]"));
     let mut pages: Vec<Page> = serde_json::from_str(&page_buf).unwrap();
-    let rss_buf = fs::read_to_string("./db/feeds").unwrap();
+    let rss_buf = fs::read_to_string("./ob/Unsort/feeds").unwrap();
     let rss = rss_buf
         .split("\n")
         .map(|l| l.trim())

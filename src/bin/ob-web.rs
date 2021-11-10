@@ -1,7 +1,5 @@
 extern crate base;
-use base::auth;
-use base::git;
-use base::rss;
+use base::*;
 use base64::decode;
 use chrono::prelude::*;
 use chrono::DateTime;
@@ -10,7 +8,6 @@ use glob::glob;
 use path_clean;
 use rand::seq::SliceRandom;
 use serde::Deserialize;
-use serde::Serialize;
 use std::fs;
 use std::fs::File;
 use std::net::Ipv4Addr;
@@ -73,7 +70,7 @@ fn gen_path(date: &String, page: &String) -> String {
     return path;
 }
 
-fn process_image(data: &String) -> Vec<u8> {
+fn decode_image(data: &String) -> Vec<u8> {
     let index = data.find(",").unwrap();
     let mut image = data.chars().skip(index + 1).collect::<String>();
     image = image.replace(" ", "+");
@@ -133,7 +130,7 @@ fn page_post(req: &Request) -> Result<(), &'static str> {
         };
         content += format!("\n{}", append).as_str();
         if req.image.len() > 0 {
-            let image_buf = process_image(&req.image.to_string());
+            let image_buf = decode_image(&req.image.to_string());
             let time_stamp = Local::now().format("%Y-%m-%d-%H-%M-%S").to_string();
             let image_name = format!("obweb-{}.png", time_stamp);
             let image_path = format!("./ob/Pics/{}", image_name);
@@ -269,21 +266,10 @@ fn search_query(req: &SearchQuery) -> Result<String, &'static str> {
     Ok(res.join(""))
 }
 
-/// An item within a feed
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-struct Page {
-    pub title: String,
-    pub publish_datetime: String,
-    pub link: String,
-    pub source: String,
-    pub website: String,
-    pub readed: bool,
-}
-
 fn rss_query() -> Result<String, &'static str> {
     std::thread::spawn(|| git::git_pull());
     let page_buf = fs::read_to_string("./db/pages.json").unwrap_or(String::from("[]"));
-    let mut pages: Vec<Page> = serde_json::from_str(&page_buf).unwrap();
+    let mut pages: Vec<rss::Page> = serde_json::from_str(&page_buf).unwrap();
 
     pages.sort_by(|a, b| {
         b.publish_datetime
@@ -293,7 +279,7 @@ fn rss_query() -> Result<String, &'static str> {
             .unwrap()
     });
 
-    let max_len = usize::min(100 as usize, pages.len());
+    let max_len = usize::min(200 as usize, pages.len());
     let res: Vec<String> = pages[..max_len]
         .iter()
         .map(|page| {
