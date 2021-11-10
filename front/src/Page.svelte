@@ -216,6 +216,7 @@
                     if (rsslink != undefined && rsslink != "") {
                         jq("#rsslink").prop("hidden", false);
                         show_rsslink = true;
+                        jq("html, body").animate({ scrollTop: 0 }, "slow");
                     }
                     setPageDefault();
                 } else {
