@@ -39,7 +39,8 @@
                 jq(this).css("width", "100%");
                 jq(this).css("height", "100%");
             } else {
-                jq(this).css("width", "50%");
+                jq(this).css("width", "70%");
+                jq(this).css("width", "70%");
             }
         });
     }

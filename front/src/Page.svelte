@@ -387,6 +387,16 @@
 
     onMount(async () => {
         setPageDefault();
+        jq("body").on("click", "img", function (e) {
+            let rato = jq(this).width() / jq(this).parent().width();
+            if (rato <= 0.6) {
+                jq(this).css("width", "100%");
+                jq(this).css("height", "100%");
+            } else {
+                jq(this).css("width", "70%");
+                jq(this).css("width", "70%");
+            }
+        });
     });
 </script>
 
