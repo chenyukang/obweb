@@ -1,3 +1,7 @@
+extern crate base;
+use base::auth;
+use base::git;
+use base::rss;
 use base64::decode;
 use chrono::prelude::*;
 use chrono::DateTime;
@@ -12,10 +16,8 @@ use std::fs::File;
 use std::net::Ipv4Addr;
 use std::path::Path;
 use warp::{reject, Filter, Rejection, Reply};
-
-mod auth;
-mod git;
 #[derive(Deserialize, Debug)]
+
 pub struct Request {
     pub date: String,
     pub links: String,
@@ -51,7 +53,7 @@ struct Mark {
 fn ensure_path(path: &String) -> Result<String, &'static str> {
     let cleaned_path = path_clean::clean(path);
     if !((cleaned_path.starts_with("ob/") && cleaned_path.ends_with(".md"))
-        || (cleaned_path.starts_with("rss-reader/rss")))
+        || (cleaned_path.starts_with("pages/")))
     {
         return Err("Invalid path");
     }
@@ -178,14 +180,14 @@ fn page_query(query: &PageQuery) -> Result<warp::reply::Json, &'static str> {
             }
         }
     } else if query.query_type == "rss" {
-        let db = "./rss-reader/db/pages.json";
-        let path = ensure_path(&format!("./rss-reader/rss/{}.html", query.path))?;
+        let db = "./db/pages.json";
+        let path = ensure_path(&format!("./pages/{}.html", query.path))?;
         if !Path::new(&path).exists() {
             return Ok(warp::reply::json(&(String::from("NoPage"), String::new())));
         }
         let data = fs::read_to_string(&path).unwrap();
         let page_buf = fs::read_to_string(db).unwrap_or(String::from("[]"));
-        let mut pages: Vec<Page> = serde_json::from_str(&page_buf).unwrap();
+        let mut pages: Vec<rss::Page> = serde_json::from_str(&page_buf).unwrap();
         let page = pages.iter_mut().find(|p| p.title == query.path);
         let link = if let Some(p) = page {
             let link = p.link.clone();
@@ -280,7 +282,7 @@ struct Page {
 
 fn rss_query() -> Result<String, &'static str> {
     std::thread::spawn(|| git::git_pull());
-    let page_buf = fs::read_to_string("./rss-reader/db/pages.json").unwrap_or(String::from("[]"));
+    let page_buf = fs::read_to_string("./db/pages.json").unwrap_or(String::from("[]"));
     let mut pages: Vec<Page> = serde_json::from_str(&page_buf).unwrap();
 
     pages.sort_by(|a, b| {

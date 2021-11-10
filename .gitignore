@@ -5,6 +5,8 @@ db/accounts.json
 db/account
 db/tokens
 db/dev
+db/pages.json
+pages
 nohup.out
 update.sh
 *.Identifier

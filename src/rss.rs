@@ -1,5 +1,4 @@
 use chrono::prelude::*;
-use clap::App;
 use feed_rs::parser;
 use http::Uri;
 use scraper::{Html, Selector};
@@ -8,7 +7,7 @@ use std::fs;
 
 /// An item within a feed
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-struct Page {
+pub struct Page {
     pub title: String,
     pub publish_datetime: String,
     pub link: String,
@@ -137,7 +136,7 @@ fn fetch_feed(feed: &str, pages: &mut Vec<Page>) -> Option<i32> {
             fetch_page(&link)
         };
 
-        let path = format!("./rss/{}.html", entry_title);
+        let path = format!("./pages/{}.html", entry_title);
         content = preprocess_image(&content, &website);
         let page = Page {
             link: link.clone(),
@@ -163,10 +162,10 @@ fn fetch_feed(feed: &str, pages: &mut Vec<Page>) -> Option<i32> {
     Some(succ_count)
 }
 
-fn update_rss() {
+pub fn update_rss() {
     let page_buf = fs::read_to_string("./db/pages.json").unwrap_or(String::from("[]"));
     let mut pages: Vec<Page> = serde_json::from_str(&page_buf).unwrap();
-    let rss_buf = fs::read_to_string("./db/config").unwrap();
+    let rss_buf = fs::read_to_string("./db/feeds").unwrap();
     let rss = rss_buf
         .split("\n")
         .map(|l| l.trim())
@@ -174,20 +173,6 @@ fn update_rss() {
         .collect::<Vec<_>>();
     for feed in rss {
         let _ = fetch_feed(feed, &mut pages);
-    }
-}
-
-fn main() {
-    let matches = App::new("Rss-reader")
-        .version("0.1")
-        .author("yukang <moorekang@gmail.com>")
-        .about("Rss Reader in Rust")
-        .arg("-u, --update    'Update and fetch rss'")
-        .get_matches();
-
-    let update = matches.occurrences_of("update");
-    if update > 0 {
-        update_rss();
     }
 }
 
