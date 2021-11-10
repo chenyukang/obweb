@@ -511,7 +511,7 @@
                 <h4>
                     <span
                         class="badge badge-secondary"
-                        style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;"
+                        style="white-space: pre-line;"
                         hidden="true"
                         id="fileName"
                     />
