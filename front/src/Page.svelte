@@ -262,7 +262,6 @@
         });
 
         window.onscroll = function () {
-            console.log("now");
             console.log(window.pageYOffset);
             console.log(file);
             localStorage.setItem("pos_" + file, window.pageYOffset);
