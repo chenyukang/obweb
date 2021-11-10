@@ -17,7 +17,7 @@
         if (cur_page == "day") {
             getDaily(date);
         } else if (cur_page == "rand") {
-            fetchPage("",  "rand");
+            fetchPage("", "rand");
         } else if (cur_page == "todo") {
             fetchPage("Unsort/todo.md");
         } else if (cur_page == "find") {
@@ -216,7 +216,9 @@
                     if (rsslink != undefined && rsslink != "") {
                         jq("#rsslink").prop("hidden", false);
                         show_rsslink = true;
-                        jq("html, body").animate({ scrollTop: 0 }, "slow");
+                        let pos = localStorage.getItem("pos_" + file);
+                        pos = pos == null ? 0 : pos;
+                        jq("html, body").animate({ scrollTop: pos }, "fast");
                     }
                     setPageDefault();
                 } else {
@@ -258,6 +260,13 @@
                 search();
             }
         });
+
+        window.onscroll = function () {
+            console.log("now");
+            console.log(window.pageYOffset);
+            console.log(file);
+            localStorage.setItem("pos_" + file, window.pageYOffset);
+        };
     }
 
     function setPageDefault() {
@@ -356,11 +365,15 @@
             },
             success: function (response) {
                 show_status = false;
+                file = "rss";
                 if (response != "no-page") {
                     jq("#page-content").html(renderMdToHtml(response));
                     jq("#page-content").prop("hidden", false);
                     jq("#fileName").prop("hidden", true);
                     jq("#pageNavBar").prop("hidden", true);
+                    let pos = localStorage.getItem("pos_" + file);
+                    pos = pos == null ? 0 : pos;
+                    jq("html, body").animate({ scrollTop: pos }, "fast");
                 } else {
                     jq("#page-content").html(
                         "<h3>No Page</h3>" + " " + local_date
@@ -523,11 +536,11 @@
     </div>
 
     {#if show_rsslink}
-    <div class="row">
-        <div class="col-md-10">
-        <a href={rsslink} id="rsslink">{rsslink}</a>
+        <div class="row">
+            <div class="col-md-10">
+                <a href={rsslink} id="rsslink">{rsslink}</a>
+            </div>
         </div>
-    </div>
     {/if}
 
     <div class="row">
