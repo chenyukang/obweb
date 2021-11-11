@@ -33,6 +33,20 @@ fn extract(html: &Html, keyword: &str) -> Option<String> {
     None
 }
 
+fn remove_element(content: &str, keyword: &str) -> String {
+    let html = Html::parse_document(content);
+    let select = Selector::parse(keyword).unwrap();
+    let mut result = html.root_element().html().to_string();
+    //println!("result: {:?}", result);
+    html.select(&select).for_each(|it| {
+        let unescaped = it.html();
+        //println!("unescaped: {:?}", unescaped);
+        assert!(result.contains(&unescaped));
+        result = result.replace(&unescaped, "")
+    });
+    return result;
+}
+
 fn convert_image(uri: &str) -> Option<String> {
     println!("preprocess_image: {:?}", uri);
     let resp = reqwest::blocking::get(uri);
@@ -95,7 +109,7 @@ fn fetch_page(url: &str) -> String {
     }
 }
 
-fn fetch_feed(feed: &str, pages: &mut Vec<Page>) -> Option<i32> {
+fn fetch_feed(feed: &str, pages: &mut Vec<Page>, force: bool) -> Option<i32> {
     println!("fetch_feed: {:?}", feed);
     let resp = reqwest::blocking::get(feed);
     if resp.is_err() {
@@ -128,7 +142,7 @@ fn fetch_feed(feed: &str, pages: &mut Vec<Page>) -> Option<i32> {
             .iter()
             .any(|p| p.link == link && p.title == entry_title);
 
-        if page_exist {
+        if page_exist && !force {
             println!("link: {} cached", link);
             continue;
         }
@@ -137,9 +151,9 @@ fn fetch_feed(feed: &str, pages: &mut Vec<Page>) -> Option<i32> {
         } else {
             fetch_page(&link)
         };
-
-        let path = format!("./pages/{}.html", entry_title);
         content = preprocess_image(&content, &website);
+        content = remove_element(&content, "footer");
+        content = remove_element(&content, "header");
         let page = Page {
             link: link.clone(),
             website: website.clone(),
@@ -150,12 +164,12 @@ fn fetch_feed(feed: &str, pages: &mut Vec<Page>) -> Option<i32> {
         };
 
         if content.len() > 0 {
+            let path = format!("./pages/{}.html", entry_title);
             fs::write(&path, &content).unwrap();
-            pages.push(page.clone());
-            let dump_json = serde_json::to_string(&pages);
-            if dump_json.is_ok() {
-                let _ = fs::write(PAGES_DB, &dump_json.unwrap());
+            if !page_exist {
+                pages.push(page.clone());
             }
+            dump_pages(&pages);
             succ_count += 1;
         } else {
             println!("error: {}", entry_title);
@@ -164,7 +178,7 @@ fn fetch_feed(feed: &str, pages: &mut Vec<Page>) -> Option<i32> {
     Some(succ_count)
 }
 
-pub fn update_rss() {
+pub fn update_rss(feed: Option<&str>, force: bool) {
     let page_buf = fs::read_to_string(PAGES_DB).unwrap_or(String::from("[]"));
     let mut pages: Vec<Page> = serde_json::from_str(&page_buf).unwrap();
     let rss_buf = fs::read_to_string("./ob/Unsort/feeds.md").unwrap();
@@ -173,22 +187,31 @@ pub fn update_rss() {
         .map(|l| l.trim())
         .filter(|&l| l.len() > 0)
         .collect::<Vec<_>>();
-    for feed in rss {
-        let _ = fetch_feed(feed, &mut pages);
+    if let Some(f) = feed {
+        let _ = fetch_feed(f, &mut pages, true);
+    } else {
+        for feed in rss {
+            println!("force: {:?}", force);
+            let _ = fetch_feed(feed, &mut pages, force);
+        }
     }
 }
 
+pub fn dump_pages(pages: &Vec<Page>) {
+    let dump_json = serde_json::to_string(&pages);
+    if dump_json.is_ok() {
+        let _ = fs::write(PAGES_DB, &dump_json.unwrap());
+    }
+}
 pub fn clear_for_feed(feed: &str) {
     let page_buf = fs::read_to_string(PAGES_DB).unwrap_or(String::from("[]"));
     let pages: Vec<Page> = serde_json::from_str(&page_buf).unwrap();
     let filted_pages = pages
         .iter()
         .filter(|p| p.source != feed)
+        .map(|p| p.clone())
         .collect::<Vec<_>>();
-    let dump_json = serde_json::to_string(&filted_pages);
-    if dump_json.is_ok() {
-        let _ = fs::write(PAGES_DB, &dump_json.unwrap());
-    }
+    dump_pages(&filted_pages);
 }
 
 #[cfg(test)]
@@ -226,6 +249,20 @@ mod tests {
     }
 
     #[test]
+    fn test_remove_element() {
+        let html = r#"
+        <!DOCTYPE html>
+        <body>
+        <meta charset="utf-8">
+        <footer>Hello, world!</footer>
+        <h1 class="foo">Hello, <i>world!</i></h1>
+        </body>
+    "#;
+        let res = remove_element(html, "footer");
+        assert!(!res.contains("<footer>"));
+    }
+
+    #[test]
     fn test_articles() {
         let html = r#"
         <!DOCTYPE html>
@@ -260,5 +297,14 @@ mod tests {
         let url = "https://blog.janestreet.com/ocaml-4-03-everything-else/";
         let content = fetch_page(url);
         assert!(!content.contains("<body>"));
+    }
+
+    #[test]
+    fn test_fetch_page_remove_footer() {
+        let url = "https://yihui.org/cn/2021/07/injuries/";
+        let mut content = fetch_page(url);
+        assert!(content.contains("<footer>"));
+        content = remove_element(&content, "footer");
+        assert!(!content.contains("<footer>"));
     }
 }

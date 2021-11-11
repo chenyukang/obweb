@@ -191,11 +191,7 @@ fn page_query(query: &PageQuery) -> Result<warp::reply::Json, &'static str> {
             if !p.readed {
                 p.readed = true;
                 println!("set {} readed ...", p.link);
-                let dump_json = serde_json::to_string(&pages);
-                if dump_json.is_ok() {
-                    let res = fs::write(db, &dump_json.unwrap());
-                    println!("set readed result: {:?}", res);
-                }
+                rss::dump_pages(&pages);
             }
             link
         } else {

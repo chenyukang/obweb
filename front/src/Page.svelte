@@ -214,7 +214,9 @@
                     jq("#fileName").text(file.replaceAll(".md", ""));
                     jq("#fileName").prop("hidden", false);
                     jq("#pageNavBar").prop("hidden", false);
-                    jq("#page-content").html(renderMdToHtml(content));
+                    let res = query_type == "rss" ? content : renderMdToHtml(content);
+                    console.log(res);
+                    jq("#page-content").html(res);
                     jq("#page-content").prop("hidden", false);
                     if (rsslink != undefined && rsslink != "") {
                         jq("#rsslink").prop("hidden", false);
@@ -263,7 +265,7 @@
                         search_input = text;
                         if (cur_page == "find") search();
                         else cur_page = "find";
-                    } else if(url.indexOf("#") != -1){
+                    } else if (url.indexOf("#") != -1) {
                         let type = cur_page == "rss" ? "rss" : "md";
                         fetchPage(text, type);
                     }
@@ -417,14 +419,18 @@
     onMount(async () => {
         setPageDefault();
         jq("body").on("click", "img", function (e) {
-            let rato = jq(this).width() / jq(this).parent().width();
-            if (rato <= 0.6) {
+            let cur_rato = localStorage.getItem("ratio");
+            if (cur_rato == "normal" || cur_rato == null) {
+                cur_rato = "full";
                 jq(this).css("width", "100%");
                 jq(this).css("height", "100%");
             } else {
+                cur_rato = "normal";
                 jq(this).css("width", "70%");
-                jq(this).css("width", "70%");
+                jq(this).css("height", "70%");
             }
+            console.log(cur_rato);
+            localStorage.setItem("ratio", cur_rato);
         });
     });
 </script>
