@@ -5,6 +5,8 @@ use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
 use std::fs;
 
+static PAGES_DB: &'static str = "./db/pages.json";
+
 /// An item within a feed
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Page {
@@ -152,7 +154,7 @@ fn fetch_feed(feed: &str, pages: &mut Vec<Page>) -> Option<i32> {
             pages.push(page.clone());
             let dump_json = serde_json::to_string(&pages);
             if dump_json.is_ok() {
-                let _ = fs::write("./db/pages.json", &dump_json.unwrap());
+                let _ = fs::write(PAGES_DB, &dump_json.unwrap());
             }
             succ_count += 1;
         } else {
@@ -163,7 +165,7 @@ fn fetch_feed(feed: &str, pages: &mut Vec<Page>) -> Option<i32> {
 }
 
 pub fn update_rss() {
-    let page_buf = fs::read_to_string("./db/pages.json").unwrap_or(String::from("[]"));
+    let page_buf = fs::read_to_string(PAGES_DB).unwrap_or(String::from("[]"));
     let mut pages: Vec<Page> = serde_json::from_str(&page_buf).unwrap();
     let rss_buf = fs::read_to_string("./ob/Unsort/feeds.md").unwrap();
     let rss = rss_buf
@@ -173,6 +175,19 @@ pub fn update_rss() {
         .collect::<Vec<_>>();
     for feed in rss {
         let _ = fetch_feed(feed, &mut pages);
+    }
+}
+
+pub fn clear_for_feed(feed: &str) {
+    let page_buf = fs::read_to_string(PAGES_DB).unwrap_or(String::from("[]"));
+    let pages: Vec<Page> = serde_json::from_str(&page_buf).unwrap();
+    let filted_pages = pages
+        .iter()
+        .filter(|p| p.source != feed)
+        .collect::<Vec<_>>();
+    let dump_json = serde_json::to_string(&filted_pages);
+    if dump_json.is_ok() {
+        let _ = fs::write(PAGES_DB, &dump_json.unwrap());
     }
 }
 

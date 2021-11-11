@@ -12,4 +12,4 @@ COPY ./src ./src
 
 RUN cargo install --path .
 
-COPY ./static ./static
+COPY ./front ./front

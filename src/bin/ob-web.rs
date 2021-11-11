@@ -478,10 +478,9 @@ fn main() {
         None => 8005,
     };
 
-    let config = matches.occurrences_of("config");
-    if config > 0 as u64 {
+    if matches.is_present("config") {
         auth::init_password();
+    } else {
+        run_server(port);
     }
-
-    run_server(port);
 }

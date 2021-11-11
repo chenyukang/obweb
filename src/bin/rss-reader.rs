@@ -8,10 +8,12 @@ fn main() {
         .author("yukang <moorekang@gmail.com>")
         .about("Rss Reader in Rust")
         .arg("-u, --update    'Update and fetch rss'")
+        .arg("-r, --remove=[FEED]    'Remove all the pages for a feed'")
         .get_matches();
 
-    let update = matches.occurrences_of("update");
-    if update > 0 {
+    if matches.is_present("update") {
         rss::update_rss();
+    } else if let Some(feed) = matches.value_of("remove") {
+        rss::clear_for_feed(feed);
     }
 }
