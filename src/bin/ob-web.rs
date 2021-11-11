@@ -203,7 +203,7 @@ fn page_query(query: &PageQuery) -> Result<warp::reply::Json, &'static str> {
         };
         return Ok(warp::reply::json(&(query.path.clone(), data, link)));
     } else {
-        let path = ensure_path(&format!("./ob/{}", query.path))?;
+        let path = ensure_path(&format!("./ob/{}.md", query.path))?;
         if !Path::new(&path).exists() {
             return Ok(warp::reply::json(&(String::from("NoPage"), String::new())));
         }
@@ -260,7 +260,7 @@ fn search_query(req: &SearchQuery) -> Result<String, &'static str> {
         .iter()
         .map(|(f, _)| {
             let f = f.replace(".md", "").replace("ob/", "");
-            format!("<li><a href=\"#ob/{}\">{}</a></li>", f, f)
+            format!("<li><a href=\"#\">{}</a></li>", f)
         })
         .collect();
     Ok(res.join(""))
@@ -285,8 +285,8 @@ fn rss_query() -> Result<String, &'static str> {
         .map(|page| {
             let class = if page.readed { "visited" } else { "" };
             format!(
-                "<li><a  class=\"{}\" href=\"#rss/{}\">{}</a></li>",
-                class, page.title, page.title
+                "<li><a  class=\"{}\" href=\"#\">{}</a></li>",
+                class, page.title
             )
         })
         .collect();
@@ -348,13 +348,10 @@ pub async fn run_server(port: u16) {
         });
 
     let pages = warp::path("static").and(warp::fs::dir("./static/"));
-
     let root = warp::path!("obweb").and(warp::fs::file("./front/public/index.html"));
     let routes = routes.or(pages).or(root);
-
     let front = warp::path("front").and(warp::fs::dir("./front/public/"));
-    let root = warp::path!("obwebx").and(warp::fs::file("./front/public/index.html"));
-    let routes = routes.or(front).or(root);
+    let routes = routes.or(front);
 
     let images = warp::path("static")
         .and(warp::path("images"))

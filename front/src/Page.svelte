@@ -19,7 +19,7 @@
         } else if (cur_page == "rand") {
             fetchPage("", "rand");
         } else if (cur_page == "todo") {
-            fetchPage("Unsort/todo.md");
+            fetchPage("Unsort/todo");
         } else if (cur_page == "find") {
             search();
         } else if (cur_page == "rss") {
@@ -60,7 +60,7 @@
 
     function getDaily(date) {
         let date_str = dateStr(date);
-        fetchPage(`Daily/${date_str}.md`);
+        fetchPage(`Daily/${date_str}`);
     }
 
     function preprocessImage(response) {
@@ -89,7 +89,7 @@
             type: "POST",
             success: function (response) {
                 if (response == "done") {
-                    fetchPage("Unsort/todo.md", false);
+                    fetchPage("Unsort/todo");
                 }
             },
             error: function (err) {
@@ -183,8 +183,11 @@
         let begin_date = new Date(date.setDate(date.getDate() - 1000));
         show_status = true;
         show_rsslink = false;
+        console.log("fetchPage: ", url);
         jq.ajax({
-            url: `/api/page?path=${encodeURIComponent(url)}&query_type=${query_type}`,
+            url: `/api/page?path=${encodeURIComponent(
+                url
+            )}&query_type=${query_type}`,
             type: "GET",
             datatype: "json",
             contentType: "Application/json",
@@ -194,10 +197,10 @@
             },
             statusCode: {
                 400: function () {
-                    window.location.href = "/obwebx";
+                    window.location.href = "/obweb";
                 },
                 500: function () {
-                    window.location.href = "/obwebx";
+                    window.location.href = "/obweb";
                 },
             },
             success: function (response) {
@@ -233,27 +236,40 @@
         });
     }
 
+    function isValidHttpUrl(string) {
+        let url;
+
+        try {
+            url = new URL(string);
+        } catch (_) {
+            return false;
+        }
+        return url.protocol === "http:" || url.protocol === "https:";
+    }
+
     function hookInit() {
         jq(".pageContent")
             .off("click")
             .on("click", "a", function (e) {
-                let url = e.target.innerText;
+                e.preventDefault();
+                let text = e.target.innerText;
+                let url = e.target.href;
+                let relative_url = url.replace(window.location.origin, "");
                 console.log("url : ", url);
+                console.log("relative_url: ", relative_url);
                 //console.log(e.target);
-                if (e.target.href && e.target.href.indexOf("#ob/") != -1) {
-                    e.preventDefault();
-                    fetchPage(url + ".md");
-                }
-                if (e.target.href && e.target.href.indexOf("#rss/") != -1) {
-                    fetchPage(url, "rss");
-                } else if (
-                    e.target.href == null ||
-                    e.target.href.indexOf("##") != -1
-                ) {
-                    e.preventDefault();
-                    search_input = url;
-                    if (cur_page == "find") search();
-                    else cur_page = "find";
+                if (!isValidHttpUrl(relative_url)) {
+                    if (url.indexOf("##") != -1) {
+                        search_input = text;
+                        if (cur_page == "find") search();
+                        else cur_page = "find";
+                    } else if(url.indexOf("#") != -1){
+                        let type = cur_page == "rss" ? "rss" : "md";
+                        fetchPage(text, type);
+                    }
+                } else {
+                    console.log("open ....");
+                    window.open(url, "_blank");
                 }
             });
 
@@ -319,10 +335,10 @@
             contentType: "Application/json",
             statusCode: {
                 400: function () {
-                    window.location.href = "/obwebx";
+                    window.location.href = "/obweb";
                 },
                 500: function () {
-                    window.location.href = "/obwebx";
+                    window.location.href = "/obweb";
                 },
             },
             success: function (response) {
@@ -356,10 +372,10 @@
             contentType: "Application/json",
             statusCode: {
                 400: function () {
-                    window.location.href = "/obwebx";
+                    window.location.href = "/obweb";
                 },
                 500: function () {
-                    window.location.href = "/obwebx";
+                    window.location.href = "/obweb";
                 },
             },
             success: function (response) {
@@ -537,7 +553,7 @@
     {#if show_rsslink}
         <div class="row">
             <div class="col-md-10">
-                <a href={rsslink} id="rsslink" target="blank">{rsslink}</a>
+                <a href={rsslink} id="rsslink" target="_blank">{rsslink}</a>
             </div>
         </div>
     {/if}

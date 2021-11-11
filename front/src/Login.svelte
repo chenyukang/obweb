@@ -35,7 +35,7 @@
 
     function showLoginModal(init = false) {
         if (jq("#loginModal").length == 0) {
-            window.location.href = "/obwebx";
+            window.location.href = "/obweb";
         }
         jq("#loginModal").modal("show");
         if (init) {
