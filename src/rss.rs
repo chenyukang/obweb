@@ -149,11 +149,13 @@ fn fetch_feed(feed: &str, pages: &Vec<Page>, force: bool) -> Option<i32> {
     }
     let feed_resp = parser::parse(body.unwrap().as_bytes()).unwrap();
     println!("title: {:?}", feed_resp.title);
-    let website = if let Some(l) = feed_resp.links.get(0) {
-        l.href.clone()
-    } else {
-        String::default()
-    };
+    let mut website = String::new();
+    for link in feed_resp.links {
+        if link.href.starts_with("http") {
+            website = link.href;
+            break;
+        }
+    }
     let mut succ_count = 0;
     for entry in feed_resp.entries {
         let entry_title = entry.title.unwrap().content.replace("/", "|");
