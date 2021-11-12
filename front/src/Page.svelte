@@ -565,7 +565,7 @@
         <div class="row">
             <div class="col-md-2"></div>
             <div class="col-md-8">
-                <a href={rsslink} id="rsslink" target="_blank">{rsslink}</a>
+                <a href={rsslink} id="rsslink" target="_blank">{(new URL(rsslink)).origin}</a>
             </div>
         </div>
     {/if}
