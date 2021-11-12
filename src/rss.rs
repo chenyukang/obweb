@@ -177,7 +177,12 @@ fn fetch_feed(feed: &str, pages: &mut Vec<Page>, force: bool) -> Option<i32> {
         let mut content = if let Some(ct) = entry.content {
             ct.body.unwrap()
         } else {
-            fetch_page(&link)
+            let descrption = entry.summary;
+            if descrption.is_some() {
+                descrption.unwrap().content
+            } else {
+                fetch_page(&link)
+            }
         };
         content = preprocess_image(&content, &website);
         content = remove_element(&content, "footer");
