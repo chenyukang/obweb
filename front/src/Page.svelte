@@ -183,7 +183,6 @@
         let begin_date = new Date(date.setDate(date.getDate() - 1000));
         show_status = true;
         show_rsslink = false;
-        console.log("fetchPage: ", url);
         jq.ajax({
             url: `/api/page?path=${encodeURIComponent(
                 url
@@ -215,7 +214,6 @@
                     jq("#fileName").prop("hidden", false);
                     jq("#pageNavBar").prop("hidden", false);
                     let res = query_type == "rss" ? content : renderMdToHtml(content);
-                    console.log(res);
                     jq("#page-content").html(res);
                     jq("#page-content").prop("hidden", false);
                     if (rsslink != undefined && rsslink != "") {
@@ -257,8 +255,6 @@
                 let text = e.target.innerText;
                 let url = e.target.href;
                 let relative_url = url.replace(window.location.origin, "");
-                console.log("url : ", url);
-                console.log("relative_url: ", relative_url);
                 //console.log(e.target);
                 if (!isValidHttpUrl(relative_url)) {
                     if (url.indexOf("##") != -1) {
@@ -434,7 +430,6 @@
                 jq(this).css("width", "");
                 jq(this).css("height", "");
             }
-            console.log(cur_rato);
             localStorage.setItem("ratio", cur_rato);
         });
     });
