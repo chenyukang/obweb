@@ -17,7 +17,7 @@ fn main() {
         rss::update_rss(None, matches.is_present("force"));
     } else if let Some(feed) = matches.value_of("remove") {
         rss::clear_for_feed(feed);
-    } else if let Some(feed) = matches.value_of("force") {
+    } else if let Some(feed) = matches.value_of("single") {
         rss::update_rss(Some(feed), true);
     }
 }
