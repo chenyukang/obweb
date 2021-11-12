@@ -6,7 +6,8 @@ db/account
 db/tokens
 db/dev
 db/pages.json
-pages
+pages/*.html
+pages/images/*
 rss-reader
 nohup.out
 update.sh
