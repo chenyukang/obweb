@@ -1,5 +1,4 @@
 target/
-ob-web
 ob
 db/accounts.json
 db/account
@@ -8,7 +7,6 @@ db/dev
 db/pages.json
 pages/*.html
 pages/images/*
-rss-reader
 nohup.out
 update.sh
 *.Identifier
