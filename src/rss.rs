@@ -47,6 +47,24 @@ fn remove_element(content: &str, keyword: &str) -> String {
     return result;
 }
 
+fn gen_image_name(uri: &str) -> String {
+    use rand::distributions::Alphanumeric;
+    use rand::{thread_rng, Rng};
+
+    let rand_str: String = thread_rng()
+        .sample_iter(&Alphanumeric)
+        .take(5)
+        .map(char::from)
+        .collect();
+
+    let url = String::from(uri);
+    let elems = url.split("/").into_iter().collect::<Vec<_>>();
+    let last = elems.last().unwrap().to_string();
+    let index = last.chars().position(|c| c == '?').unwrap_or(last.len());
+    let orig_name = last[..index].to_string();
+    format!("{}_{}", rand_str, orig_name)
+}
+
 fn convert_image(uri: &str) -> Option<String> {
     println!("preprocess_image: {:?}", uri);
     let resp = reqwest::blocking::get(uri);
@@ -55,8 +73,15 @@ fn convert_image(uri: &str) -> Option<String> {
         if body.is_ok() {
             let image = body.unwrap().to_owned();
             //println!("image: {:?}", image);
-            let encoded = base64::encode(&image);
-            return Some(encoded);
+            let dir = "./pages/images";
+            let _ = fs::create_dir_all(dir);
+            let image_path = format!("{}/{}", dir, gen_image_name(uri));
+            let res = fs::write(&image_path, &image);
+            if res.is_ok() {
+                return Some(image_path.clone());
+            } else {
+                return None;
+            }
         }
     }
     None
@@ -80,7 +105,7 @@ fn preprocess_image(content: &str, website: &str) -> String {
             if r.is_ok() {
                 let data = convert_image(&r.unwrap().to_string());
                 if let Some(d) = data {
-                    result = result.replace(&src.unwrap(), &format!("data:image/jpg;base64,{}", d));
+                    result = result.replace(&src.unwrap(), &d);
                 }
             }
         }
@@ -227,6 +252,14 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_url_base() {
+        assert!(gen_image_name("http://abc/d/x/demo.png").ends_with("_demo.png"));
+        assert!(gen_image_name("http://abc/d/x/demo.png?ab=1&c=3").ends_with("_demo.png"));
+        assert!(gen_image_name("/demo.png?ab=1&c=3").ends_with("_demo.png"));
+        assert!(gen_image_name("//demo.jpg").ends_with("demo.jpg"));
+    }
+
+    #[test]
     fn test_article() {
         let html = r#"
         <!DOCTYPE html>
@@ -293,11 +326,7 @@ mod tests {
             img
         );
         let processed = preprocess_image(&html, "");
-        assert_eq!(processed.find(".png"), None);
-        assert!(processed.find("base64").is_some());
-        let converted_image = convert_image(img);
-        assert!(converted_image.is_some());
-        assert!(processed.contains(&converted_image.unwrap()));
+        assert!(processed.find("logo.png").is_some());
     }
 
     #[test]
