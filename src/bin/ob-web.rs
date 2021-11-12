@@ -177,14 +177,12 @@ fn page_query(query: &PageQuery) -> Result<warp::reply::Json, &'static str> {
             }
         }
     } else if query.query_type == "rss" {
-        let db = "./db/pages.json";
         let path = ensure_path(&format!("./pages/{}.html", query.path))?;
         if !Path::new(&path).exists() {
             return Ok(warp::reply::json(&(String::from("NoPage"), String::new())));
         }
         let data = fs::read_to_string(&path).unwrap();
-        let page_buf = fs::read_to_string(db).unwrap_or(String::from("[]"));
-        let mut pages: Vec<rss::Page> = serde_json::from_str(&page_buf).unwrap();
+        let mut pages = rss::cur_pages();
         let page = pages.iter_mut().find(|p| p.title == query.path);
         let link = if let Some(p) = page {
             let link = p.link.clone();

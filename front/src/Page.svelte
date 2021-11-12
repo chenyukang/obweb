@@ -442,8 +442,9 @@
 
 <div class="tab-content">
     {#if cur_page == "day"}
-        <div class="row card sticky-top" style="margin-top: 20px; border: 0;">
-            <div class="col-md-10 text-right">
+        <div class="row sticky-top" style="margin-top: 20px; border: 0;">
+            <div class="col-md-2"></div>
+            <div class="col-md-8 text-right">
                 <button
                     type="button"
                     class="btn btn-info"
@@ -463,8 +464,9 @@
             </div>
         </div>
     {:else if cur_page == "rand" || cur_page == "todo"}
-        <div class="row card sticky-top" style="margin-top: 20px; border: 0;">
-            <div class="col-md-10 text-right">
+        <div class="row sticky-top" style="margin-top: 20px; border: 0;">
+            <div class="col-md-2"></div>
+            <div class="col-md-8 text-right">
                 <button
                     type="button"
                     class="btn btn-warning"
@@ -475,8 +477,9 @@
             </div>
         </div>
     {:else if cur_page == "rss"}
-        <div class="row card sticky-top" style="margin-top: 20px; border: 0;">
-            <div class="col-md-10 text-right" hidden="true" id="pageNavBar">
+        <div class="row sticky-top" style="margin-top: 20px; border: 0;">
+            <div class="col-md-2"></div>
+            <div class="col-md-8 text-right" hidden="true" id="pageNavBar">
                 <button
                     type="button"
                     class="btn btn-info"
@@ -488,7 +491,8 @@
         </div>
     {:else if cur_page == "find"}
         <div class="row">
-            <div class="col-md-10">
+            <div class="col-md-2"></div>
+            <div class="col-md-8">
                 <div class="input-group" style="margin-top: 30px">
                     <input
                         type="text"
@@ -512,8 +516,9 @@
             </div>
         </div>
 
-        <div class="row card sticky-top" style="margin-top: 20px; border: 0;">
-            <div class="col-md-10 text-right" hidden="true" id="pageNavBar">
+        <div class="row sticky-top" style="margin-top: 20px; border: 0;">
+            <div class="col-md-2"></div>
+            <div class="col-md-8 text-right" hidden="true" id="pageNavBar">
                 <button
                     type="button"
                     class="btn btn-info"
@@ -534,7 +539,7 @@
     {#if show_status}
         <div class="row">
             <div class="col-md-2" />
-            <div class="col-md-6" id="status-sp" style="margin-top: 20px;">
+            <div class="col-md-8" id="status-sp" style="margin-top: 20px;">
                 <div class="text-center">
                     <div class="spinner-border text-success" role="status">
                         <span class="sr-only" />
@@ -546,7 +551,7 @@
 
     <div class="row">
         <div class="col-md-2" />
-        <div class="col-md-6">
+        <div class="col-md-8">
             <div class="text-center" style="margin-top: 20px;">
                 <h4>
                     <span
@@ -563,14 +568,16 @@
 
     {#if show_rsslink}
         <div class="row">
-            <div class="col-md-10">
+            <div class="col-md-2"></div>
+            <div class="col-md-8">
                 <a href={rsslink} id="rsslink" target="_blank">{rsslink}</a>
             </div>
         </div>
     {/if}
 
     <div class="row">
-        <div class="col-md-10">
+        <div class="col-md-2"></div>
+        <div class="col-md-8">
             <div class="pageContent" hidden="true" id="page-content" />
         </div>
     </div>

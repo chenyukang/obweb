@@ -137,7 +137,7 @@ fn fetch_page(url: &str) -> String {
     }
 }
 
-fn fetch_feed(feed: &str, pages: &mut Vec<Page>, force: bool) -> Option<i32> {
+fn fetch_feed(feed: &str, pages: &Vec<Page>, force: bool) -> Option<i32> {
     println!("fetch_feed: {:?}", feed);
     let resp = reqwest::blocking::get(feed);
     if resp.is_err() {
@@ -208,23 +208,35 @@ fn fetch_feed(feed: &str, pages: &mut Vec<Page>, force: bool) -> Option<i32> {
     Some(succ_count)
 }
 
-pub fn update_rss(feed: Option<&str>, force: bool) {
+pub fn cur_pages() -> Vec<Page> {
     let page_buf = fs::read_to_string(PAGES_DB).unwrap_or(String::from("[]"));
-    let mut pages: Vec<Page> = serde_json::from_str(&page_buf).unwrap();
+    serde_json::from_str(&page_buf).unwrap()
+}
+
+pub fn update_rss(feed: Option<&str>, force: bool) {
+    let pages = cur_pages();
     let rss_buf = fs::read_to_string("./ob/Unsort/feeds.md").unwrap();
-    let rss = rss_buf
+    let feeds = rss_buf
         .split("\n")
         .map(|l| l.trim())
         .filter(|&l| l.len() > 0)
         .collect::<Vec<_>>();
     if let Some(f) = feed {
-        let _ = fetch_feed(f, &mut pages, true);
+        let _ = fetch_feed(f, &pages, true);
     } else {
-        for feed in rss {
+        for feed in feeds.iter() {
             println!("force: {:?}", force);
-            let _ = fetch_feed(feed, &mut pages, force);
+            let _ = fetch_feed(*feed, &pages, force);
         }
     }
+
+    let pages = cur_pages();
+    let filtered_pages = pages
+        .iter()
+        .filter(|&p| feeds.contains(&p.source.as_str()))
+        .map(|p| p.clone())
+        .collect::<Vec<Page>>();
+    dump_pages(&filtered_pages);
 }
 
 pub fn dump_pages(pages: &Vec<Page>) {
