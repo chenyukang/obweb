@@ -1,7 +1,7 @@
 # Obweb : Obsidian + Web = Obsdian on Mobile + Flomo
 
 <p align="center">
-  <img src="static/style/logo.png">
+  <img src="front/public/logo.png">
 </p>
 
 ## Motivation
@@ -14,7 +14,7 @@ But Flomo don't work well with Obsidian. I decided to create a Web interface for
 
 Here are the principles of this project:
 
-1. The UI is designed to be more suitable for a mobile device. On PC/Mac, the Obsidian native application is more convenient than Web Applications. 
+1. The UI is designed to be more suitable for a mobile device. On PC/Mac, the Obsidian native application is more convenient than Web Applications.
 
 2. We won't do complicated editing operations on the mobile end, in most scenarios, we create simple note and memos in daily life, but we can use `link` in Obsidian to build connections between notes.
 
@@ -55,7 +55,7 @@ Make sure you have installed [Rust and Cargo](http://rust-lang.org), and then ru
 ```bash
 ./bin/debug
 ```
-It will requires you to initialize user and password in the first time. 
+It will requires you to initialize user and password in the first time.
 
 Now you can access it on your browser [http://localhost:8005/obweb](http://localhost:8005/obweb/).
 
