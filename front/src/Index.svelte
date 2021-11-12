@@ -37,12 +37,16 @@
             let cur_rato = localStorage.getItem("index_ratio");
             if (cur_rato == "normal" || cur_rato == null) {
                 cur_rato = "full";
+                jq(this).css("max-width", "100%");
+                jq(this).css("max-height", "100%");
                 jq(this).css("width", "100%");
                 jq(this).css("height", "100%");
             } else {
                 cur_rato = "normal";
-                jq(this).css("width", "70%");
-                jq(this).css("height", "70%");
+                jq(this).css("max-width", "70%");
+                jq(this).css("max-height", "70%");
+                jq(this).css("width", "");
+                jq(this).css("height", "");
             }
             localStorage.setItem("index_ratio", cur_rato);
         });

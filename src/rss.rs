@@ -51,13 +51,17 @@ fn remove_element(content: &str, keyword: &str) -> String {
 
 fn gen_image_name(uri: &str) -> String {
     let digest = sha2::Sha256::digest(uri.as_bytes());
-    let digest_str = base64::encode(&digest);
-    let url = String::from(uri);
-    let elems = url.split("/").into_iter().collect::<Vec<_>>();
-    let last = elems.last().unwrap().to_string();
-    let index = last.chars().position(|c| c == '?').unwrap_or(last.len());
-    let orig_name = last[..index].to_string();
-    format!("{}_{}", digest_str, orig_name)
+    let mut hex = String::new();
+    for byte in digest.iter() {
+        hex.push_str(&format!("{:02x}", byte));
+    }
+    let len = usize::min(10, hex.len());
+    let hex_str = &hex[0..len].to_string();
+    let index = uri.chars().position(|c| c == '?').unwrap_or(uri.len());
+    let cleaned_uri = uri[..index].to_string();
+    let elems = cleaned_uri.split("/").into_iter().collect::<Vec<_>>();
+    let image_name = elems.last().unwrap().to_string();
+    format!("{}_{}", hex_str, image_name)
 }
 
 fn convert_image(uri: &str) -> Option<String> {
@@ -65,6 +69,7 @@ fn convert_image(uri: &str) -> Option<String> {
     let dir = "./pages/images";
     let _ = fs::create_dir_all(dir);
     let image_path = format!("{}/{}", dir, gen_image_name(uri));
+    //let ret_path = image_path.replace("./pages", "");
     if Path::new(&image_path).exists() {
         return Some(image_path.clone());
     }
@@ -103,9 +108,7 @@ fn preprocess_image(content: &str, website: &str) -> String {
             if r.is_ok() {
                 let data = convert_image(&r.unwrap().to_string());
                 if let Some(d) = data {
-                    println!("origin src: {:?}", src);
-                    println!("new image src: {:?}", d);
-                    result = result.replace(&src.unwrap(), &d);
+                    result = result.replace(&src.unwrap(), &d.replace("./", "/"));
                 }
             }
         }
@@ -257,6 +260,7 @@ mod tests {
         assert!(gen_image_name("http://abc/d/x/demo.png?ab=1&c=3").ends_with("_demo.png"));
         assert!(gen_image_name("/demo.png?ab=1&c=3").ends_with("_demo.png"));
         assert!(gen_image_name("//demo.jpg").ends_with("demo.jpg"));
+        assert!(gen_image_name("http://abc.com/demo.jpg?/test/").ends_with("demo.jpg"));
     }
 
     #[test]
@@ -343,5 +347,14 @@ mod tests {
         assert!(content.contains("<footer>"));
         content = remove_element(&content, "footer");
         assert!(!content.contains("<footer>"));
+    }
+
+    #[test]
+    fn test_fetch_page_images() {
+        let uri = "https://yihui.org/cn/2020/07/wild-onion/";
+        let mut content = fetch_page(uri);
+        content = preprocess_image(&content, uri);
+        let _ = fs::write("./pages/tmp.html", &content);
+        assert!(content.contains("/images/"));
     }
 }

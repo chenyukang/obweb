@@ -2,12 +2,16 @@
     display: block;
     margin-left: auto;
     margin-right: auto;
-    width: 70%;
-    height: 70%;
+    max-width: 70%;
+    max-height: 70%;
 }
 
 .highlight {
     background-color: yellow;
+}
+
+pre {
+    background: aliceblue;
 }
 
 mark {

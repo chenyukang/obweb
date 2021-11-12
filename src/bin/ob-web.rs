@@ -355,7 +355,13 @@ pub async fn run_server(port: u16) {
         .and(auth_validation())
         .untuple_one()
         .and(warp::fs::dir("./ob/Pics"));
-    let routes = routes.or(images);
+
+    let page_images = warp::path("pages")
+        .and(warp::path("images"))
+        .and(auth_validation())
+        .untuple_one()
+        .and(warp::fs::dir("./pages/images"));
+    let routes = routes.or(images).or(page_images);
 
     let update = warp::path!("api" / "page")
         .and(warp::post())
