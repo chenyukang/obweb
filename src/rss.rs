@@ -3,7 +3,9 @@ use feed_rs::parser;
 use http::Uri;
 use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
+use sha2::Digest;
 use std::fs;
+use std::path::Path;
 
 static PAGES_DB: &'static str = "./db/pages.json";
 
@@ -48,34 +50,30 @@ fn remove_element(content: &str, keyword: &str) -> String {
 }
 
 fn gen_image_name(uri: &str) -> String {
-    use rand::distributions::Alphanumeric;
-    use rand::{thread_rng, Rng};
-
-    let rand_str: String = thread_rng()
-        .sample_iter(&Alphanumeric)
-        .take(5)
-        .map(char::from)
-        .collect();
-
+    let digest = sha2::Sha256::digest(uri.as_bytes());
+    let digest_str = base64::encode(&digest);
     let url = String::from(uri);
     let elems = url.split("/").into_iter().collect::<Vec<_>>();
     let last = elems.last().unwrap().to_string();
     let index = last.chars().position(|c| c == '?').unwrap_or(last.len());
     let orig_name = last[..index].to_string();
-    format!("{}_{}", rand_str, orig_name)
+    format!("{}_{}", digest_str, orig_name)
 }
 
 fn convert_image(uri: &str) -> Option<String> {
     println!("preprocess_image: {:?}", uri);
+    let dir = "./pages/images";
+    let _ = fs::create_dir_all(dir);
+    let image_path = format!("{}/{}", dir, gen_image_name(uri));
+    if Path::new(&image_path).exists() {
+        return Some(image_path.clone());
+    }
     let resp = reqwest::blocking::get(uri);
     if resp.is_ok() {
         let body = resp.unwrap().bytes();
         if body.is_ok() {
             let image = body.unwrap().to_owned();
             //println!("image: {:?}", image);
-            let dir = "./pages/images";
-            let _ = fs::create_dir_all(dir);
-            let image_path = format!("{}/{}", dir, gen_image_name(uri));
             let res = fs::write(&image_path, &image);
             if res.is_ok() {
                 return Some(image_path.clone());
@@ -105,6 +103,8 @@ fn preprocess_image(content: &str, website: &str) -> String {
             if r.is_ok() {
                 let data = convert_image(&r.unwrap().to_string());
                 if let Some(d) = data {
+                    println!("origin src: {:?}", src);
+                    println!("new image src: {:?}", d);
                     result = result.replace(&src.unwrap(), &d);
                 }
             }

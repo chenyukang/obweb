@@ -33,7 +33,8 @@ path-clean = "0.1.0"
 feed-rs = "1.0"
 reqwest = { version = "0.11.6", features = ["blocking", "json"] }
 scraper = "0.12.0"
-html-escape = "0.2.9"
+digest = "0.7.6"
+sha2 = "0.9.8"
 
 [lib]
 name = "base"
