@@ -166,10 +166,7 @@ fn fetch_feed(feed: &str, pages: &mut Vec<Page>, force: bool) -> Option<i32> {
         if content.len() > 0 {
             let path = format!("./pages/{}.html", entry_title);
             fs::write(&path, &content).unwrap();
-            if !page_exist {
-                pages.push(page.clone());
-            }
-            dump_pages(&pages);
+            dump_new_pages(&page);
             succ_count += 1;
         } else {
             println!("error: {}", entry_title);
@@ -200,9 +197,20 @@ pub fn update_rss(feed: Option<&str>, force: bool) {
 pub fn dump_pages(pages: &Vec<Page>) {
     let dump_json = serde_json::to_string(&pages);
     if dump_json.is_ok() {
-        let _ = fs::write(PAGES_DB, &dump_json.unwrap());
+        fs::write(PAGES_DB, &dump_json.unwrap()).unwrap();
     }
 }
+
+fn dump_new_pages(page: &Page) {
+    let page_buf = fs::read_to_string(PAGES_DB).unwrap_or(String::from("[]"));
+    let mut pages: Vec<Page> = serde_json::from_str(&page_buf).unwrap();
+    let page_exist = pages.iter().any(|p| p.link == page.link);
+    if !page_exist {
+        pages.push(page.clone());
+        dump_pages(&pages);
+    }
+}
+
 pub fn clear_for_feed(feed: &str) {
     let page_buf = fs::read_to_string(PAGES_DB).unwrap_or(String::from("[]"));
     let pages: Vec<Page> = serde_json::from_str(&page_buf).unwrap();
