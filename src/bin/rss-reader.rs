@@ -1,8 +1,9 @@
 extern crate base;
 use base::rss;
 use clap::App;
+use std::error::Error;
 
-fn main() {
+fn main() -> Result<(), Box<dyn Error>> {
     let matches = App::new("Rss-reader")
         .version("0.1")
         .author("yukang <moorekang@gmail.com>")
@@ -14,10 +15,11 @@ fn main() {
         .get_matches();
 
     if matches.is_present("update") {
-        rss::update_rss(None, matches.is_present("force"));
+        rss::update_rss(None, matches.is_present("force"))?;
     } else if let Some(feed) = matches.value_of("remove") {
-        rss::clear_for_feed(feed);
+        rss::clear_for_feed(feed)?;
     } else if let Some(feed) = matches.value_of("single") {
-        rss::update_rss(Some(feed), true);
+        rss::update_rss(Some(feed), true)?;
     }
+    Ok(())
 }

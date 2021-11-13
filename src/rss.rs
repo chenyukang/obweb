@@ -4,6 +4,7 @@ use http::Uri;
 use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
 use sha2::Digest;
+use std::error::Error;
 use std::fs;
 use std::path::Path;
 
@@ -62,7 +63,12 @@ fn gen_image_name(uri: &str) -> String {
     let elems = cleaned_uri.split("/").into_iter().collect::<Vec<_>>();
     let image_name = elems.last().unwrap().to_string();
     let name_elems = image_name.split(".").into_iter().collect::<Vec<_>>();
-    let extension = name_elems.last().unwrap_or(&"png");
+    let extension = if name_elems.len() >= 2 {
+        name_elems.last().unwrap()
+    } else {
+        "png"
+    };
+    //println!("hex_str: {:?} extension: {:?}", hex_str, &extension);
     format!("{}.{}", hex_str, extension)
 }
 
@@ -139,17 +145,11 @@ fn fetch_page(url: &str) -> String {
     }
 }
 
-fn fetch_feed(feed: &str, pages: &Vec<Page>, force: bool) -> Option<i32> {
+fn fetch_feed(feed: &str, pages: &Vec<Page>, force: bool) -> Result<i32, Box<dyn Error>> {
     println!("fetch_feed: {:?}", feed);
     let resp = reqwest::blocking::get(feed);
-    if resp.is_err() {
-        return None;
-    }
-    let body = resp.unwrap().text();
-    if body.is_err() {
-        return None;
-    }
-    let feed_resp = parser::parse(body.unwrap().as_bytes()).unwrap();
+    let body = resp?.text();
+    let feed_resp = parser::parse(body?.as_bytes())?;
     println!("title: {:?}", feed_resp.title);
     let mut website = String::new();
     for link in feed_resp.links {
@@ -202,14 +202,14 @@ fn fetch_feed(feed: &str, pages: &Vec<Page>, force: bool) -> Option<i32> {
 
         if content.len() > 0 {
             let path = format!("./pages/{}.html", entry_title);
-            fs::write(&path, &content).unwrap();
+            fs::write(&path, &content)?;
             dump_new_pages(&page);
             succ_count += 1;
         } else {
             println!("error: {}", entry_title);
         }
     }
-    Some(succ_count)
+    Ok(succ_count)
 }
 
 pub fn cur_pages() -> Vec<Page> {
@@ -217,9 +217,9 @@ pub fn cur_pages() -> Vec<Page> {
     serde_json::from_str(&page_buf).unwrap()
 }
 
-pub fn update_rss(feed: Option<&str>, force: bool) {
+pub fn update_rss(feed: Option<&str>, force: bool) -> Result<(), Box<dyn Error>> {
     let pages = cur_pages();
-    let rss_buf = fs::read_to_string("./ob/Unsort/feeds.md").unwrap();
+    let rss_buf = fs::read_to_string("./ob/Unsort/feeds.md")?;
     let feeds = rss_buf
         .split("\n")
         .map(|l| l.trim())
@@ -240,14 +240,16 @@ pub fn update_rss(feed: Option<&str>, force: bool) {
         .filter(|&p| feeds.contains(&p.source.as_str()))
         .map(|p| p.clone())
         .collect::<Vec<Page>>();
-    dump_pages(&filtered_pages);
+    dump_pages(&filtered_pages)?;
+    Ok(())
 }
 
-pub fn dump_pages(pages: &Vec<Page>) {
+pub fn dump_pages(pages: &Vec<Page>) -> Result<(), Box<dyn Error>> {
     let dump_json = serde_json::to_string(&pages);
     if dump_json.is_ok() {
-        fs::write(PAGES_DB, &dump_json.unwrap()).unwrap();
+        fs::write(PAGES_DB, &dump_json.unwrap())?
     }
+    Ok(())
 }
 
 fn dump_new_pages(page: &Page) {
@@ -256,11 +258,11 @@ fn dump_new_pages(page: &Page) {
     let page_exist = pages.iter().any(|p| p.link == page.link);
     if !page_exist {
         pages.push(page.clone());
-        dump_pages(&pages);
+        let _ = dump_pages(&pages);
     }
 }
 
-pub fn clear_for_feed(feed: &str) {
+pub fn clear_for_feed(feed: &str) -> Result<(), Box<dyn Error>> {
     let page_buf = fs::read_to_string(PAGES_DB).unwrap_or(String::from("[]"));
     let pages: Vec<Page> = serde_json::from_str(&page_buf).unwrap();
     let filted_pages = pages
@@ -268,7 +270,8 @@ pub fn clear_for_feed(feed: &str) {
         .filter(|p| p.source != feed)
         .map(|p| p.clone())
         .collect::<Vec<_>>();
-    dump_pages(&filted_pages);
+    dump_pages(&filted_pages)?;
+    Ok(())
 }
 
 #[cfg(test)]
@@ -277,11 +280,12 @@ mod tests {
 
     #[test]
     fn test_url_base() {
-        assert!(gen_image_name("http://abc/d/x/demo.png").ends_with("_demo.png"));
-        assert!(gen_image_name("http://abc/d/x/demo.png?ab=1&c=3").ends_with("_demo.png"));
-        assert!(gen_image_name("/demo.png?ab=1&c=3").ends_with("_demo.png"));
-        assert!(gen_image_name("//demo.jpg").ends_with("demo.jpg"));
-        assert!(gen_image_name("http://abc.com/demo.jpg?/test/").ends_with("demo.jpg"));
+        assert!(gen_image_name("http://abc/d/x/demo.png").ends_with(".png"));
+        assert!(gen_image_name("http://abc/d/x/demo.png?ab=1&c=3").ends_with(".png"));
+        assert!(gen_image_name("/demo.png?ab=1&c=3").ends_with(".png"));
+        assert!(gen_image_name("//demo.jpg").ends_with(".jpg"));
+        assert!(gen_image_name("http://abc.com/demo.jpg?/test/").ends_with("jpg"));
+        assert!(gen_image_name("http://abc.com/demo?/test/").ends_with("png"));
     }
 
     #[test]
@@ -351,7 +355,7 @@ mod tests {
             img
         );
         let processed = preprocess_image(&html, "");
-        assert!(processed.find("logo.png").is_some());
+        assert!(processed.find(".png").is_some());
     }
 
     #[test]

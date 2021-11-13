@@ -8,6 +8,7 @@ use glob::glob;
 use path_clean;
 use rand::seq::SliceRandom;
 use serde::Deserialize;
+use std::error::Error;
 use std::fs;
 use std::fs::File;
 use std::net::Ipv4Addr;
@@ -191,7 +192,7 @@ fn page_query(query: &PageQuery) -> Result<warp::reply::Json, &'static str> {
             if !p.readed {
                 p.readed = true;
                 println!("set {} readed ...", p.link);
-                rss::dump_pages(&pages);
+                let _ = rss::dump_pages(&pages);
             }
             link
         } else {
@@ -262,10 +263,10 @@ fn search_query(req: &SearchQuery) -> Result<String, &'static str> {
     Ok(res.join(""))
 }
 
-fn rss_query() -> Result<String, &'static str> {
+fn rss_query() -> Result<String, Box<dyn Error>> {
     std::thread::spawn(|| git::git_pull());
     let page_buf = fs::read_to_string("./db/pages.json").unwrap_or(String::from("[]"));
-    let mut pages: Vec<rss::Page> = serde_json::from_str(&page_buf).unwrap();
+    let mut pages: Vec<rss::Page> = serde_json::from_str(&page_buf)?;
 
     pages.sort_by(|a, b| {
         b.publish_datetime
@@ -289,9 +290,9 @@ fn rss_query() -> Result<String, &'static str> {
     Ok(res.join(""))
 }
 
-fn mark_done(req: &Mark) -> Result<String, &'static str> {
+fn mark_done(req: &Mark) -> Result<String, Box<dyn Error>> {
     std::thread::spawn(|| git::git_pull());
-    let todo = fs::read_to_string("./ob/Unsort/todo.md").unwrap();
+    let todo = fs::read_to_string("./ob/Unsort/todo.md")?;
     let todos: Vec<&str> = todo.split("---").collect();
     let mut elems: Vec<String> = todos.iter().map(|&x| String::from(x)).collect();
     elems[req.index] = elems[req.index].replace("- [ ] ", "- [x] ");
