@@ -61,7 +61,9 @@ fn gen_image_name(uri: &str) -> String {
     let cleaned_uri = uri[..index].to_string();
     let elems = cleaned_uri.split("/").into_iter().collect::<Vec<_>>();
     let image_name = elems.last().unwrap().to_string();
-    format!("{}_{}", hex_str, image_name)
+    let name_elems = image_name.split(".").into_iter().collect::<Vec<_>>();
+    let extension = name_elems.last().unwrap_or(&"png");
+    format!("{}.{}", hex_str, extension)
 }
 
 fn convert_image(uri: &str) -> Option<String> {

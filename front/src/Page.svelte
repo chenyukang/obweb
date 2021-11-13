@@ -12,6 +12,7 @@
     let search_input = "";
     let in_edit = false;
     let rsslink = "";
+    let publish_time = "";
 
     export const refresh = (cur) => {
         if (cur_page == "day") {
@@ -207,13 +208,15 @@
                 file = response[0];
                 content = response[1];
                 rsslink = response[2];
+                publish_time = response[3];
                 if (file != "NoPage") {
                     localStorage.setItem("page-content", content);
                     localStorage.setItem("file", file);
                     jq("#fileName").text(file.replaceAll(".md", ""));
                     jq("#fileName").prop("hidden", false);
                     jq("#pageNavBar").prop("hidden", false);
-                    let res = query_type == "rss" ? content : renderMdToHtml(content);
+                    let res =
+                        query_type == "rss" ? content : renderMdToHtml(content);
                     jq("#page-content").html(res);
                     jq("#page-content").prop("hidden", false);
                     if (rsslink != undefined && rsslink != "") {
@@ -254,6 +257,7 @@
                 e.preventDefault();
                 let text = e.target.innerText;
                 let url = e.target.href;
+                if (!url) { return false; }
                 let relative_url = url.replace(window.location.origin, "");
                 //console.log(e.target);
                 if (!isValidHttpUrl(relative_url)) {
@@ -286,8 +290,7 @@
         jq("#page-content").prop("contenteditable", false);
         jq("#page-content").css("backgroundColor", "white");
         jq("#editBtn").text("Edit");
-        if (cur_page != "rss")
-            hljs.highlightAll();
+        if (cur_page != "rss") hljs.highlightAll();
         adjustTodo();
         hookInit();
         in_edit = false;
@@ -415,30 +418,13 @@
 
     onMount(async () => {
         setPageDefault();
-        jq("body").on("click", "img", function (e) {
-            let cur_rato = localStorage.getItem("ratio");
-            if (cur_rato == "normal" || cur_rato == null) {
-                cur_rato = "full";
-                jq(this).css("max-width", "100%");
-                jq(this).css("max-height", "100%");
-                jq(this).css("width", "100%");
-                jq(this).css("height", "100%");
-            } else {
-                cur_rato = "normal";
-                jq(this).css("max-width", "70%");
-                jq(this).css("max-height", "70%");
-                jq(this).css("width", "");
-                jq(this).css("height", "");
-            }
-            localStorage.setItem("ratio", cur_rato);
-        });
     });
 </script>
 
 <div class="tab-content">
     {#if cur_page == "day"}
         <div class="row sticky-top" style="margin-top: 20px; border: 0;">
-            <div class="col-md-2"></div>
+            <div class="col-md-2" />
             <div class="col-md-8 text-right">
                 <button
                     type="button"
@@ -460,7 +446,7 @@
         </div>
     {:else if cur_page == "rand" || cur_page == "todo"}
         <div class="row sticky-top" style="margin-top: 20px; border: 0;">
-            <div class="col-md-2"></div>
+            <div class="col-md-2" />
             <div class="col-md-8 text-right">
                 <button
                     type="button"
@@ -473,7 +459,7 @@
         </div>
     {:else if cur_page == "rss"}
         <div class="row sticky-top" style="margin-top: 20px; border: 0;">
-            <div class="col-md-2"></div>
+            <div class="col-md-2" />
             <div class="col-md-8 text-right" hidden="true" id="pageNavBar">
                 <button
                     type="button"
@@ -486,7 +472,7 @@
         </div>
     {:else if cur_page == "find"}
         <div class="row">
-            <div class="col-md-2"></div>
+            <div class="col-md-2" />
             <div class="col-md-8">
                 <div class="input-group" style="margin-top: 30px">
                     <input
@@ -512,7 +498,7 @@
         </div>
 
         <div class="row sticky-top" style="margin-top: 20px; border: 0;">
-            <div class="col-md-2"></div>
+            <div class="col-md-2" />
             <div class="col-md-8 text-right" hidden="true" id="pageNavBar">
                 <button
                     type="button"
@@ -563,15 +549,16 @@
 
     {#if show_rsslink}
         <div class="row">
-            <div class="col-md-2"></div>
+            <div class="col-md-2" />
             <div class="col-md-8">
-                <a href={rsslink} id="rsslink" target="_blank">{(new URL(rsslink)).origin}</a>
+                <a href={rsslink} id="rsslink" target="_blank">{publish_time.split(" ")[0]} 👻 {new URL(rsslink).origin} </a
+                >
             </div>
         </div>
     {/if}
 
     <div class="row">
-        <div class="col-md-2"></div>
+        <div class="col-md-2" />
         <div class="col-md-8">
             <div class="pageContent" hidden="true" id="page-content" />
         </div>
