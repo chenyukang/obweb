@@ -7,4 +7,4 @@ pushd front
 npm run build
 popd
 
-cargo build --release; rm -rf ./ob-web; cp target/release/ob-web ./ ; cp target/release/rss-reader ./; nohup ./ob-web  >/tmp/nog 2>&1 &
+nohup ./bin/ob-web  >/tmp/nog 2>&1 &
