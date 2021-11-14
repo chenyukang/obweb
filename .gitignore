@@ -9,6 +9,8 @@ pages/*.html
 pages/images/*
 nohup.out
 update.sh
+ob-web
+db/pages.db
 *.Identifier
 __sapper__
 front/public/build

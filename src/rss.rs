@@ -1,14 +1,15 @@
 use chrono::prelude::*;
 use feed_rs::parser;
-use http::Uri;
 use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
 use sha2::Digest;
 use std::error::Error;
 use std::fs;
 use std::path::Path;
+use url::Url;
 
-static PAGES_DB: &'static str = "./db/pages.json";
+static PAGES_DB: &'static str = "./db/pages.db";
+static IMAGE_DIR: &'static str = "./pages/images";
 
 /// An item within a feed
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -50,52 +51,43 @@ fn remove_element(content: &str, keyword: &str) -> String {
     return result;
 }
 
-fn gen_image_name(uri: &str) -> String {
+fn gen_image_name(uri: &str) -> Result<String, Box<dyn Error>> {
     let digest = sha2::Sha256::digest(uri.as_bytes());
-    let mut hex = String::new();
-    for byte in digest.iter() {
-        hex.push_str(&format!("{:02x}", byte));
-    }
+    let hex = digest
+        .iter()
+        .map(|v| format!("{:02x}", v))
+        .collect::<Vec<String>>()
+        .join("");
     let len = usize::min(10, hex.len());
     let hex_str = &hex[0..len].to_string();
-    let index = uri.chars().position(|c| c == '?').unwrap_or(uri.len());
-    let cleaned_uri = uri[..index].to_string();
-    let elems = cleaned_uri.split("/").into_iter().collect::<Vec<_>>();
-    let image_name = elems.last().unwrap().to_string();
-    let name_elems = image_name.split(".").into_iter().collect::<Vec<_>>();
-    let extension = if name_elems.len() >= 2 {
-        name_elems.last().unwrap()
+    let image_name = Url::parse(uri)?
+        .path_segments()
+        .map(|c| c.collect::<Vec<_>>())
+        .unwrap_or_default()
+        .last()
+        .unwrap()
+        .to_string();
+    let segs = image_name.split(".").into_iter().collect::<Vec<_>>();
+    let extension = if segs.len() >= 2 {
+        segs.last().unwrap()
     } else {
         "png"
     };
-    //println!("hex_str: {:?} extension: {:?}", hex_str, &extension);
-    format!("{}.{}", hex_str, extension)
+    fs::create_dir_all(IMAGE_DIR)?;
+    Ok(format!("{}/{}.{}", IMAGE_DIR, hex_str, extension))
 }
 
-fn convert_image(uri: &str) -> Option<String> {
+fn convert_image(uri: &str) -> Result<String, Box<dyn Error>> {
     println!("preprocess_image: {:?}", uri);
-    let dir = "./pages/images";
-    let _ = fs::create_dir_all(dir);
-    let image_path = format!("{}/{}", dir, gen_image_name(uri));
-    //let ret_path = image_path.replace("./pages", "");
-    if Path::new(&image_path).exists() {
-        return Some(image_path.clone());
+    let image_path = gen_image_name(uri).unwrap();
+    let relative_path = image_path.replace("./", "/");
+    if !Path::new(&image_path).exists() {
+        let resp = reqwest::blocking::get(uri)?;
+        let image = resp.bytes()?;
+        fs::write(&image_path, &image)?;
+        println!("image saved: {:?}", image_path);
     }
-    let resp = reqwest::blocking::get(uri);
-    if resp.is_ok() {
-        let body = resp.unwrap().bytes();
-        if body.is_ok() {
-            let image = body.unwrap().to_owned();
-            //println!("image: {:?}", image);
-            let res = fs::write(&image_path, &image);
-            if res.is_ok() {
-                return Some(image_path.clone());
-            } else {
-                return None;
-            }
-        }
-    }
-    None
+    Ok(relative_path.clone())
 }
 
 fn preprocess_image(content: &str, website: &str) -> String {
@@ -107,17 +99,13 @@ fn preprocess_image(content: &str, website: &str) -> String {
         let node = img.value();
         let src = node.attr("src");
         if let Some(url) = src {
-            let full_url = if url.starts_with("http://") || url.starts_with("https://") {
-                url.to_string()
-            } else {
-                format!("{}/{}", website, url)
-            };
-            let r = full_url.parse::<Uri>();
-            if r.is_ok() {
-                let data = convert_image(&r.unwrap().to_string());
-                if let Some(d) = data {
-                    result = result.replace(&src.unwrap(), &d.replace("./", "/"));
-                }
+            let uri = Url::parse(url);
+            let mut full_uri = url.to_string();
+            if !(uri.is_ok() && uri.unwrap().scheme().to_string().starts_with("http")) {
+                full_uri = format!("{}/{}", website, url);
+            }
+            if let Ok(image) = convert_image(&full_uri) {
+                result = result.replace(url, &image);
             }
         }
     }
@@ -217,7 +205,29 @@ pub fn cur_pages() -> Vec<Page> {
     serde_json::from_str(&page_buf).unwrap()
 }
 
+fn init_db(db_name: Option<&str>) -> Result<(), Box<dyn Error>> {
+    let name = db_name.unwrap_or(PAGES_DB);
+    if !Path::new(name).exists() {
+        let connection = sqlite::open(name).unwrap();
+        connection.execute(
+            r#"
+            BEGIN;
+            CREATE TABLE pages (title String NOT NULL,
+                                link String NOT NULL,
+                                website String,
+                                publish_datetime String,
+                                readed Boolean,
+                                source String NOT NULL);
+            CREATE UNIQUE INDEX idx_pages_link ON pages (link);
+            COMMIT;
+            "#,
+        )?;
+    }
+    Ok(())
+}
+
 pub fn update_rss(feed: Option<&str>, force: bool) -> Result<(), Box<dyn Error>> {
+    init_db(None)?;
     let pages = cur_pages();
     let rss_buf = fs::read_to_string("./ob/Unsort/feeds.md")?;
     let feeds = rss_buf
@@ -279,13 +289,14 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_url_base() {
-        assert!(gen_image_name("http://abc/d/x/demo.png").ends_with(".png"));
-        assert!(gen_image_name("http://abc/d/x/demo.png?ab=1&c=3").ends_with(".png"));
-        assert!(gen_image_name("/demo.png?ab=1&c=3").ends_with(".png"));
-        assert!(gen_image_name("//demo.jpg").ends_with(".jpg"));
-        assert!(gen_image_name("http://abc.com/demo.jpg?/test/").ends_with("jpg"));
-        assert!(gen_image_name("http://abc.com/demo?/test/").ends_with("png"));
+    fn test_url_base() -> Result<(), Box<dyn Error>> {
+        assert!(gen_image_name("http://abc/d/x/demo.png")?.ends_with(".png"));
+        assert!(gen_image_name("http://abc/d/x/demo.png?ab=1&c=3")?.ends_with(".png"));
+        assert!(gen_image_name("https://a/demo.png?ab=1&c=3")?.ends_with(".png"));
+        assert!(gen_image_name("http://x.com/demo.jpg")?.ends_with(".jpg"));
+        assert!(gen_image_name("http://abc.com/demo.jpg?/test/")?.ends_with("jpg"));
+        assert!(gen_image_name("http://abc.com/demo?/test/")?.ends_with("png"));
+        Ok(())
     }
 
     #[test]
@@ -381,5 +392,35 @@ mod tests {
         content = preprocess_image(&content, uri);
         let _ = fs::write("./pages/tmp.html", &content);
         assert!(content.contains("/images/"));
+    }
+
+    #[test]
+    fn test_db() {
+        let db_name = "/tmp/rss.db";
+        let res = init_db(Some(db_name));
+        assert!(Path::new(db_name).exists());
+        assert!(res.is_ok());
+
+        let connection = sqlite::open(db_name).unwrap();
+        connection
+            .execute(
+                r#"
+        INSERT INTO pages VALUES ('title',
+                                  'link',
+                                  'website',
+                                  'publish_time',
+                                  true,
+                                  'source');
+        "#,
+            )
+            .unwrap();
+
+        let mut statement = connection
+            .prepare("SELECT * FROM pages")
+            .unwrap()
+            .into_cursor();
+        let res = statement.next().unwrap();
+        fs::remove_file(db_name).unwrap();
+        println!("res: {:?}", res);
     }
 }
