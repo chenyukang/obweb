@@ -1,4 +1,5 @@
 use chrono::prelude::*;
+use feed_rs::model::Link;
 use feed_rs::parser;
 use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
@@ -133,30 +134,29 @@ fn fetch_page(url: &str) -> String {
     }
 }
 
+fn first_link(links: &Vec<Link>) -> String {
+    if let Some(l) = links.first() {
+        if Url::parse(&l.href).is_ok() {
+            return l.href.to_owned();
+        }
+    }
+    String::from("")
+}
+
 fn fetch_feed(feed: &str, pages: &Vec<Page>, force: bool) -> Result<i32, Box<dyn Error>> {
     println!("fetch_feed: {:?}", feed);
     let resp = reqwest::blocking::get(feed);
     let body = resp?.text();
     let feed_resp = parser::parse(body?.as_bytes())?;
     println!("title: {:?}", feed_resp.title);
-    let mut website = String::new();
-    for link in feed_resp.links {
-        if link.href.starts_with("http") {
-            website = link.href;
-            break;
-        }
-    }
+    let website = first_link(&feed_resp.links);
     let mut succ_count = 0;
     for entry in feed_resp.entries {
         let entry_title = entry.title.unwrap().content.replace("/", "|");
         let published_time = entry
             .published
             .unwrap_or(entry.updated.unwrap_or(Utc::now()));
-        let link = if let Some(l) = entry.links.get(0) {
-            l.href.clone()
-        } else {
-            String::default()
-        };
+        let link = first_link(&entry.links);
         println!("link: {}", link);
         let page_exist = pages
             .iter()
@@ -419,8 +419,7 @@ mod tests {
             .prepare("SELECT * FROM pages")
             .unwrap()
             .into_cursor();
-        let res = statement.next().unwrap();
+        let _res = statement.next().unwrap();
         fs::remove_file(db_name).unwrap();
-        println!("res: {:?}", res);
     }
 }
