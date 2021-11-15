@@ -51,7 +51,6 @@ fn remove_elements(content: &str, keywords: &Vec<&str>) -> String {
         let select = Selector::parse(keyword).unwrap();
         html.select(&select).for_each(|it| {
             let unescaped = it.html();
-            println!("unescaped: {:?}", unescaped);
             assert!(result.contains(&unescaped));
             result = result.replace(&unescaped, "")
         });
@@ -224,7 +223,7 @@ fn init_db(db_name: Option<&str>) -> Result<(), Box<dyn Error>> {
     let name = db_name.unwrap_or(PAGES_DB);
     if !Path::new(name).exists() {
         let conn = Connection::open(PAGES_DB)?;
-        conn.execute(
+        conn.execute_batch(
             r#"
             BEGIN;
             CREATE TABLE pages (title String NOT NULL,
@@ -236,7 +235,6 @@ fn init_db(db_name: Option<&str>) -> Result<(), Box<dyn Error>> {
             CREATE UNIQUE INDEX idx_pages_link ON pages (link);
             COMMIT;
             "#,
-            [],
         )?;
     }
     Ok(())
@@ -421,7 +419,7 @@ mod tests {
         assert!(res.is_ok());
 
         let conn = Connection::open(PAGES_DB)?;
-        conn.execute(
+        conn.execute_batch(
             r#"
         INSERT INTO pages (title, link, website, publish_datetime, readed, source)
         VALUES ('title',
@@ -431,25 +429,34 @@ mod tests {
                 true,
                 'source');
         "#,
-            [],
         )?;
 
         let mut statement = conn.prepare("SELECT count(*) FROM pages")?;
-        //let row = statement.query_map([], |row| row.get(0)?)?;
-        let count: rusqlite::Result<i64> = statement.query_row([1i32], |r| r.get(0));
+        let count: rusqlite::Result<i64> = statement.query_row([], |r| r.get(0));
         assert_eq!(1i64, count?);
-        //println!("row: {:?}", row);
 
         let page = Page {
             title: "title_new".to_string(),
             link: "link_new".to_string(),
-            website: "website_new".to_string(),
+            website: "website".to_string(),
             publish_datetime: "publish_time".to_string(),
             readed: true,
             source: "source".to_string(),
         };
         dump_new_page(&page)?;
 
+        let mut statement = conn.prepare("SELECT count(*) FROM pages")?;
+        let count: rusqlite::Result<i64> = statement.query_row([], |r| r.get(0));
+        assert_eq!(2i64, count?);
+
+        let mut stmt = conn.prepare("SELECT link FROM pages WHERE title = ? ")?;
+        let mut res = stmt.query(["title_new"])?;
+        let mut names: Vec<String> = Vec::new();
+        while let Some(row) = res.next()? {
+            names.push(row.get(0)?);
+        }
+        assert_eq!(names.len(), 1);
+        assert_eq!(names[0], "link_new");
         fs::remove_file(PAGES_DB).unwrap();
         Ok(())
     }
