@@ -1,6 +1,7 @@
 use chrono::prelude::*;
 use feed_rs::model::Link;
 use feed_rs::parser;
+use rusqlite::{params, Connection};
 use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
 use sha2::Digest;
@@ -9,7 +10,12 @@ use std::fs;
 use std::path::Path;
 use url::Url;
 
+#[cfg(test)]
+static PAGES_DB: &'static str = "./db/test_pages.db";
+
+#[cfg(not(test))]
 static PAGES_DB: &'static str = "./db/pages.db";
+
 static IMAGE_DIR: &'static str = "./pages/images";
 
 /// An item within a feed
@@ -38,17 +44,18 @@ fn extract(html: &Html, keyword: &str) -> Option<String> {
     None
 }
 
-fn remove_element(content: &str, keyword: &str) -> String {
+fn remove_elements(content: &str, keywords: &Vec<&str>) -> String {
     let html = Html::parse_document(content);
-    let select = Selector::parse(keyword).unwrap();
     let mut result = html.root_element().html().to_string();
-    //println!("result: {:?}", result);
-    html.select(&select).for_each(|it| {
-        let unescaped = it.html();
-        //println!("unescaped: {:?}", unescaped);
-        assert!(result.contains(&unescaped));
-        result = result.replace(&unescaped, "")
-    });
+    for keyword in keywords {
+        let select = Selector::parse(keyword).unwrap();
+        html.select(&select).for_each(|it| {
+            let unescaped = it.html();
+            println!("unescaped: {:?}", unescaped);
+            assert!(result.contains(&unescaped));
+            result = result.replace(&unescaped, "")
+        });
+    }
     return result;
 }
 
@@ -113,24 +120,16 @@ fn preprocess_image(content: &str, website: &str) -> String {
     result.clone()
 }
 
-fn fetch_page(url: &str) -> String {
+fn fetch_page(url: &str) -> Result<String, Box<dyn Error>> {
     println!("fetch_page: {:?}", url);
-    if url.is_empty() {
-        return String::default();
-    };
-    let resp = reqwest::blocking::get(url);
-    if resp.is_ok() {
-        let res = resp.unwrap().text().unwrap();
-        let document = Html::parse_document(&res);
-        let article = extract(&document, "article");
-        if let Some(r) = article {
-            r
-        } else {
-            extract(&document, "body").unwrap_or(res.clone())
-        }
+    let resp = reqwest::blocking::get(url)?;
+    let res = resp.text()?;
+    let document = Html::parse_document(&res);
+    let article = extract(&document, "article");
+    if let Some(cont) = article {
+        Ok(cont)
     } else {
-        println!("error: {:?}", resp);
-        String::from("")
+        Ok(extract(&document, "body").unwrap_or(res.clone()))
     }
 }
 
@@ -156,6 +155,7 @@ fn fetch_feed(feed: &str, pages: &Vec<Page>, force: bool) -> Result<i32, Box<dyn
         let published_time = entry
             .published
             .unwrap_or(entry.updated.unwrap_or(Utc::now()));
+
         let link = first_link(&entry.links);
         println!("link: {}", link);
         let page_exist = pages
@@ -169,16 +169,31 @@ fn fetch_feed(feed: &str, pages: &Vec<Page>, force: bool) -> Result<i32, Box<dyn
         let mut content = if let Some(ct) = entry.content {
             ct.body.unwrap()
         } else {
-            let descrption = entry.summary;
-            if descrption.is_some() {
-                descrption.unwrap().content
+            let descrption = if let Some(desc) = entry.summary {
+                desc.content
             } else {
-                fetch_page(&link)
+                String::from("")
+            };
+            let page = {
+                let page = fetch_page(&link)?;
+                let keywords = vec!["footer", "header", "script", "style", "comments"];
+                remove_elements(&page, &keywords)
+            };
+
+            // We need to guess whether the descrption is only a summary
+            // If page contains multimedia, return the page
+            if (page.len() > descrption.len() * 2)
+                || (page.contains(&descrption))
+                || (page.contains("<audio") || page.contains("<video"))
+                || page.contains("<code>")
+            {
+                page
+            } else {
+                descrption
             }
         };
+
         content = preprocess_image(&content, &website);
-        content = remove_element(&content, "footer");
-        content = remove_element(&content, "header");
         let page = Page {
             link: link.clone(),
             website: website.clone(),
@@ -191,7 +206,7 @@ fn fetch_feed(feed: &str, pages: &Vec<Page>, force: bool) -> Result<i32, Box<dyn
         if content.len() > 0 {
             let path = format!("./pages/{}.html", entry_title);
             fs::write(&path, &content)?;
-            dump_new_pages(&page);
+            dump_new_page(&page)?;
             succ_count += 1;
         } else {
             println!("error: {}", entry_title);
@@ -208,8 +223,8 @@ pub fn cur_pages() -> Vec<Page> {
 fn init_db(db_name: Option<&str>) -> Result<(), Box<dyn Error>> {
     let name = db_name.unwrap_or(PAGES_DB);
     if !Path::new(name).exists() {
-        let connection = sqlite::open(name).unwrap();
-        connection.execute(
+        let conn = Connection::open(PAGES_DB)?;
+        conn.execute(
             r#"
             BEGIN;
             CREATE TABLE pages (title String NOT NULL,
@@ -221,6 +236,7 @@ fn init_db(db_name: Option<&str>) -> Result<(), Box<dyn Error>> {
             CREATE UNIQUE INDEX idx_pages_link ON pages (link);
             COMMIT;
             "#,
+            [],
         )?;
     }
     Ok(())
@@ -262,14 +278,13 @@ pub fn dump_pages(pages: &Vec<Page>) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn dump_new_pages(page: &Page) {
-    let page_buf = fs::read_to_string(PAGES_DB).unwrap_or(String::from("[]"));
-    let mut pages: Vec<Page> = serde_json::from_str(&page_buf).unwrap();
-    let page_exist = pages.iter().any(|p| p.link == page.link);
-    if !page_exist {
-        pages.push(page.clone());
-        let _ = dump_pages(&pages);
-    }
+fn dump_new_page(page: &Page) -> rusqlite::Result<()> {
+    let conn = Connection::open(PAGES_DB)?;
+
+    conn.execute(
+        "INSERT INTO pages (title, link, website, publish_datetime, readed, source) values (?1, ?2, ?3, ?4, ?5, ?6)",
+        params![page.title, page.link, page.website, page.publish_datetime, page.readed, page.source])?;
+    Ok(())
 }
 
 pub fn clear_for_feed(feed: &str) -> Result<(), Box<dyn Error>> {
@@ -336,11 +351,13 @@ mod tests {
         <body>
         <meta charset="utf-8">
         <footer>Hello, world!</footer>
+        <comments>Comments</comments>
         <h1 class="foo">Hello, <i>world!</i></h1>
         </body>
     "#;
-        let res = remove_element(html, "footer");
+        let res = remove_elements(html, &vec!["footer", "comments"]);
         assert!(!res.contains("<footer>"));
+        assert!(!res.contains("<comments>"));
     }
 
     #[test]
@@ -372,54 +389,68 @@ mod tests {
     #[test]
     fn test_fetch_page() {
         let url = "https://blog.janestreet.com/ocaml-4-03-everything-else/";
-        let content = fetch_page(url);
+        let content = fetch_page(url).unwrap();
         assert!(!content.contains("<body>"));
     }
 
     #[test]
-    fn test_fetch_page_remove_footer() {
+    fn test_fetch_page_remove_footer() -> Result<(), Box<dyn Error>> {
         let url = "https://yihui.org/cn/2021/07/injuries/";
-        let mut content = fetch_page(url);
+        let mut content = fetch_page(url)?;
         assert!(content.contains("<footer>"));
-        content = remove_element(&content, "footer");
+        content = remove_elements(&content, &vec!["footer"]);
         assert!(!content.contains("<footer>"));
+        Ok(())
     }
 
     #[test]
-    fn test_fetch_page_images() {
+    fn test_fetch_page_images() -> Result<(), Box<dyn Error>> {
         let uri = "https://yihui.org/cn/2020/07/wild-onion/";
-        let mut content = fetch_page(uri);
+        let mut content = fetch_page(uri)?;
         content = preprocess_image(&content, uri);
-        let _ = fs::write("./pages/tmp.html", &content);
+        fs::write("/tmp/tmp.html", &content)?;
         assert!(content.contains("/images/"));
+        Ok(())
     }
 
     #[test]
-    fn test_db() {
-        let db_name = "/tmp/rss.db";
-        let res = init_db(Some(db_name));
-        assert!(Path::new(db_name).exists());
+    fn test_db() -> rusqlite::Result<()> {
+        let _ = fs::remove_file(PAGES_DB);
+        let res = init_db(None);
+        assert!(Path::new(PAGES_DB).exists());
         assert!(res.is_ok());
 
-        let connection = sqlite::open(db_name).unwrap();
-        connection
-            .execute(
-                r#"
-        INSERT INTO pages VALUES ('title',
-                                  'link',
-                                  'website',
-                                  'publish_time',
-                                  true,
-                                  'source');
+        let conn = Connection::open(PAGES_DB)?;
+        conn.execute(
+            r#"
+        INSERT INTO pages (title, link, website, publish_datetime, readed, source)
+        VALUES ('title',
+                'link',
+                'website',
+                'publish_time',
+                true,
+                'source');
         "#,
-            )
-            .unwrap();
+            [],
+        )?;
 
-        let mut statement = connection
-            .prepare("SELECT * FROM pages")
-            .unwrap()
-            .into_cursor();
-        let _res = statement.next().unwrap();
-        fs::remove_file(db_name).unwrap();
+        let mut statement = conn.prepare("SELECT count(*) FROM pages")?;
+        //let row = statement.query_map([], |row| row.get(0)?)?;
+        let count: rusqlite::Result<i64> = statement.query_row([1i32], |r| r.get(0));
+        assert_eq!(1i64, count?);
+        //println!("row: {:?}", row);
+
+        let page = Page {
+            title: "title_new".to_string(),
+            link: "link_new".to_string(),
+            website: "website_new".to_string(),
+            publish_datetime: "publish_time".to_string(),
+            readed: true,
+            source: "source".to_string(),
+        };
+        dump_new_page(&page)?;
+
+        fs::remove_file(PAGES_DB).unwrap();
+        Ok(())
     }
 }

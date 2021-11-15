@@ -13,4 +13,5 @@ ob-web
 db/pages.db
 *.Identifier
 __sapper__
+db/test_pages.db
 front/public/build
