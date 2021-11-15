@@ -17,7 +17,7 @@ static PAGES_DB: &'static str = "./db/test_pages.db";
 static PAGES_DB: &'static str = "./db/pages.db";
 
 static IMAGE_DIR: &'static str = "./pages/images";
-
+static ALL_FEEDS: &'static str = "./ob/Unsort/feeds.md";
 /// An item within a feed
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Page {
@@ -243,7 +243,7 @@ fn init_db(db_name: Option<&str>) -> Result<(), Box<dyn Error>> {
 pub fn update_rss(feed: Option<&str>, force: bool) -> Result<(), Box<dyn Error>> {
     init_db(None)?;
     let pages = cur_pages();
-    let rss_buf = fs::read_to_string("./ob/Unsort/feeds.md")?;
+    let rss_buf = fs::read_to_string(ALL_FEEDS)?;
     let feeds = rss_buf
         .split("\n")
         .map(|l| l.trim())
