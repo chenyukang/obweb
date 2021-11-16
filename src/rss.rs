@@ -157,7 +157,7 @@ fn fetch_feed(feed: &str, force: bool) -> Result<i32, Box<dyn Error>> {
 
         let link = first_link(&entry.links);
         println!("link: {}", link);
-        let prev = query_page(&entry_title);
+        let prev = query_page_link(&link);
         let page_exist = prev.is_some();
         if page_exist && !force {
             println!("link: {} cached", link);
@@ -171,6 +171,7 @@ fn fetch_feed(feed: &str, force: bool) -> Result<i32, Box<dyn Error>> {
             } else {
                 String::from("")
             };
+
             let page = {
                 let page = fetch_page(&link)?;
                 let keywords = vec!["footer", "header", "script", "style", "comments"];
@@ -305,6 +306,7 @@ pub fn query_pages(limits: &Vec<(&str, &str)>) -> Vec<Page> {
         String::from(" 1 = 1 ")
     };
     let sql = format!("SELECT * FROM pages WHERE {} ORDER BY id DESC", limit_str);
+    println!("sql: {:?}", sql);
     let mut statement = conn.prepare(&sql).unwrap();
     let pages = statement
         .query_map([], |row| {
@@ -321,6 +323,16 @@ pub fn query_pages(limits: &Vec<(&str, &str)>) -> Vec<Page> {
 
     let res: Vec<Page> = pages.map(|f| f.unwrap()).collect();
     return res;
+}
+
+pub fn query_page_link(link: &str) -> Option<Page> {
+    let pages = query_pages(&vec![("link", link)]);
+    assert!(pages.len() <= 1);
+    if pages.len() == 1 {
+        return Some(pages[0].clone());
+    } else {
+        None
+    }
 }
 
 pub fn query_page(title: &str) -> Option<Page> {
@@ -560,8 +572,6 @@ mod tests {
         let _ = fs::remove_file(PAGES_DB);
         init_db(None)?;
         assert!(Path::new(PAGES_DB).exists());
-
-        let conn = Connection::open(&PAGES_DB)?;
         let page = Page {
             title: "title1".to_string(),
             link: "link1".to_string(),
@@ -572,15 +582,12 @@ mod tests {
         };
         dump_new_page(&page)?;
 
-        let mut statement = conn.prepare("SELECT * FROM pages where link = :link")?;
-        let readed: rusqlite::Result<i64> =
-            statement.query_row(&[(":link", "link1")], |r| r.get(5));
-        assert_eq!(0i64, readed?);
+        let page = query_page_link("link1");
+        assert_eq!(page.unwrap().readed, false);
 
         update_page_read("link1")?;
-        let readed: rusqlite::Result<i64> =
-            statement.query_row(&[(":link", "link1")], |r| r.get(5));
-        assert_eq!(1i64, readed?);
+        let page = query_page_link("link1");
+        assert_eq!(page.unwrap().readed, true);
         Ok(())
     }
 }
