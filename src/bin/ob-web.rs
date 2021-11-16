@@ -183,14 +183,12 @@ fn page_query(query: &PageQuery) -> Result<warp::reply::Json, &'static str> {
             return Ok(warp::reply::json(&(String::from("NoPage"), String::new())));
         }
         let data = fs::read_to_string(&path).unwrap();
-        let mut pages = rss::cur_pages();
-        let page = pages.iter_mut().find(|p| p.title == query.path);
+        let page = rss::query_page(&query.path);
         let mut time = String::new();
         let link = if let Some(p) = page {
             let link = p.link.clone();
             time = p.publish_datetime.clone();
             if !p.readed {
-                p.readed = true;
                 let _ = rss::update_page_read(&p.link);
                 println!("set {} readed ...", p.link);
             }

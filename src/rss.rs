@@ -11,7 +11,7 @@ use std::path::Path;
 use url::Url;
 
 #[cfg(test)]
-static PAGES_DB: &'static str = "./db/test_pages.db";
+static PAGES_DB: &'static str = "/tmp/pages.db";
 
 #[cfg(not(test))]
 static PAGES_DB: &'static str = "./db/pages.db";
@@ -219,10 +219,10 @@ pub fn cur_pages() -> Vec<Page> {
     serde_json::from_str(&page_buf).unwrap()
 }
 
-fn init_db(db_name: Option<&str>) -> Result<(), Box<dyn Error>> {
+fn init_db(db_name: Option<&str>) -> rusqlite::Result<()> {
     let name = db_name.unwrap_or(PAGES_DB);
     if !Path::new(name).exists() {
-        let conn = Connection::open(PAGES_DB)?;
+        let conn = Connection::open(name)?;
         conn.execute_batch(
             r#"
             BEGIN;
@@ -264,14 +264,6 @@ pub fn update_rss(feed: Option<&str>, force: bool) -> Result<(), Box<dyn Error>>
     Ok(())
 }
 
-pub fn dump_pages(pages: &Vec<Page>) -> Result<(), Box<dyn Error>> {
-    let dump_json = serde_json::to_string(&pages);
-    if dump_json.is_ok() {
-        fs::write(PAGES_DB, &dump_json.unwrap())?
-    }
-    Ok(())
-}
-
 fn cleanup_pages(feeds: &Vec<&str>) -> rusqlite::Result<()> {
     let conn = Connection::open(PAGES_DB)?;
     let params = feeds
@@ -303,6 +295,33 @@ pub fn update_page_read(link: &str) -> rusqlite::Result<usize> {
     let conn = Connection::open(PAGES_DB)?;
     conn.execute("UPDATE pages set readed = 1 where link = ?", [link])
 }
+
+pub fn query_page(title: &str) -> Option<Page> {
+    let conn = Connection::open(PAGES_DB).unwrap();
+    let mut statement = conn
+        .prepare("SELECT * FROM pages where title = :title")
+        .unwrap();
+    let pages = statement
+        .query_map(&[(":title", title)], |row| {
+            Ok(Page {
+                title: row.get(1).unwrap(),
+                link: row.get(2).unwrap(),
+                website: row.get(3).unwrap(),
+                publish_datetime: row.get(4).unwrap(),
+                readed: row.get(5).unwrap(),
+                source: row.get(6).unwrap(),
+            })
+        })
+        .unwrap();
+
+    let res: Vec<Page> = pages.map(|f| f.unwrap()).collect();
+    if res.len() > 0 {
+        Some(res[0].clone())
+    } else {
+        None
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -420,12 +439,10 @@ mod tests {
     #[test]
     fn test_db() -> rusqlite::Result<()> {
         let _ = fs::remove_file(PAGES_DB);
-        let res = init_db(None);
+        init_db(None)?;
         assert!(Path::new(PAGES_DB).exists());
-        println!("res: {:?}", res);
-        assert!(res.is_ok());
 
-        let conn = Connection::open(PAGES_DB)?;
+        let conn = Connection::open(&PAGES_DB)?;
         conn.execute_batch(
             r#"
         INSERT INTO pages (title, link, website, publish_datetime, readed, source)
@@ -474,16 +491,16 @@ mod tests {
         let mut statement = conn.prepare("SELECT count(*) FROM pages")?;
         let count: rusqlite::Result<i64> = statement.query_row([], |r| r.get(0));
         assert_eq!(1i64, count?);
-
-        fs::remove_file(PAGES_DB).unwrap();
-
         Ok(())
     }
 
     #[test]
     fn test_cleanup_pages() -> rusqlite::Result<()> {
         let _ = fs::remove_file(PAGES_DB);
-        let _ = init_db(None);
+        init_db(None)?;
+        assert!(Path::new(PAGES_DB).exists());
+
+        let conn = Connection::open(&PAGES_DB)?;
         let page1 = Page {
             title: "title1".to_string(),
             link: "link1".to_string(),
@@ -504,10 +521,14 @@ mod tests {
         dump_new_page(&page3)?;
         cleanup_pages(&vec!["source1", "source2"])?;
 
-        let conn = Connection::open(PAGES_DB)?;
         let mut statement = conn.prepare("SELECT count(*) FROM pages")?;
         let count: rusqlite::Result<i64> = statement.query_row([], |r| r.get(0));
         assert_eq!(2i64, count?);
+
+        let page = query_page("title");
+        assert!(page.is_none());
+        let page = query_page("title1");
+        assert_eq!(page.unwrap().title, "title1");
 
         Ok(())
     }
@@ -515,7 +536,10 @@ mod tests {
     #[test]
     fn test_update_read() -> rusqlite::Result<()> {
         let _ = fs::remove_file(PAGES_DB);
-        let _ = init_db(None);
+        init_db(None)?;
+        assert!(Path::new(PAGES_DB).exists());
+
+        let conn = Connection::open(&PAGES_DB)?;
         let page = Page {
             title: "title1".to_string(),
             link: "link1".to_string(),
@@ -526,7 +550,6 @@ mod tests {
         };
         dump_new_page(&page)?;
 
-        let conn = Connection::open(PAGES_DB)?;
         let mut statement = conn.prepare("SELECT * FROM pages where link = :link")?;
         let readed: rusqlite::Result<i64> =
             statement.query_row(&[(":link", "link1")], |r| r.get(5));
@@ -536,7 +559,6 @@ mod tests {
         let readed: rusqlite::Result<i64> =
             statement.query_row(&[(":link", "link1")], |r| r.get(5));
         assert_eq!(1i64, readed?);
-
         Ok(())
     }
 }
