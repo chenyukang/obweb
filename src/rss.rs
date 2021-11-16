@@ -141,7 +141,7 @@ fn first_link(links: &Vec<Link>) -> String {
     String::from("")
 }
 
-fn fetch_feed(feed: &str, pages: &Vec<Page>, force: bool) -> Result<i32, Box<dyn Error>> {
+fn fetch_feed(feed: &str, force: bool) -> Result<i32, Box<dyn Error>> {
     println!("fetch_feed: {:?}", feed);
     let resp = reqwest::blocking::get(feed);
     let body = resp?.text();
@@ -157,10 +157,8 @@ fn fetch_feed(feed: &str, pages: &Vec<Page>, force: bool) -> Result<i32, Box<dyn
 
         let link = first_link(&entry.links);
         println!("link: {}", link);
-        let page_exist = pages
-            .iter()
-            .any(|p| p.link == link && p.title == entry_title);
-
+        let prev = query_page(&entry_title);
+        let page_exist = prev.is_some();
         if page_exist && !force {
             println!("link: {} cached", link);
             continue;
@@ -244,7 +242,6 @@ fn init_db(db_name: Option<&str>) -> rusqlite::Result<()> {
 
 pub fn update_rss(feed: Option<&str>, force: bool) -> Result<(), Box<dyn Error>> {
     init_db(None)?;
-    let pages = cur_pages();
     let rss_buf = fs::read_to_string(ALL_FEEDS)?;
     let feeds = rss_buf
         .split("\n")
@@ -252,11 +249,11 @@ pub fn update_rss(feed: Option<&str>, force: bool) -> Result<(), Box<dyn Error>>
         .filter(|&l| l.len() > 0)
         .collect::<Vec<_>>();
     if let Some(f) = feed {
-        let _ = fetch_feed(f, &pages, true);
+        let _ = fetch_feed(f, true)?;
     } else {
         for feed in feeds.iter() {
             println!("force: {:?}", force);
-            let _ = fetch_feed(*feed, &pages, force);
+            let _ = fetch_feed(*feed, force);
         }
     }
 
@@ -296,13 +293,13 @@ pub fn update_page_read(link: &str) -> rusqlite::Result<usize> {
     conn.execute("UPDATE pages set readed = 1 where link = ?", [link])
 }
 
-pub fn query_page(title: &str) -> Option<Page> {
+pub fn query_all_page() -> Vec<Page> {
     let conn = Connection::open(PAGES_DB).unwrap();
     let mut statement = conn
-        .prepare("SELECT * FROM pages where title = :title")
+        .prepare("SELECT * FROM pages ORDER BY id DESC")
         .unwrap();
     let pages = statement
-        .query_map(&[(":title", title)], |row| {
+        .query_map([], |row| {
             Ok(Page {
                 title: row.get(1).unwrap(),
                 link: row.get(2).unwrap(),
@@ -315,11 +312,15 @@ pub fn query_page(title: &str) -> Option<Page> {
         .unwrap();
 
     let res: Vec<Page> = pages.map(|f| f.unwrap()).collect();
-    if res.len() > 0 {
-        Some(res[0].clone())
-    } else {
-        None
-    }
+    return res;
+}
+
+pub fn query_page(title: &str) -> Option<Page> {
+    let pages = query_all_page();
+    pages
+        .iter()
+        .find(|&p| p.title == title)
+        .map_or(None, |f| Some(f.to_owned()))
 }
 
 #[cfg(test)]

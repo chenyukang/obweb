@@ -263,9 +263,7 @@ fn search_query(req: &SearchQuery) -> Result<String, &'static str> {
 
 fn rss_query() -> Result<String, Box<dyn Error>> {
     std::thread::spawn(|| git::git_pull());
-    let page_buf = fs::read_to_string("./db/pages.json").unwrap_or(String::from("[]"));
-    let mut pages: Vec<rss::Page> = serde_json::from_str(&page_buf)?;
-
+    let mut pages = rss::query_all_page();
     pages.sort_by(|a, b| {
         b.publish_datetime
             .parse::<DateTime<Local>>()
