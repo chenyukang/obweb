@@ -191,8 +191,8 @@ fn page_query(query: &PageQuery) -> Result<warp::reply::Json, &'static str> {
             time = p.publish_datetime.clone();
             if !p.readed {
                 p.readed = true;
+                let _ = rss::update_page_read(&p.link);
                 println!("set {} readed ...", p.link);
-                let _ = rss::dump_pages(&pages);
             }
             link
         } else {
