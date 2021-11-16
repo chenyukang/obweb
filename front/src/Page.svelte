@@ -13,6 +13,7 @@
     let in_edit = false;
     let rsslink = "";
     let publish_time = "";
+    let rss_query_type = "unread";
 
     export const refresh = (cur) => {
         if (cur_page == "day") {
@@ -21,10 +22,10 @@
             fetchPage("", "rand");
         } else if (cur_page == "todo") {
             fetchPage("Unsort/todo");
-        } else if (cur_page == "find") {
-            search();
         } else if (cur_page == "rss") {
             fetchRss();
+        } else if (cur_page == "find") {
+            search();
         }
     };
 
@@ -100,22 +101,24 @@
     }
 
     function adjustTodo() {
-        jq("input:checkbox").each(function (index) {
-            jq(this).prop("id", index);
-        });
+        if (cur_page == "todo") {
+            jq("input:checkbox").each(function (index) {
+                jq(this).prop("id", index);
+            });
 
-        jq("input:checkbox:not(:checked)").each(function () {
-            let parent = jq(this).parent();
-            jq(this).prop("disabled", false);
-            parent.css("color", "red");
-            parent.css("font-weight", "bold");
-        });
+            jq("input:checkbox:not(:checked)").each(function () {
+                let parent = jq(this).parent();
+                jq(this).prop("disabled", false);
+                parent.css("color", "red");
+                parent.css("font-weight", "bold");
+            });
 
-        jq("input:checkbox:not(:checked)").change(function () {
-            if (jq(this).is(":checked")) {
-                markDone(jq(this).prop("id"));
-            }
-        });
+            jq("input:checkbox:not(:checked)").change(function () {
+                if (jq(this).is(":checked")) {
+                    markDone(jq(this).prop("id"));
+                }
+            });
+        }
     }
 
     function preprocessLink(response) {
@@ -184,10 +187,13 @@
         let begin_date = new Date(date.setDate(date.getDate() - 1000));
         show_status = true;
         show_rsslink = false;
+        let data = {
+            path: url,
+            query_type: query_type,
+        };
         jq.ajax({
-            url: `/api/page?path=${encodeURIComponent(
-                url
-            )}&query_type=${query_type}`,
+            url: "/api/page",
+            data: data,
             type: "GET",
             datatype: "json",
             contentType: "Application/json",
@@ -215,8 +221,7 @@
                     jq("#fileName").text(file.replaceAll(".md", ""));
                     jq("#fileName").prop("hidden", false);
                     jq("#pageNavBar").prop("hidden", false);
-                    let res =
-                        query_type == "rss" ? content : renderMdToHtml(content);
+                    let res = query_type == "rss" ? content : renderMdToHtml(content);
                     jq("#page-content").html(res);
                     jq("#page-content").prop("hidden", false);
                     if (rsslink != undefined && rsslink != "") {
@@ -288,6 +293,7 @@
 
     function setPageDefault() {
         jq("#page-content").prop("contenteditable", false);
+        jq("#backBtn").prop("hidden", false);
         jq("#page-content").css("backgroundColor", "white");
         jq("#editBtn").text("Edit");
         if (cur_page != "rss") hljs.highlightAll();
@@ -367,9 +373,15 @@
     function fetchRss() {
         show_status = true;
         show_rsslink = false;
+        rss_query_type = localStorage.getItem("rss_query_type") || "unread";
+        let data = {
+            "query_type": rss_query_type,
+            "limit": 100,
+        }
         jq.ajax({
             url: "/api/rss",
             type: "GET",
+            data: data,
             datatype: "json",
             contentType: "Application/json",
             statusCode: {
@@ -387,7 +399,12 @@
                     jq("#page-content").html(renderMdToHtml(response));
                     jq("#page-content").prop("hidden", false);
                     jq("#fileName").prop("hidden", true);
+                    jq("#backBtn").prop("hidden", true);
                     jq("#pageNavBar").prop("hidden", true);
+                    console.log("set setPageDefault....");
+                    jq("#rssread").prop("checked", rss_query_type == "all");
+                    console.log("set default: ", rss_query_type);
+
                     let pos = localStorage.getItem("pos_" + file);
                     pos = pos == null ? 0 : pos;
                     jq("html, body").animate({ scrollTop: pos }, "fast");
@@ -402,6 +419,14 @@
                 return err;
             },
         });
+    }
+
+    function rssRead() {
+        rss_query_type = jq(this).prop('checked') === true ? "all" : "unread";
+        localStorage.setItem("rss_query_type", rss_query_type);
+        cur_page = "rss";
+        console.log("rss read:", rss_query_type);
+        fetchRss();
     }
 
     function highlight(keyword) {
@@ -437,8 +462,7 @@
                     class="btn btn-warning"
                     style="float: center"
                     id="editBtn"
-                    on:click={editPage}>Edit</button
-                >
+                    on:click={editPage}>Edit</button>
                 <button type="button" class="btn btn-info" on:click={nextDaily}
                     >Next</button
                 >
@@ -453,23 +477,27 @@
                     class="btn btn-warning"
                     style="float: center"
                     id="editBtn"
-                    on:click={editPage}>Edit</button
-                >
+                    on:click={editPage}>Edit</button>
             </div>
         </div>
     {:else if cur_page == "rss"}
         <div class="row sticky-top" style="margin-top: 20px; border: 0;">
             <div class="col-md-2" />
-            <div class="col-md-8 text-right" hidden="true" id="pageNavBar">
+            <div class="col-md-8 text-right" id="pageNavBarRss">
                 <button
                     type="button"
                     class="btn btn-info"
                     style="float: left"
                     id="backBtn"
-                    on:click={fetchRss}>Back</button
-                >
+                    on:click={fetchRss}>Back</button>
+
+                    <label class="switch" style="float: right">
+                        <input id="rssread" type="checkbox" on:click={rssRead} >
+                        <span class="slider round"></span>
+                    </label>
             </div>
         </div>
+
     {:else if cur_page == "find"}
         <div class="row">
             <div class="col-md-2" />
@@ -480,16 +508,14 @@
                         bind:value={search_input}
                         class="form-control"
                         placeholder="search ..."
-                        id="searchInput"
-                    />
+                        id="searchInput"/>
                     <div class="input-group-append">
                         <button
                             class="btn btn-secondary"
                             type="button"
                             id="searchBtn"
                             style="margin-left: 5px"
-                            on:click={search}
-                        >
+                            on:click={search}>
                             <i class="fa fa-search" />
                         </button>
                     </div>

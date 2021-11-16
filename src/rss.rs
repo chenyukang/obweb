@@ -293,11 +293,19 @@ pub fn update_page_read(link: &str) -> rusqlite::Result<usize> {
     conn.execute("UPDATE pages set readed = 1 where link = ?", [link])
 }
 
-pub fn query_all_page() -> Vec<Page> {
+pub fn query_pages(limits: &Vec<(&str, &str)>) -> Vec<Page> {
     let conn = Connection::open(PAGES_DB).unwrap();
-    let mut statement = conn
-        .prepare("SELECT * FROM pages ORDER BY id DESC")
-        .unwrap();
+    let limit_str = if limits.len() > 0 {
+        limits
+            .iter()
+            .map(|&(k, v)| format!("{} = '{}'", k, v))
+            .collect::<Vec<String>>()
+            .join(" AND ")
+    } else {
+        String::from(" 1 = 1 ")
+    };
+    let sql = format!("SELECT * FROM pages WHERE {} ORDER BY id DESC", limit_str);
+    let mut statement = conn.prepare(&sql).unwrap();
     let pages = statement
         .query_map([], |row| {
             Ok(Page {
@@ -316,11 +324,23 @@ pub fn query_all_page() -> Vec<Page> {
 }
 
 pub fn query_page(title: &str) -> Option<Page> {
-    let pages = query_all_page();
-    pages
-        .iter()
-        .find(|&p| p.title == title)
-        .map_or(None, |f| Some(f.to_owned()))
+    let pages = query_pages(&vec![("title", title)]);
+    assert!(pages.len() <= 1);
+    if pages.len() == 1 {
+        return Some(pages[0].clone());
+    } else {
+        None
+    }
+}
+
+pub fn migrate_from_json_to_sqli() -> Result<(), Box<dyn Error>> {
+    let page_buf = fs::read_to_string("./db/pages.json").unwrap_or(String::from("[]"));
+    let pages: Vec<Page> = serde_json::from_str(&page_buf).unwrap();
+    for page in pages.iter() {
+        println!("dump: {:?}", &page.link);
+        dump_new_page(page)?;
+    }
+    Ok(())
 }
 
 #[cfg(test)]
@@ -470,18 +490,11 @@ mod tests {
         };
         dump_new_page(&page)?;
 
-        let mut statement = conn.prepare("SELECT count(*) FROM pages")?;
-        let count: rusqlite::Result<i64> = statement.query_row([], |r| r.get(0));
-        assert_eq!(2i64, count?);
+        let pages = query_pages(&vec![]);
+        assert_eq!(pages.len(), 2);
 
-        let mut stmt = conn.prepare("SELECT link FROM pages WHERE title = ? ")?;
-        let mut res = stmt.query(["title_new"])?;
-        let mut names: Vec<String> = Vec::new();
-        while let Some(row) = res.next()? {
-            names.push(row.get(0)?);
-        }
-        assert_eq!(names.len(), 1);
-        assert_eq!(names[0], "link_new");
+        let page_res = query_page("title_new");
+        assert_eq!(page_res.unwrap().link, "link_new");
 
         let mut new_page = page.clone();
         new_page.source = "source3".to_string();
@@ -489,9 +502,8 @@ mod tests {
         dump_new_page(&new_page)?;
 
         remove_pages_from("source")?;
-        let mut statement = conn.prepare("SELECT count(*) FROM pages")?;
-        let count: rusqlite::Result<i64> = statement.query_row([], |r| r.get(0));
-        assert_eq!(1i64, count?);
+        let pages = query_pages(&vec![]);
+        assert_eq!(pages.len(), 1);
         Ok(())
     }
 
@@ -501,7 +513,6 @@ mod tests {
         init_db(None)?;
         assert!(Path::new(PAGES_DB).exists());
 
-        let conn = Connection::open(&PAGES_DB)?;
         let page1 = Page {
             title: "title1".to_string(),
             link: "link1".to_string(),
@@ -512,8 +523,10 @@ mod tests {
         };
         let mut page2 = page1.clone();
         let mut page3 = page1.clone();
+        page2.title = "title2".to_string();
         page2.link = "link2".to_string();
         page2.source = "source2".to_string();
+        page3.title = "title3".to_string();
         page3.link = "link3".to_string();
         page3.source = "source3".to_string();
 
@@ -522,9 +535,8 @@ mod tests {
         dump_new_page(&page3)?;
         cleanup_pages(&vec!["source1", "source2"])?;
 
-        let mut statement = conn.prepare("SELECT count(*) FROM pages")?;
-        let count: rusqlite::Result<i64> = statement.query_row([], |r| r.get(0));
-        assert_eq!(2i64, count?);
+        let pages = query_pages(&vec![]);
+        assert_eq!(pages.len(), 2);
 
         let page = query_page("title");
         assert!(page.is_none());

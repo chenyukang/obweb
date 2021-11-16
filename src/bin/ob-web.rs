@@ -35,7 +35,9 @@ struct SearchQuery {
 }
 
 #[derive(Debug, Deserialize)]
-struct RssQuery {}
+struct RssQuery {
+    query_type: String,
+}
 
 #[derive(Debug, Deserialize)]
 struct PageQuery {
@@ -261,9 +263,14 @@ fn search_query(req: &SearchQuery) -> Result<String, &'static str> {
     Ok(res.join(""))
 }
 
-fn rss_query() -> Result<String, Box<dyn Error>> {
+fn rss_query(query: &RssQuery) -> Result<String, Box<dyn Error>> {
     std::thread::spawn(|| git::git_pull());
-    let mut pages = rss::query_all_page();
+    let limits = if query.query_type == "unread" {
+        vec![("readed", "0")]
+    } else {
+        vec![]
+    };
+    let mut pages = rss::query_pages(&limits);
     pages.sort_by(|a, b| {
         b.publish_datetime
             .parse::<DateTime<Local>>()
@@ -428,8 +435,8 @@ pub async fn run_server(port: u16) {
         .and(auth_validation())
         .untuple_one()
         .and(warp::query::<RssQuery>())
-        .map(|_query: RssQuery| {
-            let res = rss_query();
+        .map(|query: RssQuery| {
+            let res = rss_query(&query);
             if res.is_ok() {
                 format!("{}", res.unwrap())
             } else {
