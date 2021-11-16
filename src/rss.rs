@@ -325,7 +325,7 @@ pub fn query_pages(limits: &Vec<(&str, &str)>) -> Vec<Page> {
 
 pub fn query_page(title: &str) -> Option<Page> {
     let pages = query_pages(&vec![("title", title)]);
-    assert!(pages.len() <= 1);
+    //assert!(pages.len() <= 1);
     if pages.len() == 1 {
         return Some(pages[0].clone());
     } else {
