@@ -334,8 +334,17 @@ pub fn query_page(title: &str) -> Option<Page> {
 }
 
 pub fn migrate_from_json_to_sqli() -> Result<(), Box<dyn Error>> {
+    init_db(None)?;
     let page_buf = fs::read_to_string("./db/pages.json").unwrap_or(String::from("[]"));
-    let pages: Vec<Page> = serde_json::from_str(&page_buf).unwrap();
+    let mut pages: Vec<Page> = serde_json::from_str(&page_buf).unwrap();
+    pages.sort_by(|a, b| {
+        a.publish_datetime
+            .parse::<DateTime<Local>>()
+            .unwrap()
+            .partial_cmp(&b.publish_datetime.parse::<DateTime<Local>>().unwrap())
+            .unwrap()
+    });
+
     for page in pages.iter() {
         println!("dump: {:?}", &page.link);
         dump_new_page(page)?;
