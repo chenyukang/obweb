@@ -305,7 +305,10 @@ pub fn query_pages(limits: &Vec<(&str, &str)>) -> Vec<Page> {
     } else {
         String::from(" 1 = 1 ")
     };
-    let sql = format!("SELECT * FROM pages WHERE {} ORDER BY id DESC", limit_str);
+    let sql = format!(
+        "SELECT * FROM pages WHERE {} ORDER BY publish_datetime DESC",
+        limit_str
+    );
     println!("sql: {:?}", sql);
     let mut statement = conn.prepare(&sql).unwrap();
     let pages = statement
