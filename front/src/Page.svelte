@@ -263,16 +263,18 @@
                 let text = e.target.innerText;
                 let url = e.target.href;
                 if (!url) { return false; }
-                let relative_url = url.replace(window.location.origin, "");
                 //console.log(e.target);
-                if (!isValidHttpUrl(relative_url)) {
+                console.log(e.target);
+                let internal_link = e.target.getAttribute("id");
+                console.log(internal_link);
+                if (internal_link != null) {
                     if (url.indexOf("##") != -1) {
-                        search_input = text;
+                        search_input = internal_link;
                         if (cur_page == "find") search();
                         else cur_page = "find";
                     } else if (url.indexOf("#") != -1) {
                         let type = cur_page == "rss" ? "rss" : "md";
-                        fetchPage(text, type);
+                        fetchPage(internal_link, type);
                     }
                 } else {
                     console.log("open ....");

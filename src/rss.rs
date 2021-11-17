@@ -335,16 +335,6 @@ pub fn query_page_link(link: &str) -> Option<Page> {
     }
 }
 
-pub fn query_page(title: &str) -> Option<Page> {
-    let pages = query_pages(&vec![("title", title)]);
-    //assert!(pages.len() <= 1);
-    if pages.len() == 1 {
-        return Some(pages[0].clone());
-    } else {
-        None
-    }
-}
-
 pub fn migrate_from_json_to_sqli() -> Result<(), Box<dyn Error>> {
     init_db(None)?;
     let page_buf = fs::read_to_string("./db/pages.json").unwrap_or(String::from("[]"));
@@ -514,7 +504,7 @@ mod tests {
         let pages = query_pages(&vec![]);
         assert_eq!(pages.len(), 2);
 
-        let page_res = query_page("title_new");
+        let page_res = query_page_link("link_new");
         assert_eq!(page_res.unwrap().link, "link_new");
 
         let mut new_page = page.clone();
@@ -559,9 +549,9 @@ mod tests {
         let pages = query_pages(&vec![]);
         assert_eq!(pages.len(), 2);
 
-        let page = query_page("title");
+        let page = query_page_link("link");
         assert!(page.is_none());
-        let page = query_page("title1");
+        let page = query_page_link("link1");
         assert_eq!(page.unwrap().title, "title1");
 
         Ok(())

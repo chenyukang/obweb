@@ -180,12 +180,15 @@ fn page_query(query: &PageQuery) -> Result<warp::reply::Json, &'static str> {
             }
         }
     } else if query.query_type == "rss" {
-        let path = ensure_path(&format!("./pages/{}.html", query.path))?;
-        if !Path::new(&path).exists() {
+        let page = rss::query_page_link(&query.path);
+        if page.is_none() {
             return Ok(warp::reply::json(&(String::from("NoPage"), String::new())));
         }
+        let path = ensure_path(&format!(
+            "./pages/{}.html",
+            page.as_ref().unwrap().title.clone()
+        ))?;
         let data = fs::read_to_string(&path).unwrap();
-        let page = rss::query_page(&query.path);
         let mut time = String::new();
         let link = if let Some(p) = page {
             let link = p.link.clone();
@@ -257,7 +260,7 @@ fn search_query(req: &SearchQuery) -> Result<String, &'static str> {
         .iter()
         .map(|(f, _)| {
             let f = f.replace(".md", "").replace("ob/", "");
-            format!("<li><a href=\"#\">{}</a></li>", f)
+            format!("<li><a id=\"{}\" href=\"#\">{}</a></li>", f, f)
         })
         .collect();
     Ok(res.join(""))
@@ -285,8 +288,8 @@ fn rss_query(query: &RssQuery) -> Result<String, Box<dyn Error>> {
         .map(|page| {
             let class = if page.readed { "visited" } else { "" };
             format!(
-                "<li><a  class=\"{}\" href=\"#\">{}</a></li>",
-                class, page.title
+                "<li><a class=\"{}\" id=\"{}\", href=\"#\">{}</a></li>",
+                class, page.link, page.title
             )
         })
         .collect();
