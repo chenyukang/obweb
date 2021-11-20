@@ -1,15 +1,33 @@
-FROM rust:1.55
+FROM ubuntu:20.04
 
-RUN USER=root cargo new --bin ob-web
+RUN apt-get update
+
+RUN mkdir /ob-web
 WORKDIR /ob-web
 
-COPY ./Cargo.lock ./Cargo.lock
-COPY ./Cargo.toml ./Cargo.toml
 
-RUN rm src/*.rs
+COPY ./bin/ob-web ./
+COPY ./bin/rss-reader ./
 
-COPY ./src ./src
+RUN apt-get install build-essential -y
+RUN ./ob-web -h
 
-RUN cargo install --path .
+RUN apt remove --purge nodejs npm
+RUN apt clean
+RUN apt install -f
+RUN apt autoremove
+RUN apt-get install curl -y
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
+RUN apt-get update -y
+RUN apt-get install nodejs yarn -y
+RUN node -v
+RUN npm -v
 
-COPY ./front ./front
+RUN mkdir /ob-web/front
+WORKDIR /ob-web/front
+COPY ./front ./
+RUN npm install
+RUN npm run build
+
+WORKDIR /ob-web/
+ENTRYPOINT ["/ob-web/ob-web"]

@@ -31,8 +31,9 @@ pub fn verify_user(user: &User) -> bool {
 }
 
 pub fn verify_token(token: &str) -> Option<bool> {
+    //Don't need to verify token if it's empty
     if !Path::new(ACCOUNT_DB).exists() {
-        return None;
+        return Some(true);
     }
     let data = fs::read_to_string(TOKENS_DB).unwrap();
     let tokens: Vec<&str> = data.split("\n").collect();

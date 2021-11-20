@@ -22,10 +22,12 @@ Here are the principles of this project:
 
 4. We don't want to store any data on other third-parties, here we will deploy it on our own server.
 
+5. There is a simple but workable RSS reader
+
 ## Development
 
 + Backend: Rust + Warp for API
-+ Frontend: Javascript, Bootstrap, JQuery. I'm a novice in Frontend :)
++ Frontend: JavaScript, Bootstrap, JQuery, svelte. I'm a novice in Frontend :)
 
 For a MVP, I want to keep it stupid and simple. Most of code is simple and easy to understand, there are some hard-coded parts.
 
@@ -53,9 +55,8 @@ Obweb assume your Obsidian vault has `Daily` and `Unsort` directories to store d
 Make sure you have installed [Rust and Cargo](http://rust-lang.org), and then run:
 
 ```bash
-./bin/debug
+./bin/debug.sh
 ```
-It will requires you to initialize user and password in the first time.
 
 Now you can access it on your browser [http://localhost:8005/obweb](http://localhost:8005/obweb/).
 
@@ -67,8 +68,15 @@ docker-compose up
 
 3. Post configuration
 
-If you have your own domain, you can config it to a custom domain. You may want to add some other security enhancement such as HTTPS, request frequency limit, etc.
+If you have your own domain, you can deploy it to a custom domain. You may want to add some other security enhancement such as HTTPS, request frequency limit, etc.
 
+If you want to add authorization with an account and password, you may run:
+
+```bash
+./target/debug/obweb -c
+```
+
+The encrepted account information will be stored in file `./db/accounts`.
 ----
 
 **I use this App everyday, hope it will be useful for you.**

@@ -6,5 +6,6 @@ ob-web:
   - ~/.ssh:/root/.ssh
   - ./db:/ob-web/db:rw
   - ./ob:/ob-web/ob:rw
- command: ob-web
- 
+ command: /ob-web/ob-web
+ working_dir: /ob-web/
+

@@ -324,7 +324,7 @@ fn auth_validation() -> impl Filter<Extract = ((),), Error = Rejection> + Copy {
                 let res = auth::verify_token(&token);
                 if res.is_none() {
                     return Err(warp::reject::not_found());
-                } else if res.unwrap() {
+                } else {
                     return Ok(());
                 }
             }
