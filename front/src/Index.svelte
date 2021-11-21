@@ -205,7 +205,7 @@
                     on:input={handleInput}
                     on:keyup={handleKeyup}
                     on:paste={handlePaste}
-                    rows="8"
+                    rows="11"
                     class="form-control"
                 />
             </div>
