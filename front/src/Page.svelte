@@ -297,6 +297,7 @@
     function setPageDefault() {
         jq("#page-content").prop("contenteditable", false);
         jq("#backBtn").prop("hidden", false);
+        jq("#markBtn").prop("hidden", true);
         jq("#page-content").css("backgroundColor", "white");
         jq("#editBtn").text("Edit");
         if (cur_page != "rss") hljs.highlightAll();
@@ -373,6 +374,37 @@
         });
     }
 
+    function markRead() {
+        show_status = true;
+        jq.ajax({
+            url: "/api/rss_mark?index=0",
+            type: "POST",
+            data: "",
+            datatype: "json",
+            contentType: "Application/json",
+            statusCode: {
+                400: function () {
+                    window.location.href = "/obweb";
+                },
+                500: function () {
+                    window.location.href = "/obweb";
+                },
+            },
+            success: function (response) {
+                show_status = false;
+                if (response == "ok") {
+                    jq("#markBtn").prop("hidden", false);
+                    fetchRss();
+                }
+            },
+            error: function (err) {
+                show_status = false;
+                console.log(err);
+                return err;
+            },
+        });
+    }
+
     function fetchRss() {
         show_status = true;
         show_rsslink = false;
@@ -403,6 +435,7 @@
                     jq("#page-content").prop("hidden", false);
                     jq("#fileName").prop("hidden", true);
                     jq("#backBtn").prop("hidden", true);
+                    jq("#markBtn").prop("hidden", false);
                     jq("#pageNavBar").prop("hidden", true);
                     console.log("set setPageDefault....");
                     jq("#rssread").prop("checked", rss_query_type == "all");
@@ -493,6 +526,14 @@
                     style="float: left"
                     id="backBtn"
                     on:click={fetchRss}>Back</button>
+
+
+                    <button
+                    type="button"
+                    class="btn btn-info"
+                    style="margin-right: 10px"
+                    id="markBtn"
+                    on:click={markRead}>Mark</button>
 
                     <label class="switch" style="float: right">
                         <input id="rssread" type="checkbox" on:click={rssRead} >

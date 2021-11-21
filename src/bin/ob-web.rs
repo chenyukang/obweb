@@ -281,7 +281,12 @@ fn rss_query(query: &RssQuery) -> Result<String, Box<dyn Error>> {
             .unwrap()
     });
 
-    let max_len = usize::min(200 as usize, pages.len());
+    let page_limit = if query.query_type == "unread" {
+        15
+    } else {
+        100
+    };
+    let max_len = usize::min(page_limit as usize, pages.len());
     let res: Vec<String> = pages[..max_len]
         .iter()
         .map(|page| {
@@ -293,6 +298,11 @@ fn rss_query(query: &RssQuery) -> Result<String, Box<dyn Error>> {
         })
         .collect();
     Ok(res.join(""))
+}
+
+fn rss_mark(_query: &Mark) -> Result<(), Box<dyn Error>> {
+    rss::mark_pages_read(15)?;
+    Ok(())
 }
 
 fn mark_done(req: &Mark) -> Result<String, Box<dyn Error>> {
@@ -445,7 +455,21 @@ pub async fn run_server(port: u16) {
                 format!("no-page")
             }
         });
-    let routes = routes.or(rss);
+
+    let rss_mark = warp::path!("api" / "rss_mark")
+        .and(warp::post())
+        .and(auth_validation())
+        .untuple_one()
+        .and(warp::query::<Mark>())
+        .map(|query: Mark| {
+            let res = rss_mark(&query);
+            if res.is_ok() {
+                format!("ok")
+            } else {
+                format!("no-page")
+            }
+        });
+    let routes = routes.or(rss).or(rss_mark);
 
     let mark = warp::path!("api" / "mark")
         .and(warp::post())

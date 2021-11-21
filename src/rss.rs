@@ -310,6 +310,17 @@ pub fn update_page_read(link: &str) -> rusqlite::Result<usize> {
     conn.execute("UPDATE pages set readed = 1 where link = ?", [link])
 }
 
+pub fn mark_pages_read(limit: usize) -> rusqlite::Result<usize> {
+    let conn = Connection::open(PAGES_DB)?;
+    let sql = format!(
+        "UPDATE pages SET readed = 1 WHERE id IN (SELECT id FROM pages WHERE readed = 0 ORDER BY publish_datetime DESC LIMIT {})",
+        limit
+    );
+    let res = conn.execute(&sql, []);
+    println!("result: {:?}", res);
+    res
+}
+
 pub fn query_pages(limits: &Vec<(&str, &str)>) -> Vec<Page> {
     let conn = Connection::open(PAGES_DB).unwrap();
     let limit_str = if limits.len() > 0 {
