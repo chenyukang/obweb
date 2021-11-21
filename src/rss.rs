@@ -97,7 +97,7 @@ fn convert_image(uri: &str) -> Result<String, Box<dyn Error>> {
     Ok(relative_path.clone())
 }
 
-fn preprocess_image(content: &str, website: &str) -> String {
+fn preprocess_image(content: &str, website: &str) -> Result<String, Box<dyn Error>> {
     let html = Html::parse_document(content);
     let select = Selector::parse("img").unwrap();
     let imgs = html.select(&select);
@@ -111,12 +111,11 @@ fn preprocess_image(content: &str, website: &str) -> String {
             if !(uri.is_ok() && uri.unwrap().scheme().to_string().starts_with("http")) {
                 full_uri = format!("{}/{}", website, url);
             }
-            if let Ok(image) = convert_image(&full_uri) {
-                result = result.replace(url, &image);
-            }
+            let image = convert_image(&full_uri)?;
+            result = result.replace(url, &image);
         }
     }
-    result.clone()
+    Ok(result.clone())
 }
 
 fn fetch_page(url: &str) -> Result<String, Box<dyn Error>> {
@@ -133,7 +132,7 @@ fn fetch_page(url: &str) -> Result<String, Box<dyn Error>> {
 }
 
 fn first_link(links: &Vec<Link>) -> String {
-    if let Some(l) = links.first() {
+    for l in links {
         if Url::parse(&l.href).is_ok() {
             return l.href.to_owned();
         }
@@ -146,8 +145,8 @@ fn fetch_feed(feed: &str, force: bool) -> Result<i32, Box<dyn Error>> {
     let resp = reqwest::blocking::get(feed);
     let body = resp?.text();
     let feed_resp = parser::parse(body?.as_bytes())?;
-    println!("title: {:?}", feed_resp.title);
     let website = first_link(&feed_resp.links);
+    println!("title: {:?}\n website: {:?}\n", feed_resp.title, website);
     let mut succ_count = 0;
     for entry in feed_resp.entries {
         let entry_title = entry.title.unwrap().content.replace("/", "|");
@@ -191,7 +190,7 @@ fn fetch_feed(feed: &str, force: bool) -> Result<i32, Box<dyn Error>> {
             }
         };
 
-        content = preprocess_image(&content, &website);
+        content = preprocess_image(&content, &website)?;
         let page = Page {
             link: link.clone(),
             website: website.clone(),
@@ -278,6 +277,9 @@ fn cleanup_pages(feeds: &Vec<&str>) -> rusqlite::Result<()> {
 
 fn dump_new_page(page: &Page) -> rusqlite::Result<()> {
     let conn = Connection::open(PAGES_DB)?;
+    if let Some(_) = query_page_link(&page.link) {
+        return Ok(());
+    }
     conn.execute(
         "INSERT INTO pages (title, link, website, publish_datetime, readed, source) values (?1, ?2, ?3, ?4, ?5, ?6)",
         params![page.title, page.link, page.website, page.publish_datetime, page.readed, page.source])?;
@@ -434,14 +436,31 @@ mod tests {
     }
 
     #[test]
-    fn test_process_image() {
+    fn test_process_image() -> Result<(), Box<dyn Error>> {
         let img = "https://coderscat.com/css/images/logo.png";
         let html = format!(
             "<img src=\"{}\" alt=\"moores-law\" style=\"width: 50%; height: 100%;\">",
             img
         );
-        let processed = preprocess_image(&html, "");
+        let processed = preprocess_image(&html, "")?;
         assert!(processed.find(".png").is_some());
+        Ok(())
+    }
+
+    #[test]
+    fn test_preprocess_image() -> Result<(), Box<dyn Error>> {
+        let content = r#"
+        <!DOCTYPE html>
+        <meta charset="utf-8">
+        <article>Hello, world!</article>
+        <article>Hello, world now!</article>
+        <img src="/images/logo.png" alt="moores-law" style="width: 50%; height: 100%;">
+        <h1 class="foo">Hello, <i>world!</i></h1>
+        "#;
+
+        let res = preprocess_image(content, "http://demo.com")?;
+        assert!(res.contains(".png"));
+        Ok(())
     }
 
     #[test]
@@ -465,10 +484,17 @@ mod tests {
     fn test_fetch_page_images() -> Result<(), Box<dyn Error>> {
         let uri = "https://yihui.org/cn/2020/07/wild-onion/";
         let mut content = fetch_page(uri)?;
-        content = preprocess_image(&content, uri);
+        content = preprocess_image(&content, uri)?;
         fs::write("/tmp/tmp.html", &content)?;
         assert!(content.contains("/images/"));
         Ok(())
+    }
+
+    #[test]
+    fn test_fetch_feed() {
+        let res = fetch_feed("http://chenyukang.github.io/atom.xml", true);
+        println!("res: {:?}", res);
+        assert!(res.is_ok());
     }
 
     #[test]
