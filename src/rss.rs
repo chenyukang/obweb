@@ -90,14 +90,22 @@ fn convert_image(uri: &str) -> Result<String, Box<dyn Error>> {
     let relative_path = image_path.replace("./", "/");
     if !Path::new(&image_path).exists() {
         let resp = reqwest::blocking::get(uri)?;
-        let image = resp.bytes()?;
-        fs::write(&image_path, &image)?;
-        println!("image saved: {:?}", image_path);
+        if resp.status().is_success() {
+            let image = resp.bytes()?;
+            fs::write(&image_path, &image)?;
+            println!("image saved: {:?}", image_path);
+        }
+    } else {
+        println!("image exists: {:?}", image_path);
     }
     Ok(relative_path.clone())
 }
 
-fn preprocess_image(content: &str, website: &str) -> Result<String, Box<dyn Error>> {
+fn preprocess_image(
+    content: &str,
+    website: &str,
+    cur_link: &str,
+) -> Result<String, Box<dyn Error>> {
     let html = Html::parse_document(content);
     let select = Selector::parse("img").unwrap();
     let imgs = html.select(&select);
@@ -109,7 +117,13 @@ fn preprocess_image(content: &str, website: &str) -> Result<String, Box<dyn Erro
             let uri = Url::parse(url);
             let mut full_uri = url.to_string();
             if !(uri.is_ok() && uri.unwrap().scheme().to_string().starts_with("http")) {
-                full_uri = format!("{}/{}", website, url);
+                if url.starts_with("/") {
+                    full_uri = format!("{}{}", website, url);
+                } else {
+                    let last_pos = cur_link.rfind("/").unwrap();
+                    let prefix = &cur_link[0..last_pos];
+                    full_uri = format!("{}/{}", prefix, url);
+                }
             }
             let image = convert_image(&full_uri)?;
             result = result.replace(url, &image);
@@ -190,7 +204,7 @@ fn fetch_feed(feed: &str, force: bool) -> Result<i32, Box<dyn Error>> {
             }
         };
 
-        content = preprocess_image(&content, &website)?;
+        content = preprocess_image(&content, &website, &link)?;
         let page = Page {
             link: link.clone(),
             website: website.clone(),
@@ -442,7 +456,7 @@ mod tests {
             "<img src=\"{}\" alt=\"moores-law\" style=\"width: 50%; height: 100%;\">",
             img
         );
-        let processed = preprocess_image(&html, "")?;
+        let processed = preprocess_image(&html, "", "")?;
         assert!(processed.find(".png").is_some());
         Ok(())
     }
@@ -458,7 +472,7 @@ mod tests {
         <h1 class="foo">Hello, <i>world!</i></h1>
         "#;
 
-        let res = preprocess_image(content, "http://demo.com")?;
+        let res = preprocess_image(content, "http://demo.com", "")?;
         assert!(res.contains(".png"));
         Ok(())
     }
@@ -468,6 +482,16 @@ mod tests {
         let url = "https://blog.janestreet.com/ocaml-4-03-everything-else/";
         let content = fetch_page(url).unwrap();
         assert!(!content.contains("<body>"));
+    }
+
+    #[test]
+    fn test_fetch_page_with_image() {
+        let url = "https://flaviocopes.com/macos-terminal-setup/";
+        let content = fetch_page(url).unwrap();
+        assert!(content.contains(".png"));
+        let res = preprocess_image(&content, "https://flaviocopes.com", url);
+        println!("res: {:?}", res);
+        assert!(res.is_ok());
     }
 
     #[test]
@@ -484,7 +508,7 @@ mod tests {
     fn test_fetch_page_images() -> Result<(), Box<dyn Error>> {
         let uri = "https://yihui.org/cn/2020/07/wild-onion/";
         let mut content = fetch_page(uri)?;
-        content = preprocess_image(&content, uri)?;
+        content = preprocess_image(&content, uri, "")?;
         fs::write("/tmp/tmp.html", &content)?;
         assert!(content.contains("/images/"));
         Ok(())

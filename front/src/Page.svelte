@@ -224,6 +224,7 @@
                     let res = query_type == "rss" ? content : renderMdToHtml(content);
                     jq("#page-content").html(res);
                     jq("#page-content").prop("hidden", false);
+                    console.log(rsslink);
                     if (rsslink != undefined && rsslink != "") {
                         jq("#rsslink").prop("hidden", false);
                         show_rsslink = true;
