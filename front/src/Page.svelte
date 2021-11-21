@@ -520,19 +520,20 @@
         <div class="row sticky-top" style="margin-top: 20px; border: 0;">
             <div class="col-md-2" />
             <div class="col-md-8 text-right" id="pageNavBarRss">
-                <button
+                    <button
                     type="button"
                     class="btn btn-info"
                     style="float: left"
                     id="backBtn"
+                    hidden="true"
                     on:click={fetchRss}>Back</button>
-
 
                     <button
                     type="button"
                     class="btn btn-info"
                     style="float: left"
                     id="markBtn"
+                    hidden="true"
                     on:click={markRead}>Mark</button>
 
                     <label class="switch" style="float: right">
