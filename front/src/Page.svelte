@@ -531,7 +531,7 @@
                     <button
                     type="button"
                     class="btn btn-info"
-                    style="margin-right: 10px"
+                    style="float: left"
                     id="markBtn"
                     on:click={markRead}>Mark</button>
 
