@@ -301,6 +301,10 @@
         jq("#page-content").css("backgroundColor", "white");
         jq("#editBtn").text("Edit");
         if (cur_page != "rss") hljs.highlightAll();
+        if (cur_page == "day") {
+            jq("img").css("width", "70%");
+            jq("img").css("height", "70%");
+        }
         adjustTodo();
         hookInit();
         in_edit = false;
