@@ -77,6 +77,7 @@ If you want to add authorization with an account and password, you may run:
 ```
 
 The encrepted account information will be stored in file `./db/accounts`.
+
 ----
 
 **I use this App everyday, hope it will be useful for you.**
