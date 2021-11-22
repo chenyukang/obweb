@@ -52,10 +52,10 @@ Obweb assume your Obsidian vault has `Daily` and `Unsort` directories to store d
 
 2. Compile and run
 
-Make sure you have installed [Rust and Cargo](http://rust-lang.org), and then run:
+Make sure you have installed [Rust and Cargo](http://rust-lang.org) and [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm), and then run:
 
 ```bash
-./bin/debug.sh
+./bin/dev.sh
 ```
 
 Now you can access it on your browser [http://localhost:8005/obweb](http://localhost:8005/obweb/).
