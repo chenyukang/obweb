@@ -29,5 +29,3 @@ COPY ./front ./
 RUN npm install
 RUN npm run build
 
-WORKDIR /ob-web/
-ENTRYPOINT ["/ob-web/ob-web"]

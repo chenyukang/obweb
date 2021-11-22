@@ -9,4 +9,3 @@ ob-web:
   - ./pages:/ob-web/pages:rw
  command: /ob-web/ob-web
  working_dir: /ob-web/
-
