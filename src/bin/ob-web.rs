@@ -323,22 +323,13 @@ struct Unauthorized;
 impl reject::Reject for Unauthorized {}
 
 fn auth_validation() -> impl Filter<Extract = ((),), Error = Rejection> + Copy {
-    warp::header::<String>("Cookie").and_then(|n: String| async move {
-        //println!("cookie: {:?}", n);
-        let vals: Vec<&str> = n.split(";").collect();
-        for val in vals {
-            let v = val.trim().to_owned();
-            if v.starts_with("token=") {
-                let token = v.replace("token=", "");
-                let res = auth::verify_token(&token);
-                if res.is_none() {
-                    return Err(warp::reject::not_found());
-                } else {
-                    return Ok(());
-                }
-            }
+    warp::cookie::<String>("token").and_then(|token: String| async move {
+        println!("token: {}", token);
+        if let Some(true) = auth::verify_token(&token) {
+            Ok(())
+        } else {
+            Err(warp::reject::custom(Unauthorized))
         }
-        Err(reject::custom(Unauthorized))
     })
 }
 

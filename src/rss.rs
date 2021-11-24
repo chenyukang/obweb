@@ -51,7 +51,7 @@ fn remove_elements(content: &str, keywords: &Vec<&str>) -> String {
         let select = Selector::parse(keyword).unwrap();
         html.select(&select).for_each(|it| {
             let unescaped = it.html();
-            assert!(result.contains(&unescaped));
+            //assert!(result.contains(&unescaped));
             result = result.replace(&unescaped, "")
         });
     }
@@ -267,7 +267,8 @@ pub fn update_rss(feed: Option<&str>, force: bool) -> Result<(), Box<dyn Error>>
     } else {
         for feed in feeds.iter() {
             println!("force: {:?}", force);
-            let _ = fetch_feed(*feed, force);
+            let res = fetch_feed(*feed, force);
+            println!("feed: {:?} res: {:?}", feed, res);
         }
     }
 
