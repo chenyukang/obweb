@@ -6,6 +6,8 @@
 
 ## Motivation
 
+Introduction in Chinese: [打造自己的工具](http://chenyukang.github.io/2021/11/28/intro-to-obweb.html)
+
 [Obsidian](https://obsidian.md/) and [Flomo](https://flomoapp.com/) are two of my favorite Applications.
 
 I use Obsidian for knowledge management and Flomo for daily thoughts or memos.
