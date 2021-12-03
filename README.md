@@ -30,7 +30,9 @@ Here are the principles of this project:
 
 Obweb is a classic single page Web application:
 
-![](http://chenyukang.github.io/images/ob_pasted-image-20211127144951.png)
+<p align="center">
+  <img src="http://chenyukang.github.io/images/ob_pasted-image-20211127144951.png">
+</p>
 
 + Backend: Rust + Warp for API
 + Frontend: JavaScript, Bootstrap, JQuery, svelte. I'm a novice in Frontend :)
