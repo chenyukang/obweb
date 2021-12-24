@@ -163,6 +163,9 @@ fn fetch_feed(feed: &str, force: bool) -> Result<i32, Box<dyn Error>> {
     println!("title: {:?}\n website: {:?}\n", feed_resp.title, website);
     let mut succ_count = 0;
     for entry in feed_resp.entries {
+        if entry.title.is_none() {
+            continue;
+        }
         let entry_title = entry.title.unwrap().content.replace("/", "|");
         let published_time = entry
             .published
