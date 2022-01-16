@@ -345,7 +345,7 @@ pub fn query_pages(limits: &Vec<(&str, &str)>) -> Vec<Page> {
     let pages = statement
         .query_map([], |row| {
             Ok(Page {
-                title: row.get(1).unwrap(),
+                title: row.get(1).unwrap_or("no title".to_string()),
                 link: row.get(2).unwrap(),
                 website: row.get(3).unwrap(),
                 publish_datetime: row.get(4).unwrap(),
