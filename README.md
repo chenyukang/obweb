@@ -41,7 +41,7 @@ For a MVP, I want to keep it stupid and simple. Most of code is simple and easy 
 
 Maybe you need to do some trivial tweaks. Any PR is welcome to make it better and useful for others.
 
-## Deployment
+## Usage
 
 ### 1. Initialize Obsidian repo
 
