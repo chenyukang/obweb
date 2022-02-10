@@ -15,3 +15,5 @@ db/pages.db
 __sapper__
 db/test_pages.db
 front/public/build
+release
+bin/rss-reader
