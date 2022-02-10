@@ -67,7 +67,7 @@ mkdir -p ob db pages
 cd ob-web-pack
 ./ob-web
 
-#You may start with Docker:
+#Or you may start with Docker:
 docker-compose up
 ```
 Now you can access it on your browser [http://localhost:8006/obweb](http://localhost:8006/obweb/).
