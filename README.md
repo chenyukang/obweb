@@ -43,7 +43,7 @@ Maybe you need to do some trivial tweaks. Any PR is welcome to make it better an
 
 ## Deployment
 
-1. Initialize Obsidian repo
+### 1. Initialize Obsidian repo
 
 There is a plugin [Obsidian Git](https://github.com/denolehov/obsidian-git) to help you sync you Obsidian vault with remote repository.
 
@@ -58,7 +58,22 @@ git config user.name "Your Name"
 ```
 Obweb assume your Obsidian vault has `Daily` and `Unsort` directories to store daily memos and unsorted notes.
 
-2. Compile and run
+### 2. Run with precompiled binary
+
+```bash
+wget https://github.com/chenyukang/obweb/releases/download/v0.2/ob-web-pack.zip
+unzip ob-web-pack.zip
+mkdir -p ob db pages
+cd ob-web-pack
+./ob-web
+
+#You may start with Docker:
+docker-compose up
+```
+Now you can access it on your browser [http://localhost:8006/obweb](http://localhost:8006/obweb/).
+
+
+**Option**: If you want to compile from scratch
 
 Make sure you have installed [Rust and Cargo](http://rust-lang.org) and [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm), and then run:
 
@@ -66,15 +81,7 @@ Make sure you have installed [Rust and Cargo](http://rust-lang.org) and [npm](ht
 ./bin/dev.sh
 ```
 
-Now you can access it on your browser [http://localhost:8006/obweb](http://localhost:8006/obweb/).
-
-You may start with Docker:
-
-```bash
-docker-compose up
-```
-
-3. Post configuration
+### 3. Post configuration
 
 If you have your own domain, you can deploy it to a custom domain. You may want to add some other security enhancement such as HTTPS, request frequency limit, etc.
 
