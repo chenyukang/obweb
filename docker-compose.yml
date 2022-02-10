@@ -4,8 +4,9 @@ ob-web:
   - "8006:8006"
  volumes:
   - ~/.ssh:/root/.ssh
-  - ./db:/ob-web/db:rw
-  - ./ob:/ob-web/ob:rw
-  - ./pages:/ob-web/pages:rw
- command: /ob-web/ob-web
- working_dir: /ob-web/
+  - ./db:/ob-web-pack/db:rw
+  - ./ob:/ob-web-pack/ob:rw
+  - ./pages:/ob-web-pack/pages:rw
+  - ./ob-web-pack:/ob-web-pack:rw
+ command: /ob-web-pack/ob-web
+ working_dir: /ob-web-pack
