@@ -531,7 +531,7 @@ mod tests {
 
     #[test]
     fn test_fetch_feed() {
-        let res = fetch_feed("http://chenyukang.github.io/atom.xml", true);
+        let res = fetch_feed("https://catcoding.me/atom.xml", true);
         println!("res: {:?}", res);
         assert!(res.is_ok());
     }
