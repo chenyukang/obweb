@@ -1,7 +1,7 @@
 ob-web:
  build: .
  ports:
-  - "8005:8005"
+  - "8006:8006"
  volumes:
   - ~/.ssh:/root/.ssh
   - ./db:/ob-web/db:rw

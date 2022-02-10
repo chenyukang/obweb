@@ -18,6 +18,9 @@ static ACCOUNT_DB: &'static str = "./db/account";
 static TOKENS_DB: &'static str = "./db/tokens";
 
 pub fn verify_user(user: &User) -> bool {
+    if !Path::new("db").exists() {
+        fs::create_dir("db").expect("failed to create db directory");
+    }
     let hash = fs::read_to_string(ACCOUNT_DB);
     if hash.is_ok() {
         let combine = format!("{}:{}", user.username, user.password);
@@ -30,14 +33,19 @@ pub fn verify_user(user: &User) -> bool {
     }
 }
 
-pub fn verify_token(token: &str) -> Option<bool> {
+pub fn verify_token(token: &str) -> String {
     //Don't need to verify token if it's empty
     if !Path::new(ACCOUNT_DB).exists() {
-        return Some(true);
+        println!("now debug now.......");
+        return "uninitilized".to_string();
     }
     let data = fs::read_to_string(TOKENS_DB).unwrap();
     let tokens: Vec<&str> = data.split("\n").collect();
-    Some(tokens.iter().any(|&t| t == token))
+    if tokens.iter().any(|&t| t == token) {
+        return "verified".to_string();
+    } else {
+        return "invalid".to_string();
+    }
 }
 
 fn hash(password: &[u8]) -> String {

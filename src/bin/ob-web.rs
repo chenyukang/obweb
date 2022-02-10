@@ -323,14 +323,27 @@ struct Unauthorized;
 impl reject::Reject for Unauthorized {}
 
 fn auth_validation() -> impl Filter<Extract = ((),), Error = Rejection> + Copy {
-    warp::cookie::<String>("token").and_then(|token: String| async move {
-        println!("token: {}", token);
-        if let Some(true) = auth::verify_token(&token) {
-            Ok(())
-        } else {
-            Err(warp::reject::custom(Unauthorized))
-        }
-    })
+    let token = warp::cookie::<String>("token");
+    token
+        .and_then(|token: String| async move {
+            let res = auth::verify_token(&token);
+            if res == "verified" {
+                Ok(())
+            } else if res == "uninitilized" {
+                Err(warp::reject::not_found())
+            } else {
+                Err(warp::reject::custom(Unauthorized))
+            }
+        })
+        .or_else(|_| async {
+            let empty = "";
+            let res = auth::verify_token(&empty);
+            if res == "uninitilized" {
+                Err(warp::reject::not_found())
+            } else {
+                Err(warp::reject::custom(Unauthorized))
+            }
+        })
 }
 
 #[tokio::main]
@@ -494,7 +507,7 @@ fn main() {
 
     let port = match matches.value_of("port") {
         Some(port) => port.parse::<u16>().unwrap(),
-        None => 8005,
+        None => 8006,
     };
 
     if matches.is_present("config") {

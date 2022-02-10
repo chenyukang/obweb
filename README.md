@@ -66,7 +66,7 @@ Make sure you have installed [Rust and Cargo](http://rust-lang.org) and [npm](ht
 ./bin/dev.sh
 ```
 
-Now you can access it on your browser [http://localhost:8005/obweb](http://localhost:8005/obweb/).
+Now you can access it on your browser [http://localhost:8006/obweb](http://localhost:8006/obweb/).
 
 You may start with Docker:
 

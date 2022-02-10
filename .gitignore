@@ -17,3 +17,4 @@ db/test_pages.db
 front/public/build
 release
 bin/rss-reader
+release.zip

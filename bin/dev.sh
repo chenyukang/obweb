@@ -8,13 +8,6 @@ npm install
 npm run build
 popd
 
-mkdir -p release/front
-cp -r front/public release/front/
-cp target/debug/ob-web release/
-cp target/debug/rss-reader release/
-
-
 cargo build
 rm -rf ./ob-web
-cp target/debug/ob-web ./
-RUST_LOG=obweb::api ./ob-web
+RUST_LOG=obweb::api ./target/debug/ob-web

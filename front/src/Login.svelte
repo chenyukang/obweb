@@ -40,6 +40,7 @@
         jq("#loginModal").modal("show");
         if (init) {
             jq("#loginBtn").text("Initialize Account");
+            jq("#loginTitle").text("Initialize Account");
         }
     }
 
@@ -90,7 +91,7 @@
             </div>
             <div class="modal-body">
                 <div class="form-title text-center">
-                    <h4>Login</h4>
+                    <h4 id="loginTitle">Login</h4>
                 </div>
                 <div class="d-flex flex-column text-center">
                     <form>
