@@ -6,7 +6,9 @@ db/tokens
 db/dev
 db/pages.json
 pages/*.html
+server/public
 pages/images/*
+node_modules
 nohup.out
 update.sh
 ob-web
