@@ -50,8 +50,5 @@ router.all('/obweb', ctx => {
 app.use(mount('/front', serve(path.join(__dirname, 'front/public'))))
 app.use(router.routes())
     .use(router.allowedMethods());
-app
-    .use(router.routes())
-    .use(router.allowedMethods());
 
 app.listen(3000);
