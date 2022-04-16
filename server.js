@@ -7,11 +7,11 @@ const logger = require('koa-logger')
 const path = require('path')
 const fs = require('fs')
 const json = require('koa-json');
-const { resolve } = require('path');
-const { readdir } = require('fs').promises;
 const extname = path.extname;
 const bodyParser = require('koa-bodyparser');
 const chinaTime = require('china-time');
+const { resolve } = require('path');
+const { readdir } = require('fs').promises;
 
 const OBPATH = process.env.NODE_ENV == "test" ? resolve("./ob_test") : resolve("./ob");
 
