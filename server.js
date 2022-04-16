@@ -10,13 +10,15 @@ const json = require('koa-json');
 const { resolve } = require('path');
 const { readdir } = require('fs').promises;
 const extname = path.extname;
-
+const bodyParser = require('koa-bodyparser');
+const chinaTime = require('china-time');
 
 const OBPATH = resolve("./ob");
 
 // logger
 app.use(json());
 app.use(logger());
+app.use(bodyParser());
 
 app.use(async(ctx, next) => {
     if (ctx.url.match(/^\/front/)) {
@@ -46,6 +48,10 @@ function stat(file) {
     });
 }
 
+function strip_ob(path) {
+    return path.replace(OBPATH + "/", "");
+}
+
 async function getFiles(dir) {
     const dirents = await readdir(dir, { withFileTypes: true });
     const files = await Promise.all(dirents.map((dirent) => {
@@ -63,10 +69,9 @@ async function get_page(ctx) {
     const query = ctx.request.query;
     let date = query['path'];
     let page_path = path.join(OBPATH, `${date}.md`);
-    console.log(page_path);
     if (fs.existsSync(page_path)) {
         let content = fs.readFileSync(page_path, 'utf-8');
-        ctx.body = [page_path, content];
+        ctx.body = [strip_ob(page_path), content];
     } else {
         ctx.body = ["NoPage", ""];
     }
@@ -77,7 +82,6 @@ function get_or(value, def) {
 }
 
 async function get_image(ctx) {
-    console.log("get_image: ", ctx.params.path);
     const fpath = path.join(OBPATH + "/Pics/", ctx.params.path);
     const fstat = await stat(fpath);
     if (fstat.isFile()) {
@@ -89,7 +93,6 @@ async function get_image(ctx) {
 async function search(ctx) {
     let query = ctx.request.query;
     let keyword = get_or(query['keyword'], "");
-    console.log(typeof(keyword));
     let result = await getFiles(OBPATH)
         .then(files => {
             return files.filter(file => {
@@ -102,24 +105,81 @@ async function search(ctx) {
             });
         })
         .catch(e => console.error(e));
-    console.log(result);
     let max_len = keyword.length == 0 ? 10 : result.length;
     result.sort((a, b) => b.time - a.time);
     result = result.slice(0, max_len);
     console.log(result);
 
     let res = result.map(f => {
-        let path = f.path.replace(".md", "").replace(OBPATH + "/", "");
+        let path = strip_ob(f.path.replace(".md", ""));
         return `<li><a id=\"${path}\" href=\"#\">${path}</a></li>`;
     }).join("")
-    console.log("finished");
     ctx.body = res
 }
 
+function gen_path(page, date) {
+    let path = page == "" ? `${OBPATH}/Daily/${date}.md` : `${OBPATH}/Unsort/${page}.md`;
+    if (!fs.existsSync(path)) {
+        fs.writeFileSync(path, "", 'utf-8');
+    }
+    return path;
+}
+
+async function post_entry(ctx) {
+    let date_str = chinaTime('YYYY-MM-DD');
+    let time_str = chinaTime('HH:mm');
+    let body = ctx.request.body;
+    let page = body['page']
+    let path = gen_path(page, date_str);
+    let data = fs.readFileSync(path, 'utf-8');
+
+    if (page == "" && data.length == 0) {
+        data = `## ${date_str}`;
+    }
+    let text = body['text'];
+    let content = "";
+
+    if (page != "") {
+        content += `\n### ${date_str} ${time_str}`;
+    } else {
+        content += `\n## ${time_str}`;
+    }
+
+    let links = body['links'];
+    console.log("links: ", links);
+    if (links.length > 0) {
+        let link_str = links.split(",").map(l => `[[${l}]]`).join(" ");
+        content += `\nLinks: ${link_str}`;
+    }
+    let append = page == "todo" ? `- [ ] ${text}` : text;
+    content += `\n${append}`;
+    let image = body['image'];
+    if (image != "") {
+        var ext = image.split(';')[0].match(/jpeg|png|gif/)[0];
+        var image_data = image.replace(/^data:image\/\w+;base64,/, "");
+        var buf = Buffer.from(image_data, 'base64');
+        let image_name = `obweb-${chinaTime('YYYY-MM-DD-HH-mm-ss')}.${ext}`;
+        let image_path = `${OBPATH}/Pics/${image_name}`;
+        fs.writeFile(image_path, buf, { flag: 'w+' }, function(err) {
+            console.log(err);
+        });
+        content += `\n\n![[${image_name} | #x-small]]\n`;
+    }
+    if (page == "todo") {
+        content = `${content}\n\n---\n`;
+        content += "\n${data}";
+    } else {
+        content = `${data}\n${content}`;
+    }
+    fs.writeFileSync(path, content, 'utf-8');
+    //todo git sync
+    ctx.body = "ok"
+}
 
 router.get('/api/page', get_page)
     .get('/api/search', search)
     .get('/static/images/:path', get_image)
+    .post('/api/entry', post_entry)
     .get('/api/verify', verify_login);
 
 router.all('/obweb', ctx => {
