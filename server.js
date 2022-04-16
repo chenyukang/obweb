@@ -117,8 +117,6 @@ async function search(ctx) {
     let max_len = keyword.length == 0 ? 10 : result.length;
     result.sort((a, b) => b.time - a.time);
     result = result.slice(0, max_len);
-    console.log(result);
-
     let res = result.map(f => {
         let path = strip_ob(f.path.replace(".md", ""));
         return `<li><a id=\"${path}\" href=\"#\">${path}</a></li>`;
@@ -138,7 +136,6 @@ async function post_entry(ctx) {
     let date_str = chinaTime('YYYY-MM-DD');
     let time_str = chinaTime('HH:mm');
     let body = ctx.request.body;
-    console.log("body: ", body);
     let page = body['page']
     let path = gen_path(page, date_str);
     let data = fs.readFileSync(path, 'utf-8');
@@ -158,7 +155,6 @@ async function post_entry(ctx) {
     content += `\n${append}`;
     let image = body['image'];
     if (image != "") {
-        console.log("debug body: ", image);
         var ext = image.split(';')[0].match(/jpeg|png|gif/)[0];
         var image_data = image.replace(/^data:image\/\w+;base64,/, "");
         var buf = Buffer.from(image_data, 'base64');
