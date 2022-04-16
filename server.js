@@ -29,6 +29,17 @@ app.use(async(ctx, next) => {
     await next();
 });
 
+// error handling
+app.use(async(ctx, next) => {
+    try {
+        await next();
+    } catch (err) {
+        ctx.status = err.status || 500;
+        ctx.body = err.message;
+        ctx.app.emit('error', err, ctx);
+    }
+});
+
 // response
 async function verify_login(ctx) {
     ctx.body = "ok";
@@ -127,6 +138,7 @@ async function post_entry(ctx) {
     let date_str = chinaTime('YYYY-MM-DD');
     let time_str = chinaTime('HH:mm');
     let body = ctx.request.body;
+    console.log("body: ", body);
     let page = body['page']
     let path = gen_path(page, date_str);
     let data = fs.readFileSync(path, 'utf-8');
@@ -146,14 +158,13 @@ async function post_entry(ctx) {
     content += `\n${append}`;
     let image = body['image'];
     if (image != "") {
+        console.log("debug body: ", image);
         var ext = image.split(';')[0].match(/jpeg|png|gif/)[0];
         var image_data = image.replace(/^data:image\/\w+;base64,/, "");
         var buf = Buffer.from(image_data, 'base64');
         let image_name = `obweb-${chinaTime('YYYY-MM-DD-HH-mm-ss')}.${ext}`;
         let image_path = `${OBPATH}/Pics/${image_name}`;
-        fs.writeFile(image_path, buf, { flag: 'w+' }, function(err) {
-            console.log(err);
-        });
+        fs.writeFile(image_path, buf, { flag: 'w+' }, function(err) {});
         content += `\n\n![[${image_name} | #x-small]]\n`;
     }
     content = page == "todo" ? `${content}\n\n---\n\n${data}` : `${data}\n${content}`;

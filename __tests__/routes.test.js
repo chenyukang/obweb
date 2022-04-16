@@ -42,7 +42,7 @@ describe('basic route tests', () => {
 
 
     test('search failed GET /api/search', async() => {
-        const response = await request(server).get('/api/search?keyword=undef');
+        const response = await request(server).get('/api/search?keyword=undefxx');
         expect(response.status).toEqual(200);
         expect(response.text).toEqual("");
     });
@@ -61,5 +61,20 @@ describe('basic route tests', () => {
         expect(response.status).toEqual(200);
         expect(response.text).toEqual("ok");
     });
+
+
+    test('post entry POST /api/entry', async() => {
+        const response = await request(server).post('/api/entry').send({
+            "page": "new_post",
+            "links": "link1,link2",
+            "image": "data:image/png;base64,image.....",
+            "date": "2022-04-16T13:24:11.444Z",
+            "text": "test text"
+        });
+        expect(response.status).toEqual(200);
+        expect(response.text).toEqual("ok");
+    });
+
+
 
 });
