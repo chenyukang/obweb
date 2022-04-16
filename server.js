@@ -13,7 +13,7 @@ const extname = path.extname;
 const bodyParser = require('koa-bodyparser');
 const chinaTime = require('china-time');
 
-const OBPATH = resolve("./ob");
+const OBPATH = process.env.NODE_ENV == "test" ? resolve("./ob_test") : resolve("./ob");
 
 // logger
 app.use(json());
@@ -27,14 +27,12 @@ app.use(async(ctx, next) => {
         //console.log("protected checking ....");
     }
     await next();
-
 });
 
 // response
 async function verify_login(ctx) {
     ctx.body = "ok";
 }
-
 
 function stat(file) {
     return new Promise(function(resolve, reject) {
@@ -137,16 +135,9 @@ async function post_entry(ctx) {
         data = `## ${date_str}`;
     }
     let text = body['text'];
-    let content = "";
-
-    if (page != "") {
-        content += `\n### ${date_str} ${time_str}`;
-    } else {
-        content += `\n## ${time_str}`;
-    }
-
     let links = body['links'];
-    console.log("links: ", links);
+
+    let content = page != "" ? `\n### ${date_str} ${time_str}` : `\n## ${time_str}`;
     if (links.length > 0) {
         let link_str = links.split(",").map(l => `[[${l}]]`).join(" ");
         content += `\nLinks: ${link_str}`;
@@ -165,18 +156,16 @@ async function post_entry(ctx) {
         });
         content += `\n\n![[${image_name} | #x-small]]\n`;
     }
-    if (page == "todo") {
-        content = `${content}\n\n---\n`;
-        content += "\n${data}";
-    } else {
-        content = `${data}\n${content}`;
-    }
+    content = page == "todo" ? `${content}\n\n---\n\n${data}` : `${data}\n${content}`;
     fs.writeFileSync(path, content, 'utf-8');
     //todo git sync
     ctx.body = "ok"
 }
 
-router.get('/api/page', get_page)
+router.get('/', async(ctx, next) => {
+        ctx.body = "Hello World!";
+    })
+    .get('/api/page', get_page)
     .get('/api/search', search)
     .get('/static/images/:path', get_image)
     .post('/api/entry', post_entry)
@@ -192,4 +181,5 @@ app.use(mount('/front', serve(path.join(__dirname, 'front/public'))));
 app.use(router.routes())
     .use(router.allowedMethods());
 
-app.listen(8006);
+const server = app.listen(8006);
+module.exports = server;
