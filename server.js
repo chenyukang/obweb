@@ -9,6 +9,7 @@ const fs = require('fs')
 const json = require('koa-json');
 const { resolve } = require('path');
 const { readdir } = require('fs').promises;
+const extname = path.extname;
 
 
 const OBPATH = resolve("./ob");
@@ -30,6 +31,19 @@ app.use(async(ctx, next) => {
 // response
 async function verify_login(ctx) {
     ctx.body = "ok";
+}
+
+
+function stat(file) {
+    return new Promise(function(resolve, reject) {
+        fs.stat(file, function(err, stat) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(stat);
+            }
+        });
+    });
 }
 
 async function getFiles(dir) {
@@ -62,6 +76,16 @@ function get_or(value, def) {
     return (value === null || value === undefined) ? def : value;
 }
 
+async function get_image(ctx) {
+    console.log("get_image: ", ctx.params.path);
+    const fpath = path.join(OBPATH + "/Pics/", ctx.params.path);
+    const fstat = await stat(fpath);
+    if (fstat.isFile()) {
+        ctx.type = extname(fpath);
+        ctx.body = fs.createReadStream(fpath);
+    }
+}
+
 async function search(ctx) {
     let query = ctx.request.query;
     let keyword = get_or(query['keyword'], "");
@@ -92,8 +116,10 @@ async function search(ctx) {
     ctx.body = res
 }
 
+
 router.get('/api/page', get_page)
     .get('/api/search', search)
+    .get('/static/images/:path', get_image)
     .get('/api/verify', verify_login);
 
 router.all('/obweb', ctx => {
@@ -101,7 +127,8 @@ router.all('/obweb', ctx => {
     ctx.status = 301;
 });
 
-app.use(mount('/front', serve(path.join(__dirname, 'front/public'))))
+app.use(mount('/front', serve(path.join(__dirname, 'front/public'))));
+//app.use(mount('/static/images', serve(path.join(__dirname, 'ob/Pics'))));
 app.use(router.routes())
     .use(router.allowedMethods());
 
