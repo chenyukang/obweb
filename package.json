@@ -9,6 +9,7 @@
     "dependencies": {
         "china-time": "^0.12.3",
         "koa": "^2.13.4",
+        "koa-basic-auth": "^4.0.0",
         "koa-bodyparser": "^4.3.0",
         "koa-json": "^2.0.2",
         "koa-jwt": "^4.0.3",

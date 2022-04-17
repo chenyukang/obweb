@@ -11,7 +11,9 @@ const extname = path.extname;
 const bodyParser = require('koa-bodyparser');
 const chinaTime = require('china-time');
 const { resolve } = require('path');
+const auth = require('koa-basic-auth');
 const { readdir } = require('fs').promises;
+var exec = require('child_process').exec;
 
 const OBPATH = process.env.NODE_ENV == "test" ? resolve("./ob_test") : resolve("./ob");
 
@@ -19,6 +21,7 @@ const OBPATH = process.env.NODE_ENV == "test" ? resolve("./ob_test") : resolve("
 app.use(json());
 app.use(logger());
 app.use(bodyParser());
+//app.use(auth({ name: 'tj', pass: 'xxx' }));
 
 app.use(async(ctx, next) => {
     if (ctx.url.match(/^\/front/)) {
@@ -59,6 +62,30 @@ function stat(file) {
 
 function strip_ob(path) {
     return path.replace(OBPATH + "/", "");
+}
+
+function runShell(command) {
+    let dir = exec(command, function(err, stdout, stderr) {
+        if (err) {
+            console.log(err);
+        }
+        console.log(stdout);
+    });
+
+    dir.on('exit', function(code) {
+        // exit code is code
+        if (code != 0) {
+            console.log("exit code is " + code);
+        }
+    });
+}
+
+function gitPull() {
+    runShell("git pull");
+}
+
+function gitSync() {
+    runShell("git add . && git commit -m \"update\" && git push");
 }
 
 async function getFiles(dir) {
