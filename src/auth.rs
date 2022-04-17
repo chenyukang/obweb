@@ -36,7 +36,6 @@ pub fn verify_user(user: &User) -> bool {
 pub fn verify_token(token: &str) -> String {
     //Don't need to verify token if it's empty
     if !Path::new(ACCOUNT_DB).exists() {
-        println!("now debug now.......");
         return "uninitilized".to_string();
     }
     let data = fs::read_to_string(TOKENS_DB).unwrap();

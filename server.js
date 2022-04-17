@@ -11,23 +11,46 @@ const extname = path.extname;
 const bodyParser = require('koa-bodyparser');
 const chinaTime = require('china-time');
 const { resolve } = require('path');
-const auth = require('koa-basic-auth');
+const basicAuth = require('koa-basic-auth');
 const { readdir } = require('fs').promises;
 var exec = require('child_process').exec;
+const yaml = require('js-yaml');
 
 const OBPATH = process.env.NODE_ENV == "test" ? resolve("./ob_test") : resolve("./ob");
+const CONFPATH = resolve("./.config.yml");
+const DBPATH = resolve("./db");
+
+function globalConfig() {
+    if (fs.existsSync(CONFPATH)) {
+        return yaml.load(fs.readFileSync(CONFPATH, 'utf-8'));
+    } else {
+        return {};
+    }
+}
+
+function init() {
+    let auth = globalConfig()['basicAuth'];
+    if (auth) {
+        app.use(basicAuth({
+            name: auth['name'],
+            pass: auth['pass']
+        }));
+    }
+}
 
 // logger
 app.use(json());
 app.use(logger());
 app.use(bodyParser());
-//app.use(auth({ name: 'tj', pass: 'xxx' }));
+
+//app.use(basicAuth({ name: 'tj', pass: 'xxx' }));
 
 app.use(async(ctx, next) => {
     if (ctx.url.match(/^\/front/)) {
         //console.log("unprotected ...");
     } else {
         //console.log("protected checking ....");
+        await verify_login(ctx);
     }
     await next();
 });
@@ -45,7 +68,47 @@ app.use(async(ctx, next) => {
 
 // response
 async function verify_login(ctx) {
-    ctx.body = "ok";
+    let token = ctx.cookies.get('obweb');
+    if (token != null && token != undefined) {
+        const tokens = fs.readFileSync(DBPATH + "/tokens", 'utf-8');
+        tokens.split(/\r?\n/).forEach(line => {
+            if (line.trim() === token) {
+                ctx.body = "ok";
+                ctx.status = 200;
+                return;
+            }
+        });
+    } else {
+        ctx.body = "failed";
+        ctx.status = 401;
+    }
+}
+
+async function user_login(ctx) {
+    const body = ctx.request.body;
+    let username = body['username'];
+    let password = body['password'];
+    let conf = globalConfig();
+    if (conf['basicAuth'] && conf['basicAuth']['name'] == username && conf['basicAuth']['pass'] == password) {
+        var crypto = require('crypto');
+        let token = crypto.randomBytes(12).toString('hex');
+        let content = fs.readFileSync(DBPATH + "/tokens", 'utf-8').split(/\r?\n/);
+        content.push(token);
+        while (content.length >= 7) {
+            content.shift();
+        }
+        fs.writeFileSync(DBPATH + "/tokens", content.join("\n"));
+        ctx.cookies.set('obweb', token, {
+            maxAge: 1209600,
+            httpOnly: true,
+            path: '/'
+        });
+        ctx.body = "ok";
+        ctx.status = 200;
+    } else {
+        ctx.body = "failed";
+        ctx.status = 401;
+    }
 }
 
 function stat(file) {
@@ -65,6 +128,10 @@ function strip_ob(path) {
 }
 
 function runShell(command) {
+    if (process.env.NODE_ENV == "test") {
+        return;
+    }
+    process.chdir(OBPATH);
     let dir = exec(command, function(err, stdout, stderr) {
         if (err) {
             console.log(err);
@@ -102,6 +169,7 @@ async function getFiles(dir) {
 }
 
 async function get_page(ctx) {
+    gitPull();
     const query = ctx.request.query;
     let date = query['path'];
     let page_path = path.join(OBPATH, `${date}.md`);
@@ -112,6 +180,22 @@ async function get_page(ctx) {
         ctx.body = ["NoPage", ""];
     }
 }
+
+async function post_page(ctx) {
+    const body = ctx.request.body;
+    let fpath = body['file'];
+    let page_path = path.join(OBPATH, `/${fpath}`);
+    if (fs.existsSync(page_path)) {
+        let content = body['content'];
+        fs.writeFileSync(page_path, content);
+        gitSync();
+        ctx.status = 200;
+    } else {
+        ctx.body = ["NoPage", ""];
+        ctx.status = 404;
+    }
+}
+
 
 function get_or(value, def) {
     return (value === null || value === undefined) ? def : value;
@@ -172,7 +256,6 @@ async function post_entry(ctx) {
     }
     let text = body['text'];
     let links = body['links'];
-
     let content = page != "" ? `\n### ${date_str} ${time_str}` : `\n## ${time_str}`;
     if (links.length > 0) {
         let link_str = links.split(",").map(l => `[[${l}]]`).join(" ");
@@ -192,7 +275,7 @@ async function post_entry(ctx) {
     }
     content = page == "todo" ? `${content}\n\n---\n\n${data}` : `${data}\n${content}`;
     fs.writeFileSync(path, content, 'utf-8');
-    //todo git sync
+    gitSync();
     ctx.body = "ok"
 }
 
@@ -200,10 +283,12 @@ router.get('/', async(ctx, next) => {
         ctx.body = "Hello World!";
     })
     .get('/api/page', get_page)
+    .post('/api/page', post_page)
     .get('/api/search', search)
-    .get('/static/images/:path', get_image)
     .post('/api/entry', post_entry)
-    .get('/api/verify', verify_login);
+    .get('/api/verify', verify_login)
+    .post('/api/login', user_login)
+    .get('/static/images/:path', get_image);
 
 router.all('/obweb', ctx => {
     ctx.redirect('/front/index.html');

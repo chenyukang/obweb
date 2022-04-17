@@ -8,6 +8,7 @@
     },
     "dependencies": {
         "china-time": "^0.12.3",
+        "js-yaml": "^4.1.0",
         "koa": "^2.13.4",
         "koa-basic-auth": "^4.0.0",
         "koa-bodyparser": "^4.3.0",
