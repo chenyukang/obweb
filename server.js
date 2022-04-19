@@ -49,7 +49,6 @@ app.use(async(ctx, next) => {
     if (!ctx.url.match(/^\/front/)) {
         await verify_login(ctx);
     }
-    console.log("debug now: ", ctx.status);
     if (ctx.status != 401 || ctx.url == "/api/login") {
         await next();
     }
@@ -69,8 +68,6 @@ app.use(async(ctx, next) => {
 // response
 async function verify_login(ctx) {
     let token = ctx.cookies.get('obweb');
-    console.log("token get verify: ", token);
-
     ctx.body = "unauthorized";
     ctx.status = 401;
     if (token != null && token != undefined) {

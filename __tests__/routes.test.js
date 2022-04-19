@@ -9,11 +9,8 @@ beforeAll(async() => {
         username: 'admin',
         password: 'helloworld123'
     });
-
-    console.log(res['headers']);
     test_token = res['headers']['set-cookie'][0].split(';')[0].split("=")[1];
     console.log('Jest starting!');
-
 });
 
 // close the server after each test
