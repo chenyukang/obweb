@@ -1,10 +1,19 @@
 //routes.test.js
 const request = require('supertest');
 const server = require('../server.js');
+var test_token;
 
 beforeAll(async() => {
     // do something before anything else runs
+    let res = await request(server).post('/api/login').send({
+        username: 'admin',
+        password: 'helloworld123'
+    });
+
+    console.log(res['headers']);
+    test_token = res['headers']['set-cookie'][0].split(';')[0].split("=")[1];
     console.log('Jest starting!');
+
 });
 
 // close the server after each test
@@ -15,48 +24,80 @@ afterAll(() => {
 
 describe('basic route tests', () => {
     test('get home route GET /', async() => {
-        const response = await request(server).get('/');
+        const response = await request(server).get('/')
+            .set('Cookie', [`obweb=${test_token}`]);
         expect(response.status).toEqual(200);
         expect(response.text).toContain('Hello World!');
     });
 
+    test('Post /api/login', async() => {
+        let res = await request(server).post('/api/login').send({
+            username: 'admin',
+            password: 'helloworld123'
+        });
+        //console.log(test_token);
+        expect(res.status).toEqual(200);
+
+        let res_error = await request(server).post('/api/login').send({
+            username: 'admin',
+            password: 'helloworld1234'
+        });
+        expect(res_error.status).toEqual(401);
+    });
+
     test('get page GET /api/page', async() => {
-        const response = await request(server).get('/api/page?path=Unsort/todo');
+        const response = await request(server).get('/api/page?path=Unsort/todo')
+            .set('Cookie', [`obweb=${test_token}`]);
         expect(response.status).toEqual(200);
         let res = response.text;
         expect(res).toContain("Unsort/todo");
     });
 
+
     test('get page invalid GET /api/page', async() => {
-        const response = await request(server).get('/api/page?path=Unsort/todo_error');
+        const response = await request(server).get('/api/page?path=Unsort/todo')
+            .set('Cookie', [`obweb=${test_token}_ee`]);
+        expect(response.status).toEqual(401);
+        console.log(response);
+        let res = response.text;
+        expect(res).toEqual("unauthorized");
+    });
+
+    test('get page invalid GET /api/page', async() => {
+        const response = await request(server).get('/api/page?path=Unsort/todo_error')
+            .set('Cookie', [`obweb=${test_token}`]);
         expect(response.status).toEqual(200);
         let res = response.text;
         expect(res).toContain("NoPage");
     });
 
     test('search GET /api/search', async() => {
-        const response = await request(server).get('/api/search?keyword=todo');
+        const response = await request(server).get('/api/search?keyword=todo')
+            .set('Cookie', [`obweb=${test_token}`]);
         expect(response.status).toEqual(200);
         expect(response.text).toContain("Unsort/todo");
     });
 
 
     test('search failed GET /api/search', async() => {
-        const response = await request(server).get('/api/search?keyword=undefxx');
+        const response = await request(server).get('/api/search?keyword=undefxx')
+            .set('Cookie', [`obweb=${test_token}`]);
         expect(response.status).toEqual(200);
         expect(response.text).toEqual("");
     });
 
     test('static image GET /static/images', async() => {
-        const response = await request(server).get('/static/images/test.png');
+        const response = await request(server).get('/static/images/test.png')
+            .set('Cookie', [`obweb=${test_token}`]);
         console.log(typeof(response.text));
         expect(response.status).toEqual(200);
         expect(response.text).toEqual(undefined);
         expect(response.type).toEqual('image/png');
     });
 
-    test('static image GET /api/verify', async() => {
-        const response = await request(server).get('/api/verify');
+    test('login verify GET /api/verify', async() => {
+        const response = await request(server).get('/api/verify')
+            .set('Cookie', [`obweb=${test_token}`]);
         console.log(typeof(response.text));
         expect(response.status).toEqual(200);
         expect(response.text).toEqual("ok");
@@ -70,7 +111,7 @@ describe('basic route tests', () => {
             "image": "data:image/png;base64,image.....",
             "date": "2022-04-16T13:24:11.444Z",
             "text": "test text"
-        });
+        }).set('Cookie', [`obweb=${test_token}`]);
         expect(response.status).toEqual(200);
         expect(response.text).toEqual("ok");
     });

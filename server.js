@@ -16,9 +16,9 @@ const { readdir } = require('fs').promises;
 var exec = require('child_process').exec;
 const yaml = require('js-yaml');
 
-const OBPATH = process.env.NODE_ENV == "test" ? resolve("./ob_test") : resolve("./ob");
-const CONFPATH = resolve("./.config.yml");
-const DBPATH = resolve("./db");
+const OBPATH = process.env.NODE_ENV == "test" ? resolve("./ob_test") : resolve("./ob")
+const CONFPATH = process.env.NODE_ENV == "test" ? resolve("./__tests__/config.yml") : resolve("./.config.yml")
+const DBPATH = process.env.NODE_ENV == "test" ? resolve("./__tests__/db") : resolve("./db");
 
 function globalConfig() {
     if (fs.existsSync(CONFPATH)) {
@@ -46,13 +46,13 @@ app.use(bodyParser());
 //app.use(basicAuth({ name: 'tj', pass: 'xxx' }));
 
 app.use(async(ctx, next) => {
-    if (ctx.url.match(/^\/front/)) {
-        //console.log("unprotected ...");
-    } else {
-        //console.log("protected checking ....");
+    if (!ctx.url.match(/^\/front/)) {
         await verify_login(ctx);
     }
-    await next();
+    console.log("debug now: ", ctx.status);
+    if (ctx.status != 401 || ctx.url == "/api/login") {
+        await next();
+    }
 });
 
 // error handling
@@ -69,6 +69,10 @@ app.use(async(ctx, next) => {
 // response
 async function verify_login(ctx) {
     let token = ctx.cookies.get('obweb');
+    console.log("token get verify: ", token);
+
+    ctx.body = "unauthorized";
+    ctx.status = 401;
     if (token != null && token != undefined) {
         const tokens = fs.readFileSync(DBPATH + "/tokens", 'utf-8');
         tokens.split(/\r?\n/).forEach(line => {
@@ -78,9 +82,6 @@ async function verify_login(ctx) {
                 return;
             }
         });
-    } else {
-        ctx.body = "failed";
-        ctx.status = 401;
     }
 }
 
@@ -90,14 +91,18 @@ async function user_login(ctx) {
     let password = body['password'];
     let conf = globalConfig();
     if (conf['basicAuth'] && conf['basicAuth']['name'] == username && conf['basicAuth']['pass'] == password) {
+        let token_path = DBPATH + "/tokens";
+        if (!fs.existsSync(token_path)) {
+            fs.writeFileSync(token_path, "");
+        }
         var crypto = require('crypto');
         let token = crypto.randomBytes(12).toString('hex');
-        let content = fs.readFileSync(DBPATH + "/tokens", 'utf-8').split(/\r?\n/);
+        let content = fs.readFileSync(token_path, 'utf-8').split(/\r?\n/);
         content.push(token);
         while (content.length >= 7) {
             content.shift();
         }
-        fs.writeFileSync(DBPATH + "/tokens", content.join("\n"));
+        fs.writeFileSync(token_path, content.join("\n"));
         ctx.cookies.set('obweb', token, {
             maxAge: 1209600,
             httpOnly: true,

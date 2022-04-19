@@ -1,0 +1,7 @@
+basicAuth:
+        name: admin
+        pass: helloworld123
+
+userAuth:
+        name: admin
+        pass: helloworld123
