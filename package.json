@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "private": true,
     "scripts": {
-        "test": "jest --watchAll",
+        "test": "jest --watchAll test_rss.js",
         "dev": "nodemon server.js"
     },
     "dependencies": {
@@ -20,7 +20,8 @@
         "koa-mount": "^4.0.0",
         "koa-router": "^10.1.1",
         "koa-static": "^5.0.0",
-        "koa-static-server": "^1.5.2"
+        "koa-static-server": "^1.5.2",
+        "rss-parser": "^3.12.0"
     },
     "devDependencies": {
         "jest": "^27.5.1",
