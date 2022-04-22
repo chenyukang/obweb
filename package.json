@@ -9,6 +9,7 @@
     "dependencies": {
         "better-sqlite3": "^7.5.1",
         "china-time": "^0.12.3",
+        "escape-path-with-spaces": "^1.0.0",
         "js-yaml": "^4.1.0",
         "koa": "^2.13.4",
         "koa-basic-auth": "^4.0.0",

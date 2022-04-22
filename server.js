@@ -15,6 +15,8 @@ const basicAuth = require('koa-basic-auth');
 const { readdir } = require('fs').promises;
 const sqlite = require('better-sqlite3');
 const yaml = require('js-yaml');
+const escape = require('escape-path-with-spaces');
+
 
 var exec = require('child_process').exec;
 var crypto = require('crypto');
@@ -142,20 +144,25 @@ function runShell(command) {
     if (process.env.NODE_ENV == "test") {
         return;
     }
-    process.chdir(OBPATH);
-    let dir = exec(command, function(err, stdout, stderr) {
-        if (err) {
-            console.log(err);
-        }
-        console.log(stdout);
-    });
+    let backup = process.cwd();
+    try {
+        process.chdir(OBPATH);
+        let dir = exec(command, function(err, stdout, stderr) {
+            if (err) {
+                console.log(err);
+            }
+            console.log(stdout);
+        });
 
-    dir.on('exit', function(code) {
-        // exit code is code
-        if (code != 0) {
-            console.log("exit code is " + code);
-        }
-    });
+        dir.on('exit', function(code) {
+            // exit code is code
+            if (code != 0) {
+                console.log("exit code is " + code);
+            }
+        });
+    } finally {
+        process.chdir(backup);
+    }
 }
 
 function gitPull() {
@@ -182,13 +189,33 @@ async function getFiles(dir) {
 async function get_page(ctx) {
     gitPull();
     const query = ctx.request.query;
-    let date = query['path'];
-    let page_path = path.join(OBPATH, `${date}.md`);
-    if (fs.existsSync(page_path)) {
-        let content = fs.readFileSync(page_path, 'utf-8');
-        ctx.body = [strip_ob(page_path), content];
-    } else {
-        ctx.body = ["NoPage", ""];
+    let query_path = query['path'];
+    let query_type = get_or(query['query_type'], "page");
+    if (query_type === "page") {
+        let page_path = path.join(OBPATH, `${query_path}.md`);
+        if (fs.existsSync(page_path)) {
+            let content = fs.readFileSync(page_path, 'utf-8');
+            ctx.body = [strip_ob(page_path), content];
+        } else {
+            ctx.body = ["NoPage", ""];
+        }
+    } else if (query_type === "rss") {
+        const data =
+            RSSDB
+            .prepare(`SELECT * FROM pages WHERE link = ? ORDER BY publish_datetime DESC LIMIT 1`)
+            .all(query_path);
+        console.log(data);
+        if (data.length > 0) {
+            RSSDB
+                .prepare(`UPDATE pages set readed = 1 where link = ?`)
+                .run(query_path);
+            let title = data[0].title;
+            let rss_path = path.join("./pages", escape(`${title}.html`));
+            let rss_page = fs.readFileSync(resolve(rss_path), 'utf-8');
+            ctx.body = [title, rss_page, query_path, data[0].publish_datetime];
+        } else {
+            ctx.body = "NoPage";
+        }
     }
 }
 

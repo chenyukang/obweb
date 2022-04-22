@@ -32,7 +32,6 @@ describe('basic route tests', () => {
             username: 'admin',
             password: 'helloworld123'
         });
-        //console.log(test_token);
         expect(res.status).toEqual(200);
 
         let res_error = await request(server).post('/api/login').send({
@@ -55,7 +54,6 @@ describe('basic route tests', () => {
         const response = await request(server).get('/api/page?path=Unsort/todo')
             .set('Cookie', [`obweb=${test_token}_ee`]);
         expect(response.status).toEqual(401);
-        console.log(response);
         let res = response.text;
         expect(res).toEqual("unauthorized");
     });
@@ -86,7 +84,6 @@ describe('basic route tests', () => {
     test('static image GET /static/images', async() => {
         const response = await request(server).get('/static/images/test.png')
             .set('Cookie', [`obweb=${test_token}`]);
-        console.log(typeof(response.text));
         expect(response.status).toEqual(200);
         expect(response.text).toEqual(undefined);
         expect(response.type).toEqual('image/png');
@@ -95,7 +92,6 @@ describe('basic route tests', () => {
     test('login verify GET /api/verify', async() => {
         const response = await request(server).get('/api/verify')
             .set('Cookie', [`obweb=${test_token}`]);
-        console.log(typeof(response.text));
         expect(response.status).toEqual(200);
         expect(response.text).toEqual("ok");
     });
@@ -103,7 +99,6 @@ describe('basic route tests', () => {
     test('get rss GET /api/rss', async() => {
         const response = await request(server).get('/api/rss')
             .set('Cookie', [`obweb=${test_token}`]);
-        console.log(typeof(response.text));
         expect(response.status).toEqual(200);
         expect(response.text).toContain("<li>");
     });
