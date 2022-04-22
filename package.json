@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "private": true,
     "scripts": {
-        "test": "jest --watchAll test_rss.js",
+        "test": "jest --watchAll",
         "dev": "nodemon server.js"
     },
     "dependencies": {

@@ -1,9 +1,9 @@
 //test_api.test.js
 const fs = require('fs')
+const { resolve } = require('path');
 const RSS = require('../rss.js');
-
-const db_path = "/tmp/rss.db";
-
+const AppDao = require('../dao.js');
+const db_path = resolve("./__tests__/rss.db");
 
 describe('basic route tests', () => {
 
@@ -13,13 +13,11 @@ describe('basic route tests', () => {
         }
     });
 
-    test('rss db init', async() => {
-        RSS.rssDB(db_path);
-        expect(fs.existsSync(db_path)).toBe(true);
-    });
-
     test('rss fetch and parse', async() => {
-        await RSS.fetchFeed('https://catcoding.me/atom.xml', db_path);
+        expect(fs.existsSync(db_path)).toBe(false);
+        AppDao.db();
+        expect(fs.existsSync(db_path)).toBe(true);
+        await RSS.fetchFeed('https://catcoding.me/atom.xml');
     });
 
     test('preprocess_image', async() => {

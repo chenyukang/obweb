@@ -7,27 +7,10 @@ let RssParser = require('rss-parser');
 var crypto = require('crypto');
 const path = require('path')
 const download = require('image-downloader');
+const AppDao = require('./dao.js');
 
-let initdb_sql = `
-CREATE TABLE IF NOT EXISTS pages(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title String NOT NULL,
-    link String NOT NULL,
-    website String,
-    publish_datetime String,
-    readed Boolean,
-    source String NOT NULL)
-`;
-
-function rssDB(db_path) {
-    const RSSDB = new sqlite(db_path);
-    RSSDB.prepare(initdb_sql).run();
-    //RSSDB.prepare(`CREATE UNIQUE INDEX idx_pages_link ON pages(link)`).run();
-    return new sqlite(db_path);
-}
-
-function get_rss_page(link, db_path) {
-    return rssDB(db_path).prepare(`SELECT * FROM pages WHERE link = ?`).all(link);
+function get_rss_page(link) {
+    return AppDao.db().get(`SELECT * FROM pages WHERE link = ?`, link);
 }
 
 function gen_image_name(image_uri) {
@@ -80,11 +63,11 @@ function preprocess_image(content, feed_url) {
         let src = attrs['src'];
         let image_uri = isValidHttpUrl(src) ? src : `${url.protocol}//${domain}${src}`;
         let new_image_path = gen_image_name(image_uri);
-        //if (!fs.existsSync(new_image_path)) {
-        console.log("downloading image: ", image_uri);
-        console.log("save: ", new_image_path);
-        downloadImage(image_uri, new_image_path, () => {});
-        //}
+        if (!fs.existsSync(new_image_path)) {
+            console.log("downloading image: ", image_uri);
+            console.log("save: ", new_image_path);
+            downloadImage(image_uri, new_image_path, () => {});
+        }
         if (fs.existsSync(new_image_path)) {
             let new_image = new_image_path.replace("./", "/");
             res = res.replace("src=\"" + src + "\"", "src=\"" + new_image + "\"");
@@ -93,21 +76,19 @@ function preprocess_image(content, feed_url) {
     return res;
 }
 
-async function fetchFeed(feed_url, db_path) {
+async function fetchFeed(feed_url) {
     let parser = new RssParser();
     let res = [];
     let feed = await parser.parseURL(feed_url);
     console.log(feed.title);
     feed.items.forEach(item => {
-        //console.log(item.title + ':' + item.link)
         res.push(item);
-        let pre = get_rss_page(item.link, db_path);
+        let pre = get_rss_page(item.link);
         if (pre.length == 0) {
-            let res = rssDB(db_path).prepare(
-                "INSERT INTO pages (title, link, website, publish_datetime, readed, source) values (?, ?, ?, ?, ?, ?)",
-            ).run(item.title, item.link, item.link, item.pubDate, 0, feed_url);
-            console.log(res);
-            let page = get_rss_page(item.link, db_path)[0];
+            AppDao.db().run(
+                "INSERT INTO pages (title, link, website, publish_datetime, readed, source) values (?, ?, ?, ?, ?, ?)", [item.title, item.link, item.link, item.pubDate, 0, feed_url]);
+            //console.log(res);
+            let page = get_rss_page(item.link)[0];
             let page_path = path.resolve(`./pages/${page.id}.html`);
             console.log(page_path);
             console.log("feed_url: ", feed_url);
@@ -126,7 +107,6 @@ async function fetchWithConf(feed_conf) {
 }
 
 module.exports = {
-    rssDB,
     fetchFeed,
     preprocess_image,
     gen_image_name,

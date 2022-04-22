@@ -7,16 +7,15 @@ const logger = require('koa-logger')
 const path = require('path')
 const fs = require('fs')
 const json = require('koa-json');
-const extname = path.extname;
 const bodyParser = require('koa-bodyparser');
 const chinaTime = require('china-time');
 const { resolve } = require('path');
 const basicAuth = require('koa-basic-auth');
 const { readdir } = require('fs').promises;
-const sqlite = require('better-sqlite3');
 const yaml = require('js-yaml');
 const escape = require('escape-path-with-spaces');
 const RSS = require('./rss.js');
+const AppDAO = require('./dao.js');
 
 var exec = require('child_process').exec;
 var crypto = require('crypto');
@@ -27,8 +26,6 @@ const CONFPATH = process.env.NODE_ENV == "test" ? resolve("./__tests__/config.ym
 const DBPATH = process.env.NODE_ENV == "test" ? resolve("./__tests__/db") : resolve("./db");
 const PORT = process.env.NODE_ENV == "test" ? 3000 : 8006;
 //const RSSDBPATH = process.env.NODE_ENV == "test" ? resolve("/tmp/rss.db") : resolve("./db/pages.db");
-const RSSDBPATH = resolve("./db/pages.db");
-const RSSDB = new sqlite(RSSDBPATH);
 
 
 function globalConfig() {
@@ -200,9 +197,7 @@ async function getFiles(dir) {
 
 
 async function initRss() {
-    let _ = RSS.rssDB(RSSDBPATH);
-    let res = await RSS.fetchFeed('https://catcoding.me/atom.xml', RSSDBPATH);
-    console.log(res);
+    //await RSS.fetchFeed('https://catcoding.me/atom.xml');
 }
 
 async function get_page(ctx) {
@@ -211,15 +206,11 @@ async function get_page(ctx) {
     let query_path = query['path'];
     let query_type = get_or(query['query_type'], "page");
     if (query_type === "rss") {
-        const data =
-            RSSDB
-            .prepare(`SELECT * FROM pages WHERE link = ? ORDER BY publish_datetime DESC LIMIT 1`)
-            .all(query_path);
+        const data = AppDAO.db()
+            .get(`SELECT * FROM pages WHERE link = ? ORDER BY publish_datetime DESC LIMIT 1`, query_path);
         console.log(data);
         if (data.length > 0) {
-            RSSDB
-                .prepare(`UPDATE pages set readed = 1 where link = ?`)
-                .run(query_path);
+            AppDAO.db().run(`UPDATE pages set readed = 1 where link = ?`, query_path);
             let title = data[0].title;
             let rss_path = path.join("./pages", escape(`${data[0].id}.html`));
             // TODO: Fix path error bug, path contains white space will trigger error
@@ -292,14 +283,13 @@ function gen_path(page, date) {
     return path;
 }
 
+
 function get_rss(ctx) {
     let query = ctx.request.query;
     let read = query['query_type'] === "unread" ? 0 : 1;
     let limit = 10;
     const data =
-        RSSDB
-        .prepare(`SELECT * FROM pages WHERE readed = ? ORDER BY publish_datetime DESC LIMIT ?`)
-        .all(read, limit);
+        AppDAO.db().get(`SELECT * FROM pages WHERE readed = ? ORDER BY publish_datetime DESC LIMIT ?`, [read, limit]);
     let res = "";
     for (let i = 0; i < data.length; i++) {
         let item = data[i];

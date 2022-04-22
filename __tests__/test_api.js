@@ -1,6 +1,7 @@
 //test_api.test.js
 const request = require('supertest');
 const server = require('../server.js');
+const AppDao = require('../dao.js');
 var test_token;
 
 beforeAll(async() => {
@@ -85,8 +86,16 @@ describe('basic route tests', () => {
         const response = await request(server).get('/static/images/test.png')
             .set('Cookie', [`obweb=${test_token}`]);
         expect(response.status).toEqual(200);
-        expect(response.text).toEqual(undefined);
-        expect(response.type).toEqual('image/png');
+        expect(response.text).toEqual("pig\n");
+        expect(response.type).toEqual('text/plain');
+    });
+
+
+    test('static image right GET /static/images', async() => {
+        const response = await request(server).get('/static/images/touxiang.png')
+            .set('Cookie', [`obweb=${test_token}`]);
+        expect(response.status).toEqual(200);
+        expect(response.type).toEqual('text/plain');
     });
 
     test('login verify GET /api/verify', async() => {
@@ -97,10 +106,18 @@ describe('basic route tests', () => {
     });
 
     test('get rss GET /api/rss', async() => {
-        const response = await request(server).get('/api/rss')
+        let response = await request(server).get('/api/rss')
             .set('Cookie', [`obweb=${test_token}`]);
         expect(response.status).toEqual(200);
-        expect(response.text).toContain("<li>");
+        expect(response.text).toContain("");
+
+        AppDao.db().run(
+            "INSERT INTO pages (title, link, website, publish_datetime, readed, source) values (?, ?, ?, ?, ?, ?)", ["title", "link", "link", Date.now(), 0, "http://google.com"]);
+        response = await request(server).get('/api/rss')
+            .set('Cookie', [`obweb=${test_token}`]);
+        expect(response.status).toEqual(200);
+        expect(response.text).toContain("");
+
     });
 
     test('post entry POST /api/entry', async() => {
@@ -114,7 +131,4 @@ describe('basic route tests', () => {
         expect(response.status).toEqual(200);
         expect(response.text).toEqual("ok");
     });
-
-
-
 });
