@@ -16,6 +16,7 @@ const { readdir } = require('fs').promises;
 const sqlite = require('better-sqlite3');
 const yaml = require('js-yaml');
 const escape = require('escape-path-with-spaces');
+const RSS = require('./rss.js');
 
 var exec = require('child_process').exec;
 var crypto = require('crypto');
@@ -121,7 +122,7 @@ async function user_login(ctx) {
         }
         fs.writeFileSync(token_path, content.join("\n"));
         ctx.cookies.set('obweb', token, {
-            maxAge: 1209600,
+            maxAge: 1209600 * 5,
             httpOnly: true,
             path: '/'
         });
@@ -195,6 +196,11 @@ async function getFiles(dir) {
     return Array.prototype.concat(...files);
 }
 
+async function initRss() {
+    let res = await RSS.fetchFeed('https://catcoding.me/atom.xml', RSSDBPATH);
+    console.log(res);
+}
+
 async function get_page(ctx) {
     gitPull();
     const query = ctx.request.query;
@@ -211,7 +217,7 @@ async function get_page(ctx) {
                 .prepare(`UPDATE pages set readed = 1 where link = ?`)
                 .run(query_path);
             let title = data[0].title;
-            let rss_path = path.join("./pages", escape(`${title}.html`));
+            let rss_path = path.join("./pages", escape(`${data[0].id}.html`));
             // TODO: Fix path error bug, path contains white space will trigger error
             let rss_page = safeRead(resolve(rss_path), 'utf-8');
             ctx.body = [title, rss_page, query_path, data[0].publish_datetime];
@@ -251,7 +257,11 @@ function get_or(value, def) {
 }
 
 async function get_image(ctx) {
-    const fpath = path.join(OBPATH + "/Pics/", ctx.params.path);
+    console.log("image : ", ctx.url);
+    const fpath = ctx.url.startsWith("/static") ?
+        path.join(OBPATH + "/Pics/", ctx.params.path) :
+        path.join("./pages/images", ctx.params.path);
+
     const fstat = await stat(fpath);
     if (fstat.isFile()) {
         ctx.type = extname(fpath);
@@ -363,8 +373,11 @@ router.all('/obweb', ctx => {
 });
 
 app.use(mount('/front', serve(path.join(__dirname, 'front/public'))));
+app.use(mount('/pages/images/', serve(path.join(__dirname, 'pages/images'))));
+
 app.use(router.routes())
     .use(router.allowedMethods());
 
+initRss();
 const server = app.listen(PORT);
 module.exports = server;
