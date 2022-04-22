@@ -22,7 +22,7 @@ bin/rss-reader
 release.zip
 ob-web-pack
 ob-web-pack.zip
-ob_test/Pics/obweb-*.png
-ob_test/Unsort/new_post.md
+__tests__/ob_test/Pics/obweb-*.png
+__tests__/ob_test/Unsort/new_post.md
 .config.yml
 __tests__/db/*

@@ -21,7 +21,8 @@ const escape = require('escape-path-with-spaces');
 var exec = require('child_process').exec;
 var crypto = require('crypto');
 
-const OBPATH = process.env.NODE_ENV == "test" ? resolve("./ob_test") : resolve("./ob");
+const ROOTPATH = path.dirname(require.main.filename);
+const OBPATH = process.env.NODE_ENV == "test" ? resolve("./__tests__/ob_test") : resolve("./ob");
 const CONFPATH = process.env.NODE_ENV == "test" ? resolve("./__tests__/config.yml") : resolve("./.config.yml");
 const DBPATH = process.env.NODE_ENV == "test" ? resolve("./__tests__/db") : resolve("./db");
 const PORT = process.env.NODE_ENV == "test" ? 3000 : 8006;
@@ -35,6 +36,15 @@ function globalConfig() {
     } else {
         return {};
     }
+}
+
+function safeRead(file_path) {
+    let p = resolve(file_path);
+    let parent = path.dirname(p);
+    if (!parent.startsWith(ROOTPATH)) {
+        throw `Invalid path: ${file_path}`
+    }
+    return fs.readFileSync(p, 'utf-8');
 }
 
 function init() {
@@ -81,7 +91,7 @@ async function verify_login(ctx) {
     ctx.body = "unauthorized";
     ctx.status = 401;
     if (token != null && token != undefined) {
-        const tokens = fs.readFileSync(DBPATH + "/tokens", 'utf-8');
+        const tokens = safeRead(DBPATH + "/tokens", 'utf-8');
         tokens.split(/\r?\n/).forEach(line => {
             if (line.trim() === token) {
                 ctx.body = "ok";
@@ -105,7 +115,7 @@ async function user_login(ctx) {
             fs.writeFileSync(token_path, "");
         }
         let token = crypto.randomBytes(12).toString('hex');
-        let content = fs.readFileSync(token_path, 'utf-8').split(/\r?\n/);
+        let content = safeRead(token_path, 'utf-8').split(/\r?\n/);
         content.push(token);
         while (content.length >= 7) {
             content.shift();
@@ -204,15 +214,16 @@ async function get_page(ctx) {
             let title = data[0].title;
             let rss_path = path.join("./pages", escape(`${title}.html`));
             // TODO: Fix path error bug, path contains white space will trigger error
-            let rss_page = fs.readFileSync(resolve(rss_path), 'utf-8');
+            let rss_page = safeRead(resolve(rss_path), 'utf-8');
             ctx.body = [title, rss_page, query_path, data[0].publish_datetime];
         } else {
             ctx.body = "NoPage";
         }
     } else {
         let page_path = path.join(OBPATH, `${query_path}.md`);
+        console.log("get page_page: ", page_path);
         if (fs.existsSync(page_path)) {
-            let content = fs.readFileSync(page_path, 'utf-8');
+            let content = safeRead(page_path, 'utf-8');
             ctx.body = [strip_ob(page_path), content];
         } else {
             ctx.body = ["NoPage", ""];
@@ -257,7 +268,7 @@ async function search(ctx) {
             return files.filter(file => {
                 let path = file.path;
                 if (path.indexOf(".md") != -1) {
-                    let content = fs.readFileSync(path, 'utf-8');
+                    let content = safeRead(path, 'utf-8');
                     return (keyword.length == 0 || content.indexOf(keyword) != -1);
                 }
                 return false;
@@ -305,7 +316,7 @@ async function post_entry(ctx) {
     let body = ctx.request.body;
     let page = body['page']
     let path = gen_path(page, date_str);
-    let data = fs.readFileSync(path, 'utf-8');
+    let data = safeRead(path, 'utf-8');
 
     if (page == "" && data.length == 0) {
         data = `## ${date_str}`;
@@ -353,7 +364,6 @@ router.all('/obweb', ctx => {
 });
 
 app.use(mount('/front', serve(path.join(__dirname, 'front/public'))));
-//app.use(mount('/static/images', serve(path.join(__dirname, 'ob/Pics'))));
 app.use(router.routes())
     .use(router.allowedMethods());
 
