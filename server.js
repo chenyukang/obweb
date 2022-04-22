@@ -15,10 +15,13 @@ const basicAuth = require('koa-basic-auth');
 const { readdir } = require('fs').promises;
 var exec = require('child_process').exec;
 const yaml = require('js-yaml');
+var crypto = require('crypto');
 
-const OBPATH = process.env.NODE_ENV == "test" ? resolve("./ob_test") : resolve("./ob")
-const CONFPATH = process.env.NODE_ENV == "test" ? resolve("./__tests__/config.yml") : resolve("./.config.yml")
+const OBPATH = process.env.NODE_ENV == "test" ? resolve("./ob_test") : resolve("./ob");
+const CONFPATH = process.env.NODE_ENV == "test" ? resolve("./__tests__/config.yml") : resolve("./.config.yml");
 const DBPATH = process.env.NODE_ENV == "test" ? resolve("./__tests__/db") : resolve("./db");
+const PORT = process.env.NODE_ENV == "test" ? 3000 : 8006;
+const RSSDB = process.env.NODE_ENV == "test" ? resolve("/tmp/rss.db") : resolve("./db/rss.db");
 
 function globalConfig() {
     if (fs.existsSync(CONFPATH)) {
@@ -46,10 +49,11 @@ app.use(bodyParser());
 //app.use(basicAuth({ name: 'tj', pass: 'xxx' }));
 
 app.use(async(ctx, next) => {
-    if (!ctx.url.match(/^\/front/)) {
+    let black_list = ["/api/login", "/obweb"];
+    if (!ctx.url.match(/^\/front/) && black_list.indexOf(ctx.url) == -1) {
         await verify_login(ctx);
     }
-    if (ctx.status != 401 || ctx.url == "/api/login") {
+    if (ctx.status != 401) {
         await next();
     }
 });
@@ -87,12 +91,13 @@ async function user_login(ctx) {
     let username = body['username'];
     let password = body['password'];
     let conf = globalConfig();
-    if (conf['basicAuth'] && conf['basicAuth']['name'] == username && conf['basicAuth']['pass'] == password) {
+    if (conf['basicAuth'] &&
+        conf['basicAuth']['name'] == username &&
+        conf['basicAuth']['pass'] == password) {
         let token_path = DBPATH + "/tokens";
         if (!fs.existsSync(token_path)) {
             fs.writeFileSync(token_path, "");
         }
-        var crypto = require('crypto');
         let token = crypto.randomBytes(12).toString('hex');
         let content = fs.readFileSync(token_path, 'utf-8').split(/\r?\n/);
         content.push(token);
@@ -245,6 +250,17 @@ function gen_path(page, date) {
     return path;
 }
 
+function get_rss(ctx) {
+    let query = ctx.request.query;
+    let read = query['type'] === "read" ? 1 : 0;
+    let limit = 10;
+
+    let page = get_or(query['page'], "");
+    let path = gen_path(page, date);
+    let content = fs.readFileSync(path, 'utf-8');
+    ctx.body = content;
+}
+
 async function post_entry(ctx) {
     let date_str = chinaTime('YYYY-MM-DD');
     let time_str = chinaTime('HH:mm');
@@ -290,6 +306,7 @@ router.get('/', async(ctx, next) => {
     .post('/api/entry', post_entry)
     .get('/api/verify', verify_login)
     .post('/api/login', user_login)
+    .get('/api/rss', get_rss)
     .get('/static/images/:path', get_image);
 
 router.all('/obweb', ctx => {
@@ -302,5 +319,5 @@ app.use(mount('/front', serve(path.join(__dirname, 'front/public'))));
 app.use(router.routes())
     .use(router.allowedMethods());
 
-const server = app.listen(8006);
+const server = app.listen(PORT);
 module.exports = server;
