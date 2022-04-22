@@ -467,6 +467,7 @@ mod tests {
     #[test]
     fn test_process_image() -> Result<(), Box<dyn Error>> {
         let img = "https://coderscat.com/css/images/logo.png";
+
         let html = format!(
             "<img src=\"{}\" alt=\"moores-law\" style=\"width: 50%; height: 100%;\">",
             img

@@ -28,7 +28,8 @@ const DBPATH = process.env.NODE_ENV == "test" ? resolve("./__tests__/db") : reso
 const PORT = process.env.NODE_ENV == "test" ? 3000 : 8006;
 //const RSSDBPATH = process.env.NODE_ENV == "test" ? resolve("/tmp/rss.db") : resolve("./db/pages.db");
 const RSSDBPATH = resolve("./db/pages.db");
-const RSSDB = new sqlite(RSSDBPATH, { fileMustExist: true });
+const RSSDB = new sqlite(RSSDBPATH);
+
 
 function globalConfig() {
     if (fs.existsSync(CONFPATH)) {
@@ -197,7 +198,9 @@ async function getFiles(dir) {
     return Array.prototype.concat(...files);
 }
 
+
 async function initRss() {
+    let _ = RSS.rssDB(RSSDBPATH);
     let res = await RSS.fetchFeed('https://catcoding.me/atom.xml', RSSDBPATH);
     console.log(res);
 }

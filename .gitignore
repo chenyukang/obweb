@@ -4,6 +4,7 @@ db/accounts.json
 db/account
 db/tokens
 db/dev
+db/*.db
 db/pages.json
 pages/*.html
 server/public

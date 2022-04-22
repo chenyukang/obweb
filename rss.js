@@ -20,11 +20,9 @@ CREATE TABLE IF NOT EXISTS pages(
 `;
 
 function rssDB(db_path) {
-    if (!fs.existsSync(db_path)) {
-        const RSSDB = new sqlite(db_path);
-        RSSDB.prepare(initdb_sql).run();
-        RSSDB.prepare(`CREATE UNIQUE INDEX idx_pages_link ON pages(link)`).run();
-    }
+    const RSSDB = new sqlite(db_path);
+    RSSDB.prepare(initdb_sql).run();
+    //RSSDB.prepare(`CREATE UNIQUE INDEX idx_pages_link ON pages(link)`).run();
     return new sqlite(db_path);
 }
 
@@ -82,12 +80,11 @@ function preprocess_image(content, feed_url) {
         let src = attrs['src'];
         let image_uri = isValidHttpUrl(src) ? src : `${url.protocol}//${domain}${src}`;
         let new_image_path = gen_image_name(image_uri);
-        if (!fs.existsSync(new_image_path)) {
-            console.log("downloading image: ", image_uri);
-            console.log("save: ", new_image_path);
-            downloadImage(image_uri, new_image_path, () => {});
-        }
-
+        //if (!fs.existsSync(new_image_path)) {
+        console.log("downloading image: ", image_uri);
+        console.log("save: ", new_image_path);
+        downloadImage(image_uri, new_image_path, () => {});
+        //}
         if (fs.existsSync(new_image_path)) {
             let new_image = new_image_path.replace("./", "/");
             res = res.replace("src=\"" + src + "\"", "src=\"" + new_image + "\"");
