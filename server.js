@@ -66,6 +66,7 @@ app.use(bodyParser());
 
 app.use(async(ctx, next) => {
     let black_list = ["/api/login", "/obweb"];
+    console.log("ctx url: ", ctx.url);
     if (!ctx.url.match(/^\/front/) && black_list.indexOf(ctx.url) == -1) {
         await verify_login(ctx);
     }
@@ -251,22 +252,8 @@ async function post_page(ctx) {
     }
 }
 
-
 function get_or(value, def) {
     return (value === null || value === undefined) ? def : value;
-}
-
-async function get_image(ctx) {
-    console.log("image : ", ctx.url);
-    const fpath = ctx.url.startsWith("/static") ?
-        path.join(OBPATH + "/Pics/", ctx.params.path) :
-        path.join("./pages/images", ctx.params.path);
-
-    const fstat = await stat(fpath);
-    if (fstat.isFile()) {
-        ctx.type = extname(fpath);
-        ctx.body = fs.createReadStream(fpath);
-    }
 }
 
 async function search(ctx) {
@@ -364,8 +351,8 @@ router.get('/', async(ctx, next) => {
     .post('/api/entry', post_entry)
     .get('/api/verify', verify_login)
     .post('/api/login', user_login)
-    .get('/api/rss', get_rss)
-    .get('/static/images/:path', get_image);
+    .get('/api/rss', get_rss);
+
 
 router.all('/obweb', ctx => {
     ctx.redirect('/front/index.html');
@@ -374,6 +361,8 @@ router.all('/obweb', ctx => {
 
 app.use(mount('/front', serve(path.join(__dirname, 'front/public'))));
 app.use(mount('/pages/images/', serve(path.join(__dirname, 'pages/images'))));
+app.use(mount('/static/images/', serve(`${OBPATH}/Pics`)));
+
 
 app.use(router.routes())
     .use(router.allowedMethods());
