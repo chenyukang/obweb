@@ -14,7 +14,6 @@ const basicAuth = require('koa-basic-auth');
 const { readdir } = require('fs').promises;
 const yaml = require('js-yaml');
 const escape = require('escape-path-with-spaces');
-const RSS = require('./rss.js');
 const AppDAO = require('./dao.js');
 
 var exec = require('child_process').exec;
@@ -133,18 +132,6 @@ async function user_login(ctx) {
     }
 }
 
-function stat(file) {
-    return new Promise(function(resolve, reject) {
-        fs.stat(file, function(err, stat) {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(stat);
-            }
-        });
-    });
-}
-
 function strip_ob(path) {
     return path.replace(OBPATH + "/", "");
 }
@@ -193,11 +180,6 @@ async function getFiles(dir) {
         return dirent.isDirectory() ? getFiles(path) : obj;
     }));
     return Array.prototype.concat(...files);
-}
-
-
-async function initRss() {
-    //await RSS.fetchFeed('https://catcoding.me/atom.xml');
 }
 
 async function get_page(ctx) {
@@ -360,6 +342,5 @@ app.use(mount('/static/images/', serve(`${OBPATH}/Pics`)));
 app.use(router.routes())
     .use(router.allowedMethods());
 
-initRss();
 const server = app.listen(PORT);
 module.exports = server;
