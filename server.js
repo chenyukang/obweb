@@ -13,15 +13,19 @@ const chinaTime = require('china-time');
 const { resolve } = require('path');
 const basicAuth = require('koa-basic-auth');
 const { readdir } = require('fs').promises;
-var exec = require('child_process').exec;
+const sqlite = require('better-sqlite3');
 const yaml = require('js-yaml');
+
+var exec = require('child_process').exec;
 var crypto = require('crypto');
 
 const OBPATH = process.env.NODE_ENV == "test" ? resolve("./ob_test") : resolve("./ob");
 const CONFPATH = process.env.NODE_ENV == "test" ? resolve("./__tests__/config.yml") : resolve("./.config.yml");
 const DBPATH = process.env.NODE_ENV == "test" ? resolve("./__tests__/db") : resolve("./db");
 const PORT = process.env.NODE_ENV == "test" ? 3000 : 8006;
-const RSSDB = process.env.NODE_ENV == "test" ? resolve("/tmp/rss.db") : resolve("./db/rss.db");
+//const RSSDBPATH = process.env.NODE_ENV == "test" ? resolve("/tmp/rss.db") : resolve("./db/pages.db");
+const RSSDBPATH = resolve("./db/pages.db");
+const RSSDB = new sqlite(RSSDBPATH, { fileMustExist: true });
 
 function globalConfig() {
     if (fs.existsSync(CONFPATH)) {
@@ -252,13 +256,19 @@ function gen_path(page, date) {
 
 function get_rss(ctx) {
     let query = ctx.request.query;
-    let read = query['type'] === "read" ? 1 : 0;
+    let read = query['query_type'] === "unread" ? 0 : 1;
     let limit = 10;
-
-    let page = get_or(query['page'], "");
-    let path = gen_path(page, date);
-    let content = fs.readFileSync(path, 'utf-8');
-    ctx.body = content;
+    const data =
+        RSSDB
+        .prepare(`SELECT * FROM pages WHERE readed = ? ORDER BY publish_datetime DESC LIMIT ?`)
+        .all(read, limit);
+    let res = "";
+    for (let i = 0; i < data.length; i++) {
+        let item = data[i];
+        let cl = item.readed ? "visited" : "";
+        res += `<li><a class=\"${cl}\" id=\"${item.link}\", href=\"#\">${item.title}</a></li>`;
+    }
+    ctx.body = res;
 }
 
 async function post_entry(ctx) {

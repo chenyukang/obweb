@@ -100,6 +100,13 @@ describe('basic route tests', () => {
         expect(response.text).toEqual("ok");
     });
 
+    test('get rss GET /api/rss', async() => {
+        const response = await request(server).get('/api/rss')
+            .set('Cookie', [`obweb=${test_token}`]);
+        console.log(typeof(response.text));
+        expect(response.status).toEqual(200);
+        expect(response.text).toContain("<li>");
+    });
 
     test('post entry POST /api/entry', async() => {
         const response = await request(server).post('/api/entry').send({
