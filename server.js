@@ -211,6 +211,7 @@ async function get_page(ctx) {
                 .run(query_path);
             let title = data[0].title;
             let rss_path = path.join("./pages", escape(`${title}.html`));
+            // TODO: Fix path error bug, path contains white space will trigger error
             let rss_page = fs.readFileSync(resolve(rss_path), 'utf-8');
             ctx.body = [title, rss_page, query_path, data[0].publish_datetime];
         } else {
