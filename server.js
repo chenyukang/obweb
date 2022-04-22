@@ -191,15 +191,7 @@ async function get_page(ctx) {
     const query = ctx.request.query;
     let query_path = query['path'];
     let query_type = get_or(query['query_type'], "page");
-    if (query_type === "page") {
-        let page_path = path.join(OBPATH, `${query_path}.md`);
-        if (fs.existsSync(page_path)) {
-            let content = fs.readFileSync(page_path, 'utf-8');
-            ctx.body = [strip_ob(page_path), content];
-        } else {
-            ctx.body = ["NoPage", ""];
-        }
-    } else if (query_type === "rss") {
+    if (query_type === "rss") {
         const data =
             RSSDB
             .prepare(`SELECT * FROM pages WHERE link = ? ORDER BY publish_datetime DESC LIMIT 1`)
@@ -216,6 +208,14 @@ async function get_page(ctx) {
             ctx.body = [title, rss_page, query_path, data[0].publish_datetime];
         } else {
             ctx.body = "NoPage";
+        }
+    } else {
+        let page_path = path.join(OBPATH, `${query_path}.md`);
+        if (fs.existsSync(page_path)) {
+            let content = fs.readFileSync(page_path, 'utf-8');
+            ctx.body = [strip_ob(page_path), content];
+        } else {
+            ctx.body = ["NoPage", ""];
         }
     }
 }
