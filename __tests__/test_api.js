@@ -1,4 +1,4 @@
-//routes.test.js
+//test_api.test.js
 const request = require('supertest');
 const server = require('../server.js');
 var test_token;

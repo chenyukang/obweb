@@ -17,7 +17,6 @@ const sqlite = require('better-sqlite3');
 const yaml = require('js-yaml');
 const escape = require('escape-path-with-spaces');
 
-
 var exec = require('child_process').exec;
 var crypto = require('crypto');
 
