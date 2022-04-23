@@ -38,6 +38,7 @@ function downloadImage(url, filepath) {
             dest: fullpath
         }).then(file => {
             //console.log("saved : ", fullpath);
+            return fullpath;
         });
     } catch (e) {
         console.log("download error: ", e);

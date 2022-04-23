@@ -50,6 +50,12 @@ describe('basic route tests', () => {
         expect(res).toContain("Unsort/todo");
     });
 
+    test('get page safe check GET /api/page', async() => {
+        const response = await request(server).get('/api/page?path=Unsort/../../etc/passwd%00')
+            .set('Cookie', [`obweb=${test_token}`]);
+        expect(response.status).toEqual(200);
+        expect(response.text).toContain("NoPage");
+    });
 
     test('get page invalid GET /api/page', async() => {
         const response = await request(server).get('/api/page?path=Unsort/todo')

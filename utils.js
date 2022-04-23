@@ -9,10 +9,18 @@ const OBPATH = resolve(config.get("ob"));
 const DBPATH = resolve(config.get("db"));
 
 function safeRead(file_path) {
-    let p = resolve(file_path);
+    let msg = `Invalid file path: ${file_path}`;
+    console.log("file_path: ", file_path)
+        /* poison Null Bytes Attack */
+    if (file_path.indexOf('\0') !== -1) {
+        throw msg;
+    }
+    /* normalize user input */
+    let safe_path = path.normalize(file_path).replace(/^(\.\.(\/|\\|$))+/, '');
+    let p = resolve(safe_path);
     let parent = path.dirname(p);
     if (!parent.startsWith(ROOTPATH)) {
-        throw `Invalid path: ${file_path}`
+        throw msg;
     }
     return fs.readFileSync(p, 'utf-8');
 }

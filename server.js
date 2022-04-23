@@ -13,7 +13,6 @@ const { resolve } = require('path');
 const basicAuth = require('koa-basic-auth');
 const { readdir } = require('fs').promises;
 const yaml = require('js-yaml');
-const escape = require('escape-path-with-spaces');
 const config = require('config');
 const AppDAO = require('./dao.js');
 const Utils = require('./utils.js');
@@ -138,9 +137,8 @@ async function get_page(ctx) {
         if (data.length > 0) {
             AppDAO.db().run(`UPDATE pages set readed = 1 where link = ?`, query_path);
             let title = data[0].title;
-            let rss_path = path.join("./pages", escape(`${data[0].id}.html`));
-            // TODO: Fix path error bug, path contains white space will trigger error
-            let rss_page = Utils.safeRead(resolve(rss_path), 'utf-8');
+            let rss_path = path.join("./pages", `${data[0].id}.html`);
+            let rss_page = Utils.safeRead(rss_path, 'utf-8');
             ctx.body = [title, rss_page, query_path, data[0].publish_datetime];
         } else {
             ctx.body = "NoPage";
