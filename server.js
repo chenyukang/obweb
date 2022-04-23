@@ -21,7 +21,6 @@ const Utils = require('./utils.js');
 var exec = require('child_process').exec;
 var crypto = require('crypto');
 
-const ROOTPATH = path.dirname(require.main.filename);
 const OBPATH = resolve(config.get("ob"));
 const DBPATH = resolve(config.get("db"));
 const PORT = config.get("server.port");
@@ -89,8 +88,6 @@ async function user_login(ctx) {
     let password = body['password'];
     let user = config.get("user");
     let pass = config.get("pass");
-    console.log("user: ", user);
-    console.log("pass: ", pass);
     if (user && pass && user == username && pass == password) {
         let token_path = DBPATH + "/tokens";
         if (!fs.existsSync(token_path)) {
@@ -104,7 +101,7 @@ async function user_login(ctx) {
         }
         fs.writeFileSync(token_path, content.join("\n"));
         ctx.cookies.set('obweb', token, {
-            maxAge: 1209600 * 5,
+            expires: new Date(Date.now() + 1209600 * 1000),
             httpOnly: true,
             path: '/'
         });

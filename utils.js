@@ -3,7 +3,6 @@ const fs = require('fs');
 const path = require('path')
 const { resolve } = require('path');
 
-
 const ROOTPATH = path.dirname(require.main.filename);
 const OBPATH = resolve(config.get("ob"));
 const DBPATH = resolve(config.get("db"));
