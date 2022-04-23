@@ -17,27 +17,17 @@ describe('basic route tests', () => {
         expect(fs.existsSync(db_path)).toBe(false);
         AppDao.db();
         expect(fs.existsSync(db_path)).toBe(true);
-        //await RSS.fetchFeed('https://catcoding.me/atom.xml');
         await RSS.fetchFeed('https://www.quastor.org/feed');
     });
 
     test('preprocess_image', async() => {
-        let html = '<ul id="list"><li>Hello World</li><img src="https://catcoding.me/images/ob_pasted-image-20220421211405.png" alt=""></ul>';
-        let res = RSS.preprocess_image(html, "https://catcoding.me/atom.xml");
-        expect(res.indexOf("/pages/images/e1230d579c19b86.png")).toBeGreaterThan(0);
-    });
-
-    test('download image', async() => {
-        let image_uri = "https://catcoding.me/images/ob_pasted-image-20220421211405.png";
-        let new_image_path = RSS.gen_image_name(image_uri);
-        if (fs.existsSync(new_image_path)) {
-            fs.unlinkSync(new_image_path, () => {});
+        let file = "./pages/images/8d274a6f8bfe9dd.png";
+        if (fs.existsSync(file)) {
+            fs.unlinkSync(file);
         }
-        expect(new_image_path).toBe("./pages/images/e1230d579c19b86.png");
-        expect(fs.existsSync(new_image_path)).toBe(false);
-        await RSS.downloadImage(image_uri, new_image_path, () => {
-            expect(fs.existsSync(new_image_path)).toBe(true);
-        });
+        let html = '<ul id="list"><li>Hello World</li><img src="https://catcoding.me/css/images/logo.png" alt=""></ul>';
+        let res = await RSS.preprocess_image(html, "https://catcoding.me/atom.xml");
+        expect(res.indexOf(file.replace("./", "/"))).toBeGreaterThan(0);
     });
 
 });

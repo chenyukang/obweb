@@ -28,24 +28,6 @@ function gen_image_name(image_uri) {
     return `${image_dir}/${digest}.${extname}`;
 }
 
-
-function downloadImage(url, filepath) {
-    let fullpath = resolve(filepath);
-    console.log("begin down load: ", url, " to ", fullpath);
-    try {
-        let res = download.image({
-            url,
-            dest: fullpath
-        }).then(file => {
-            //console.log("saved : ", fullpath);
-            return fullpath;
-        });
-    } catch (e) {
-        console.log("download error: ", e);
-    }
-    return null;
-}
-
 function isValidHttpUrl(string) {
     let url;
     try {
@@ -57,35 +39,37 @@ function isValidHttpUrl(string) {
     return url.protocol === "http:" || url.protocol === "https:";
 }
 
-function preprocess_image(content, feed_url) {
+async function preprocess_image(content, feed_url) {
     let url = (new URL(feed_url));
     let domain = url.hostname;
-    try {
-        //console.log(content);
-        let html = HTMLParser.parse(content);
-        let res = html.toString();
-        let imgs = html.querySelectorAll("img");
-        imgs.forEach(img => {
-            let attrs = img.attributes;
-            let src = attrs['src'];
-            let image_uri = isValidHttpUrl(src) ? src : `${url.protocol}//${domain}${src}`;
-            let new_image_path = gen_image_name(image_uri);
-            if (isValidHttpUrl(new_image_path) &&
-                !fs.existsSync(new_image_path) && image_uri.length <= 100) {
-                //console.log("downloading image: ", image_uri);
-                //console.log("save: ", new_image_path);
-                downloadImage(image_uri, new_image_path, () => {});
-            }
-            if (fs.existsSync(new_image_path)) {
+
+    //console.log(content);
+    let html = HTMLParser.parse(content);
+    let res = html.toString();
+    let imgs = html.querySelectorAll("img");
+    //imgs.forEach(img => {
+    for (let i = 0; i < imgs.length; i++) {
+        let img = imgs[i];
+        let attrs = img.attributes;
+        let src = attrs['src'];
+        let image_uri = isValidHttpUrl(src) ? src : `${url.protocol}//${domain}${src}`;
+        let new_image_path = gen_image_name(image_uri);
+        if (isValidHttpUrl(image_uri) && image_uri.length <= 200) {
+            let fullpath = resolve(new_image_path);
+            console.log("begin down load: ", image_uri, " to ", fullpath);
+            await download.image({
+                url: image_uri,
+                dest: fullpath
+            }).then(({ filename }) => {
+                console.log("saved : ", filename);
+            }).catch((err) => console.error(err));
+            if (fs.existsSync(fullpath)) {
                 let new_image = new_image_path.replace("./", "/");
                 res = res.replace("src=\"" + src + "\"", "src=\"" + new_image + "\"");
             }
-        })
-        return res;
-    } catch (e) {
-        //console.log("error: ", e);
-        return content;
+        }
     }
+    return res;
 }
 
 async function fetchFeed(feed_url) {
@@ -98,7 +82,7 @@ async function fetchFeed(feed_url) {
         feed_url = feed_url.replace("https://", "http://");
         feed = await parser.parseURL(feed_url);
     }
-    feed.items.forEach(item => {
+    feed.items.forEach(async item => {
         res.push(item);
         let pre = get_rss_page(item.link);
         if (pre.length == 0) {
@@ -108,7 +92,7 @@ async function fetchFeed(feed_url) {
             let page = get_rss_page(item.link)[0];
             let page_path = path.resolve(`./pages/${page.id}.html`);
             //console.log(item);
-            let content = preprocess_image(item.content, feed_url);
+            content = await preprocess_image(item.content, feed_url);
             fs.writeFileSync(page_path, content);
         }
     });
@@ -133,6 +117,5 @@ module.exports = {
     fetchFeed,
     preprocess_image,
     gen_image_name,
-    downloadImage,
     updateRss
 }
