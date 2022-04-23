@@ -1,0 +1,12 @@
+{
+    "server": {
+        "host": "localhost",
+        "port": "8006"
+    },
+    "ob": "./ob",
+    "rssdb": "./db/pages.db",
+    "db": "./db",
+    "user": "admin",
+    "pass": "hello",
+    "auth": "/.config.yml"
+}

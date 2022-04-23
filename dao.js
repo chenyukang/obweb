@@ -1,7 +1,7 @@
 const sqlite = require('better-sqlite3');
 const { resolve } = require('path');
-
-const RSSDBPATH = process.env.NODE_ENV == "test" ? resolve("./__tests__/rss.db") : resolve("./db/pages.db");
+const config = require('config');
+const RSSDBPATH = resolve(config.get("rssdb"));
 
 let instance = null;
 

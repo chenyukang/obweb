@@ -8,7 +8,7 @@ beforeAll(async() => {
     // do something before anything else runs
     let res = await request(server).post('/api/login').send({
         username: 'admin',
-        password: 'helloworld123'
+        password: 'hello'
     });
     test_token = res['headers']['set-cookie'][0].split(';')[0].split("=")[1];
     console.log('Jest starting!');
@@ -31,7 +31,7 @@ describe('basic route tests', () => {
     test('Post /api/login', async() => {
         let res = await request(server).post('/api/login').send({
             username: 'admin',
-            password: 'helloworld123'
+            password: 'hello'
         });
         expect(res.status).toEqual(200);
 

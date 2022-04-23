@@ -9,6 +9,7 @@
     "dependencies": {
         "better-sqlite3": "^7.5.1",
         "china-time": "^0.12.3",
+        "config": "^3.3.7",
         "escape-path-with-spaces": "^1.0.0",
         "image-downloader": "^4.2.0",
         "js-yaml": "^4.1.0",
