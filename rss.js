@@ -32,13 +32,17 @@ function gen_image_name(image_uri) {
 function downloadImage(url, filepath) {
     let fullpath = resolve(filepath);
     console.log("begin down load: ", url);
-    let res = download.image({
-        url,
-        dest: fullpath
-    }).then(file => {
-        console.log("saved : ", fullpath);
-    });
-    return res;
+    try {
+        let res = download.image({
+            url,
+            dest: fullpath
+        }).then(file => {
+            console.log("saved : ", fullpath);
+        });
+    } catch (e) {
+        console.log("download error: ", e);
+    }
+    return null;
 }
 
 function isValidHttpUrl(string) {
@@ -85,13 +89,11 @@ async function fetchFeed(feed_url) {
         res.push(item);
         let pre = get_rss_page(item.link);
         if (pre.length == 0) {
+            let sql = "INSERT INTO pages (title, link, website, publish_datetime, readed, source) values (?, ?, ?, ?, ?, ?)";
             AppDao.db().run(
-                "INSERT INTO pages (title, link, website, publish_datetime, readed, source) values (?, ?, ?, ?, ?, ?)", [item.title, item.link, item.link, item.pubDate, 0, feed_url]);
-            //console.log(res);
+                sql, [item.title, item.link, item.link, item.pubDate, 0, feed_url]);
             let page = get_rss_page(item.link)[0];
             let page_path = path.resolve(`./pages/${page.id}.html`);
-            console.log(page_path);
-            console.log("feed_url: ", feed_url);
             let content = preprocess_image(item.content, feed_url);
             fs.writeFileSync(page_path, content);
         }
@@ -99,11 +101,20 @@ async function fetchFeed(feed_url) {
     return res;
 }
 
-async function fetchWithConf(feed_conf) {
-    let feeds = fs.readFileSync(feed_conf).split(/\r?\n/);
+function updateRss(feed_conf) {
+    let content = fs.readFileSync(feed_conf, 'utf-8');
+    console.log(content);
+    let feeds = content.split(/\r?\n/);
+
     feeds.forEach(feed => {
-        fetchFeed(feed);
+        try {
+            console.log("fetching: ", feed);
+            fetchFeed(feed);
+        } catch (e) {
+            console.log("error: ", e.backtrace);
+        }
     });
+
 }
 
 module.exports = {
@@ -111,4 +122,5 @@ module.exports = {
     preprocess_image,
     gen_image_name,
     downloadImage,
+    updateRss
 }

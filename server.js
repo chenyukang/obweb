@@ -18,7 +18,7 @@ const config = require('config');
 const AppDAO = require('./dao.js');
 const Utils = require('./utils.js');
 
-var exec = require('child_process').exec;
+
 var crypto = require('crypto');
 
 const OBPATH = resolve(config.get("ob"));

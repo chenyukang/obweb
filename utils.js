@@ -1,6 +1,7 @@
 const config = require('config');
 const fs = require('fs');
 const path = require('path')
+var exec = require('child_process').exec;
 const { resolve } = require('path');
 
 const ROOTPATH = path.dirname(require.main.filename);
