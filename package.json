@@ -24,6 +24,7 @@
         "koa-static": "^5.0.0",
         "koa-static-server": "^1.5.2",
         "node-html-parser": "^5.3.3",
+        "nodemon": "^2.0.15",
         "request": "^2.88.2",
         "rss-parser": "^3.12.0"
     },

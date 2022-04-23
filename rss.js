@@ -22,7 +22,7 @@ function gen_image_name(image_uri) {
             }
         });
     }
-    let extname = image_uri.split('.').pop();
+    let extname = image_uri.split('.').pop().split(/\#|\?/)[0];
     let digest = crypto.createHash('sha256').update(image_uri)
         .digest('hex').substr(0, 15);
     return `${image_dir}/${digest}.${extname}`;
@@ -31,13 +31,13 @@ function gen_image_name(image_uri) {
 
 function downloadImage(url, filepath) {
     let fullpath = resolve(filepath);
-    console.log("begin down load: ", url);
+    console.log("begin down load: ", url, " to ", fullpath);
     try {
         let res = download.image({
             url,
             dest: fullpath
         }).then(file => {
-            console.log("saved : ", fullpath);
+            //console.log("saved : ", fullpath);
         });
     } catch (e) {
         console.log("download error: ", e);
@@ -67,9 +67,10 @@ function preprocess_image(content, feed_url) {
         let src = attrs['src'];
         let image_uri = isValidHttpUrl(src) ? src : `${url.protocol}//${domain}${src}`;
         let new_image_path = gen_image_name(image_uri);
-        if (!fs.existsSync(new_image_path)) {
-            console.log("downloading image: ", image_uri);
-            console.log("save: ", new_image_path);
+        if (isValidHttpUrl(new_image_path) &&
+            !fs.existsSync(new_image_path) && image_uri.length <= 100) {
+            //console.log("downloading image: ", image_uri);
+            //console.log("save: ", new_image_path);
             downloadImage(image_uri, new_image_path, () => {});
         }
         if (fs.existsSync(new_image_path)) {
@@ -101,20 +102,21 @@ async function fetchFeed(feed_url) {
     return res;
 }
 
-function updateRss(feed_conf) {
+async function updateRss(feed_conf) {
     let content = fs.readFileSync(feed_conf, 'utf-8');
     console.log(content);
     let feeds = content.split(/\r?\n/);
 
-    feeds.forEach(feed => {
+    for (let i = 0; i < feeds.length; i++) {
+        let feed = feeds[i];
+        console.log("process: %d %s", i, feed);
         try {
             console.log("fetching: ", feed);
-            fetchFeed(feed);
+            let res = await fetchFeed(feed);
         } catch (e) {
             console.log("error: ", e.backtrace);
         }
-    });
-
+    }
 }
 
 module.exports = {

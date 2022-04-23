@@ -8,7 +8,7 @@ let instance = null;
 class AppDAO {
     constructor(dbFilePath = "") {
         this.db = new sqlite(dbFilePath || RSSDBPATH);
-        console.log("debug db: ", this.db);
+        //console.log("debug db: ", this.db);
         this.db.prepare(`CREATE TABLE IF NOT EXISTS pages(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title String NOT NULL,

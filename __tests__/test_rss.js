@@ -29,7 +29,9 @@ describe('basic route tests', () => {
     test('download image', async() => {
         let image_uri = "https://catcoding.me/images/ob_pasted-image-20220421211405.png";
         let new_image_path = RSS.gen_image_name(image_uri);
-        fs.unlinkSync(new_image_path, () => {});
+        if (fs.existsSync(new_image_path)) {
+            fs.unlinkSync(new_image_path, () => {});
+        }
         expect(new_image_path).toBe("./pages/images/e1230d579c19b86.png");
         expect(fs.existsSync(new_image_path)).toBe(false);
         await RSS.downloadImage(image_uri, new_image_path, () => {

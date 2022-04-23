@@ -187,7 +187,7 @@ async function search(ctx) {
             });
         })
         .catch(e => console.error(e));
-    let max_len = keyword.length == 0 ? 10 : result.length;
+    let max_len = keyword.length == 0 ? 20 : result.length;
     result.sort((a, b) => b.time - a.time);
     result = result.slice(0, max_len);
     let res = result.map(f => {
@@ -200,7 +200,7 @@ async function search(ctx) {
 function get_rss(ctx) {
     let query = ctx.request.query;
     let read = query['query_type'] === "unread" ? 0 : 1;
-    let limit = 10;
+    let limit = 30;
     const data =
         AppDAO.db().get(`SELECT * FROM pages WHERE readed = ? ORDER BY publish_datetime DESC LIMIT ?`, [read, limit]);
     let res = "";
