@@ -9,6 +9,7 @@ const path = require('path')
 const download = require('image-downloader');
 const AppDao = require('./dao.js');
 
+
 function get_rss_page(link) {
     return AppDao.db().get(`SELECT * FROM pages WHERE link = ?`, link);
 }

@@ -12,6 +12,8 @@ const chinaTime = require('china-time');
 const { resolve } = require('path');
 const basicAuth = require('koa-basic-auth');
 const { readdir } = require('fs').promises;
+var moment = require('moment');
+
 const yaml = require('js-yaml');
 const config = require('config');
 const AppDAO = require('./dao.js');
@@ -139,7 +141,7 @@ async function get_page(ctx) {
             let title = data[0].title;
             let rss_path = path.join("./pages", `${data[0].id}.html`);
             let rss_page = Utils.safeRead(rss_path, 'utf-8');
-            ctx.body = [title, rss_page, query_path, data[0].publish_datetime];
+            ctx.body = [title, rss_page, query_path, moment(data[0].publish_datetime).format("YYYY.MM.DD")];
         } else {
             ctx.body = "NoPage";
         }

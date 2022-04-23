@@ -23,6 +23,7 @@
         "koa-router": "^10.1.1",
         "koa-static": "^5.0.0",
         "koa-static-server": "^1.5.2",
+        "moment": "^2.29.3",
         "node-html-parser": "^5.3.3",
         "nodemon": "^2.0.15",
         "npm-check-updates": "^12.5.9",
