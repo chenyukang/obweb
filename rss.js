@@ -60,33 +60,44 @@ function isValidHttpUrl(string) {
 function preprocess_image(content, feed_url) {
     let url = (new URL(feed_url));
     let domain = url.hostname;
-    let html = HTMLParser.parse(content);
-    let res = html.toString();
-    let imgs = html.querySelectorAll("img");
-    imgs.forEach(img => {
-        let attrs = img.attributes;
-        let src = attrs['src'];
-        let image_uri = isValidHttpUrl(src) ? src : `${url.protocol}//${domain}${src}`;
-        let new_image_path = gen_image_name(image_uri);
-        if (isValidHttpUrl(new_image_path) &&
-            !fs.existsSync(new_image_path) && image_uri.length <= 100) {
-            //console.log("downloading image: ", image_uri);
-            //console.log("save: ", new_image_path);
-            downloadImage(image_uri, new_image_path, () => {});
-        }
-        if (fs.existsSync(new_image_path)) {
-            let new_image = new_image_path.replace("./", "/");
-            res = res.replace("src=\"" + src + "\"", "src=\"" + new_image + "\"");
-        }
-    })
-    return res;
+    try {
+        //console.log(content);
+        let html = HTMLParser.parse(content);
+        let res = html.toString();
+        let imgs = html.querySelectorAll("img");
+        imgs.forEach(img => {
+            let attrs = img.attributes;
+            let src = attrs['src'];
+            let image_uri = isValidHttpUrl(src) ? src : `${url.protocol}//${domain}${src}`;
+            let new_image_path = gen_image_name(image_uri);
+            if (isValidHttpUrl(new_image_path) &&
+                !fs.existsSync(new_image_path) && image_uri.length <= 100) {
+                //console.log("downloading image: ", image_uri);
+                //console.log("save: ", new_image_path);
+                downloadImage(image_uri, new_image_path, () => {});
+            }
+            if (fs.existsSync(new_image_path)) {
+                let new_image = new_image_path.replace("./", "/");
+                res = res.replace("src=\"" + src + "\"", "src=\"" + new_image + "\"");
+            }
+        })
+        return res;
+    } catch (e) {
+        //console.log("error: ", e);
+        return content;
+    }
 }
 
 async function fetchFeed(feed_url) {
-    let parser = new RssParser();
     let res = [];
-    let feed = await parser.parseURL(feed_url);
-    console.log(feed.title);
+    let feed = null;
+    let parser = new RssParser();
+    try {
+        feed = await parser.parseURL(feed_url);
+    } catch (e) {
+        feed_url = feed_url.replace("https://", "http://");
+        feed = await parser.parseURL(feed_url);
+    }
     feed.items.forEach(item => {
         res.push(item);
         let pre = get_rss_page(item.link);
@@ -96,6 +107,7 @@ async function fetchFeed(feed_url) {
                 sql, [item.title, item.link, item.link, item.pubDate, 0, feed_url]);
             let page = get_rss_page(item.link)[0];
             let page_path = path.resolve(`./pages/${page.id}.html`);
+            //console.log(item);
             let content = preprocess_image(item.content, feed_url);
             fs.writeFileSync(page_path, content);
         }
@@ -105,19 +117,16 @@ async function fetchFeed(feed_url) {
 
 async function updateRss(feed_conf) {
     let content = fs.readFileSync(feed_conf, 'utf-8');
-    console.log(content);
     let feeds = content.split(/\r?\n/);
 
-    for (let i = 0; i < feeds.length; i++) {
-        let feed = feeds[i];
-        console.log("process: %d %s", i, feed);
+    feeds.forEach(async feed => {
         try {
             console.log("fetching: ", feed);
             let res = await fetchFeed(feed);
         } catch (e) {
-            console.log("error: ", e.backtrace);
+            //console.log("error: ", e);
         }
-    }
+    });
 }
 
 module.exports = {

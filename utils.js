@@ -6,7 +6,6 @@ const { resolve } = require('path');
 
 const ROOTPATH = path.dirname(require.main.filename);
 const OBPATH = resolve(config.get("ob"));
-const DBPATH = resolve(config.get("db"));
 
 function safeRead(file_path) {
     let msg = `Invalid file path: ${file_path}`;

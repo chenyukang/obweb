@@ -17,7 +17,8 @@ describe('basic route tests', () => {
         expect(fs.existsSync(db_path)).toBe(false);
         AppDao.db();
         expect(fs.existsSync(db_path)).toBe(true);
-        await RSS.fetchFeed('https://catcoding.me/atom.xml');
+        //await RSS.fetchFeed('https://catcoding.me/atom.xml');
+        await RSS.fetchFeed('https://www.quastor.org/feed');
     });
 
     test('preprocess_image', async() => {
