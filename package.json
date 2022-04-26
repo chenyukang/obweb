@@ -28,6 +28,7 @@
         "nodemon": "^2.0.15",
         "npm-check-updates": "^12.5.9",
         "request": "^2.88.2",
+        "rewire": "^6.0.0",
         "rss-parser": "^3.12.0"
     },
     "devDependencies": {

@@ -1,4 +1,3 @@
-const sqlite = require('better-sqlite3');
 const fs = require('fs')
 const { resolve } = require('path');
 var request = require('request');
@@ -50,7 +49,6 @@ async function preprocess_image(content, feed_url) {
     for (let img of imgs) {
         let attrs = img.attributes;
         let src = attrs['src'];
-        console.log("src: ", src);
         let image_uri = isValidHttpUrl(src) ? src : `${url.protocol}//${domain}${src}`;
         let new_image_path = gen_image_name(image_uri);
         if (isValidHttpUrl(image_uri) && image_uri.length <= 200) {
@@ -71,6 +69,57 @@ async function preprocess_image(content, feed_url) {
     return res;
 }
 
+function extract_html(html, keyword) {
+    let res = "";
+    let html_obj = HTMLParser.parse(html);
+    let divs = html_obj.querySelectorAll(keyword);
+    divs.sort((a, b) => {
+        return a.toString().length - b.toString().length;
+    });
+    if (divs.length > 0) {
+        res = divs[0].toString();
+    }
+    return res;
+}
+
+function remove_elems(html, keywords) {
+    let html_obj = HTMLParser.parse(html);
+    for (let keyword of keywords) {
+        let divs = html_obj.querySelectorAll(keyword);
+        for (let div of divs) {
+            div.remove();
+        }
+    }
+    return html_obj.removeWhitespace().toString();
+}
+
+function transform_html(html) {
+    let body = extract_html(html, "article");
+    if (body == "") {
+        body = extract_html(html, "body");
+    }
+    if (body == "") {
+        body = html;
+    }
+    let keywords = ["footer", "header", "script", "style", "comments"];
+    body = remove_elems(body, keywords);
+    return body;
+}
+
+function fetch_page_content(link) {
+    if (isValidHttpUrl(link)) {
+        return new Promise((resolve, reject) => {
+            request(link, function(error, response, body) {
+                if (!error && response.statusCode == 200) {
+                    resolve(transform_html(body));
+                } else {
+                    reject(error);
+                }
+            });
+        });
+    }
+}
+
 async function fetchFeed(feed_url) {
     let res = [];
     let feed = null;
@@ -89,6 +138,15 @@ async function fetchFeed(feed_url) {
             AppDao.db().run(
                 sql, [item.title, item.link, item.link, item.pubDate, 0, feed_url]);
             let page = get_rss_page(item.link)[0];
+            let html = await fetch_page_content(item.link);
+            let content = item.content;
+            if ((html.length > item.content) ||
+                (html.indexOf(item.title) != -1) ||
+                (html.indexOf("<audio") != -1) ||
+                (html.indexOf("<video") != -1) ||
+                (html.idexOf("<code>") != -1)) {
+                content = html;
+            }
             let page_path = path.resolve(`./pages/${page.id}.html`);
             //console.log(item);
             content = await preprocess_image(item.content, feed_url);
@@ -114,7 +172,5 @@ async function updateRss(feed_conf) {
 
 module.exports = {
     fetchFeed,
-    preprocess_image,
-    gen_image_name,
     updateRss
 }
