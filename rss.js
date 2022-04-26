@@ -44,15 +44,13 @@ async function preprocess_image(content, feed_url) {
     let url = (new URL(feed_url));
     let domain = url.hostname;
 
-    //console.log(content);
     let html = HTMLParser.parse(content);
     let res = html.toString();
     let imgs = html.querySelectorAll("img");
-    //imgs.forEach(img => {
-    for (let i = 0; i < imgs.length; i++) {
-        let img = imgs[i];
+    for (let img of imgs) {
         let attrs = img.attributes;
         let src = attrs['src'];
+        console.log("src: ", src);
         let image_uri = isValidHttpUrl(src) ? src : `${url.protocol}//${domain}${src}`;
         let new_image_path = gen_image_name(image_uri);
         if (isValidHttpUrl(image_uri) && image_uri.length <= 200) {
