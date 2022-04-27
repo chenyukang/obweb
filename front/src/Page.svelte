@@ -95,6 +95,7 @@
                 }
             },
             error: function (err) {
+                show_status = false;
                 console.log("Error: ", err);
             },
         });

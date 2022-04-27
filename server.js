@@ -12,18 +12,24 @@ const chinaTime = require('china-time');
 const { resolve } = require('path');
 const basicAuth = require('koa-basic-auth');
 const { readdir } = require('fs').promises;
-var moment = require('moment');
 const RSS = require('./rss');
-
 const config = require('config');
 const Utils = require('./utils.js');
 
+var moment = require('moment');
 var crypto = require('crypto');
 
 const OBPATH = resolve(config.get("ob"));
 const DBPATH = resolve(config.get("db"));
 const PORT = config.get("server.port");
 
+
+// logger
+app.use(json());
+app.use(logger());
+app.use(bodyParser());
+
+//app.use(basicAuth({ name: 'tj', pass: 'xxx' }));
 function init() {
     let auth_user = config.get("basic_auth_user");
     if (auth_user) {
@@ -34,18 +40,10 @@ function init() {
     }
 }
 
-// logger
-app.use(json());
-app.use(logger());
-app.use(bodyParser());
-
-//app.use(basicAuth({ name: 'tj', pass: 'xxx' }));
-
 app.use(async(ctx, next) => {
     let white_list = ["/api/login", "/obweb"];
     console.log("ctx url: ", ctx.url);
     if (!ctx.url.match(/^\/front/) && white_list.indexOf(ctx.url) == -1) {
-        console.log("verify ...");
         await verify_login(ctx);
     }
     if (ctx.status != 401) {
@@ -212,6 +210,10 @@ function rss_mark(ctx) {
     RSS.rss_mark(15);
 }
 
+async function todo_mark(ctx) {
+    ctx.status = 404;
+}
+
 async function post_entry(ctx) {
     let date_str = chinaTime('YYYY-MM-DD');
     let time_str = chinaTime('HH:mm');
@@ -258,8 +260,8 @@ router.get('/', async(ctx, next) => {
     .get('/api/verify', verify_login)
     .post('/api/login', user_login)
     .get('/api/rss', get_rss)
-    .post('/api/rss_mark', rss_mark);
-
+    .post('/api/rss_mark', rss_mark)
+    .post('/api/mark', todo_mark);
 
 router.all('/obweb', ctx => {
     ctx.redirect('/front/index.html');
