@@ -26,5 +26,5 @@ ob-web-pack.zip
 __tests__/ob_test/Pics/obweb-*.png
 __tests__/ob_test/Unsort/new_post.md
 .config.yml
-__tests__/db/*
+__tests__/db/tokens
 __tests__/*.db

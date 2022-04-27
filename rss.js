@@ -106,18 +106,10 @@ function rss_mark(limit) {
     (SELECT id FROM pages WHERE readed = 0 ORDER BY publish_datetime DESC LIMIT ?)`, [limit]);
 }
 
-
 function transform_html(html) {
-    let body = extract_html(html, "article");
-    if (body == "") {
-        body = extract_html(html, "body");
-    }
-    if (body == "") {
-        body = html;
-    }
+    let body = extract_html(html, "article") || extract_html(html, "body") || html;
     let keywords = ["footer", "header", "script", "style", "comments", "nav"];
-    body = remove_elems(body, keywords);
-    return body;
+    return remove_elems(body, keywords);
 }
 
 function fetch_page_content(link) {
