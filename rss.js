@@ -5,9 +5,9 @@ var HTMLParser = require('node-html-parser');
 let RssParser = require('rss-parser');
 var crypto = require('crypto');
 const path = require('path')
-const download = require('image-downloader');
 const AppDao = require('./dao.js');
-
+const Utils = require('./utils');
+var moment = require('moment');
 
 function get_rss_page(link) {
     return AppDao.db().get(`SELECT * FROM pages WHERE link = ?`, link);
@@ -16,7 +16,7 @@ function get_rss_page(link) {
 function gen_image_name(image_uri) {
     let image_dir = "./pages/images";
     if (!fs.existsSync(image_dir)) {
-        fs.mkdir(dir, (err) => {
+        fs.mkdir(image_dir, (err) => {
             if (err) {
                 throw err;
             }
@@ -53,13 +53,13 @@ async function preprocess_image(content, feed_url) {
         let new_image_path = gen_image_name(image_uri);
         if (isValidHttpUrl(image_uri) && image_uri.length <= 200) {
             let fullpath = resolve(new_image_path);
+            image_uri = image_uri.replace("https://", "http://");
             console.log("begin down load: ", image_uri, " to ", fullpath);
-            await download.image({
-                url: image_uri,
-                dest: fullpath
-            }).then(({ filename }) => {
-                console.log("saved : ", filename);
-            }).catch((err) => console.error(err));
+            if (!fs.existsSync(fullpath)) {
+                // TODO: download.Image how to follow 301?
+                // Use wget now to follow redirects
+                Utils.downLoadImage(image_uri, fullpath);
+            }
             if (fs.existsSync(fullpath)) {
                 let new_image = new_image_path.replace("./", "/");
                 res = res.replace("src=\"" + src + "\"", "src=\"" + new_image + "\"");
@@ -101,7 +101,7 @@ function transform_html(html) {
     if (body == "") {
         body = html;
     }
-    let keywords = ["footer", "header", "script", "style", "comments"];
+    let keywords = ["footer", "header", "script", "style", "comments", "nav"];
     body = remove_elems(body, keywords);
     return body;
 }
@@ -130,29 +130,41 @@ async function fetchFeed(feed_url) {
         feed_url = feed_url.replace("https://", "http://");
         feed = await parser.parseURL(feed_url);
     }
-    feed.items.forEach(async item => {
+    for (let item of feed.items) {
         res.push(item);
-        let pre = get_rss_page(item.link);
-        if (pre.length == 0) {
+        let pre = get_rss_page(item.link)[0];
+        if (pre == undefined) {
             let sql = "INSERT INTO pages (title, link, website, publish_datetime, readed, source) values (?, ?, ?, ?, ?, ?)";
+            let pubDate = moment(item.pubDate).format("YYYY-MM-DD HH:mm:ss");
             AppDao.db().run(
-                sql, [item.title, item.link, item.link, item.pubDate, 0, feed_url]);
+                sql, [item.title, item.link, item.link, pubDate, 0, feed_url]);
             let page = get_rss_page(item.link)[0];
-            let html = await fetch_page_content(item.link);
-            let content = item.content;
-            if ((html.length > item.content) ||
-                (html.indexOf(item.title) != -1) ||
-                (html.indexOf("<audio") != -1) ||
-                (html.indexOf("<video") != -1) ||
-                (html.idexOf("<code>") != -1)) {
-                content = html;
+            try {
+                let html = await fetch_page_content(item.link);
+                //console.log(html);
+                let content = item.content;
+                //console.log(item);
+                if (content == undefined ||
+                    html.length > (content.length * 4) ||
+                    (html.indexOf(item.title) != -1) ||
+                    (html.indexOf("<audio") != -1) ||
+                    (html.indexOf("<video") != -1) ||
+                    (html.indexOf("<code>") != -1)) {
+                    content = html;
+                }
+                //console.log(item);
+                content = await preprocess_image(content, feed_url);
+                if (!fs.existsSync(resolve("./pages"))) {
+                    fs.mkdirSync(resolve("./pages"));
+                }
+                fs.writeFileSync(path.resolve(`./pages/${page.id}.html`), content);
+                console.log("saved: %d for link %s", page.id, item.link);
+            } catch (e) {
+                AppDao.db().run("DELETE FROM pages WHERE id = ?", [page.id]);
+                console.log(e);
             }
-            let page_path = path.resolve(`./pages/${page.id}.html`);
-            //console.log(item);
-            content = await preprocess_image(item.content, feed_url);
-            fs.writeFileSync(page_path, content);
         }
-    });
+    }
     return res;
 }
 
@@ -160,14 +172,17 @@ async function updateRss(feed_conf) {
     let content = fs.readFileSync(feed_conf, 'utf-8');
     let feeds = content.split(/\r?\n/);
 
-    feeds.forEach(async feed => {
+    //feeds.forEach(async feed => {
+    for (let feed of feeds) {
         try {
             console.log("fetching: ", feed);
             let res = await fetchFeed(feed);
+            //console.log(res);
         } catch (e) {
-            //console.log("error: ", e);
+            console.log("error: ", e);
         }
-    });
+    }
+    //});
 }
 
 module.exports = {

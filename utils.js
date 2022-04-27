@@ -3,9 +3,11 @@ const fs = require('fs');
 const path = require('path')
 var exec = require('child_process').exec;
 const { resolve } = require('path');
+const execSync = require('child_process').execSync;
 
 const ROOTPATH = path.dirname(require.main.filename);
 const OBPATH = resolve(config.get("ob"));
+const PAGESPATH = resolve("./pages");
 
 function safeRead(file_path) {
     let msg = `Invalid file path: ${file_path}`;
@@ -40,13 +42,10 @@ function gen_path(page, date) {
     return path;
 }
 
-function runShell(command) {
-    if (process.env.NODE_ENV == "test") {
-        return;
-    }
+function runShell(command, path = OBPATH) {
     let backup = process.cwd();
     try {
-        process.chdir(OBPATH);
+        process.chdir(path);
         let dir = exec(command, function(err, stdout, stderr) {
             if (err) {
                 console.log(err);
@@ -66,10 +65,29 @@ function runShell(command) {
 }
 
 function gitPull() {
+    if (process.env.NODE_ENV == "test") {
+        return;
+    }
     runShell("git pull");
 }
 
+function downLoadImage(url, fileName) {
+    let cmd = `wget ${url} -O ${fileName}`
+    console.log(cmd);
+    console.log(PAGESPATH);
+    let backup = process.cwd();
+    try {
+        process.chdir(PAGESPATH);
+        execSync(cmd, { encoding: 'utf-8', timeout: 10 * 1000 });
+    } finally {
+        process.chdir(backup);
+    }
+}
+
 function gitSync() {
+    if (process.env.NODE_ENV == "test") {
+        return;
+    }
     runShell("git add . && git commit -m \"update\" && git push");
 }
 
@@ -79,5 +97,6 @@ module.exports = {
     strip_ob,
     gitPull,
     gitSync,
-    gen_path
+    gen_path,
+    downLoadImage
 }

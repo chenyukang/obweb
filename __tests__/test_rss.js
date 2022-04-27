@@ -15,13 +15,13 @@ describe('basic route tests', () => {
         }
     });
 
-    test('rss fetch and parse', async() => {
+    /* test('rss fetch and parse', async() => {
         expect(fs.existsSync(db_path)).toBe(false);
         AppDao.db();
         expect(fs.existsSync(db_path)).toBe(true);
         await RSS.fetchFeed('https://www.quastor.org/feed');
-    });
-
+    }, 20000);
+ */
     test('rss test html extract', () => {
         let extract = TestRSS.__get__("extract_html");
         let html = `<div>
@@ -33,6 +33,15 @@ describe('basic route tests', () => {
 
         res = extract(html, "body");
         expect(res).toBe("");
+    });
+
+    test('rss change image', async() => {
+        let html = `<div>
+            <img src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png" />
+            </div>`;
+        let res = await TestRSS.__get__("preprocess_image")(html, "https://www.quastor.org/");
+        console.log("res: ", res);
+        expect(res.indexOf("/pages")).toBeGreaterThan(0);
     });
 
     test('rss test html remove_elements', () => {

@@ -6,7 +6,7 @@ db/tokens
 db/dev
 db/*.db
 db/pages.json
-pages/*.html
+pages/*
 server/public
 pages/images/*
 node_modules
