@@ -93,6 +93,11 @@ function remove_elems(html, keywords) {
     return html_obj.removeWhitespace().toString();
 }
 
+function rss_mark(limit) {
+    AppDao.db().run(`UPDATE pages SET readed = 1 WHERE id IN
+    (SELECT id FROM pages WHERE readed = 0 ORDER BY publish_datetime DESC LIMIT ?)`, [limit]);
+}
+
 function transform_html(html) {
     let body = extract_html(html, "article");
     if (body == "") {
@@ -134,7 +139,7 @@ async function fetchFeed(feed_url) {
         res.push(item);
         let pre = get_rss_page(item.link)[0];
         if (pre == undefined) {
-            let sql = "INSERT INTO pages (title, link, website, publish_datetime, updated_time, readed, source) values (?, ?, ?, ?, ?, ?)";
+            let sql = "INSERT INTO pages (title, link, website, publish_datetime, updated_datetime, readed, source) values (?, ?, ?, ?, ?, ?, ?)";
             let pubDate = moment(item.pubDate).format("YYYY-MM-DD HH:mm:ss");
             AppDao.db().run(
                 sql, [item.title, item.link, item.link, pubDate, Utils.curTime(), 0, feed_url]);
@@ -187,5 +192,6 @@ async function updateRss(feed_conf) {
 
 module.exports = {
     fetchFeed,
-    updateRss
+    updateRss,
+    rss_mark
 }
