@@ -15,6 +15,7 @@ class AppDAO {
             link String NOT NULL,
             website String,
             publish_datetime String,
+            updated_datetime String,
             readed Boolean,
             source String NOT NULL)`).run();
     }

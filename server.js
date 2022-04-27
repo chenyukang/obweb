@@ -137,7 +137,8 @@ async function get_page(ctx) {
             .get(`SELECT * FROM pages WHERE link = ? ORDER BY publish_datetime DESC LIMIT 1`, query_path);
         console.log(data);
         if (data.length > 0) {
-            AppDAO.db().run(`UPDATE pages set readed = 1 where link = ?`, query_path);
+            AppDAO.db().run(`UPDATE pages set readed = 1, updated_datetime where link = ?`,
+                Utils.curTime(), query_path);
             let title = data[0].title;
             let rss_path = path.join("./pages", `${data[0].id}.html`);
             let rss_page = Utils.safeRead(rss_path, 'utf-8');

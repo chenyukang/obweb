@@ -4,6 +4,7 @@ const path = require('path')
 var exec = require('child_process').exec;
 const { resolve } = require('path');
 const execSync = require('child_process').execSync;
+var moment = require('moment');
 
 const ROOTPATH = path.dirname(require.main.filename);
 const OBPATH = resolve(config.get("ob"));
@@ -32,6 +33,10 @@ function get_or(value, def) {
 
 function strip_ob(path) {
     return path.replace(OBPATH + "/", "");
+}
+
+function curTime() {
+    return moment().format('YYYY-MM-DD HH:mm:ss');
 }
 
 function gen_path(page, date) {
@@ -98,5 +103,6 @@ module.exports = {
     gitPull,
     gitSync,
     gen_path,
+    curTime,
     downLoadImage
 }

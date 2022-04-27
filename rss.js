@@ -134,10 +134,10 @@ async function fetchFeed(feed_url) {
         res.push(item);
         let pre = get_rss_page(item.link)[0];
         if (pre == undefined) {
-            let sql = "INSERT INTO pages (title, link, website, publish_datetime, readed, source) values (?, ?, ?, ?, ?, ?)";
+            let sql = "INSERT INTO pages (title, link, website, publish_datetime, updated_time, readed, source) values (?, ?, ?, ?, ?, ?)";
             let pubDate = moment(item.pubDate).format("YYYY-MM-DD HH:mm:ss");
             AppDao.db().run(
-                sql, [item.title, item.link, item.link, pubDate, 0, feed_url]);
+                sql, [item.title, item.link, item.link, pubDate, Utils.curTime(), 0, feed_url]);
             let page = get_rss_page(item.link)[0];
             try {
                 let html = await fetch_page_content(item.link);
