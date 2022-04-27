@@ -7,6 +7,5 @@ ob-web:
   - ./db:/ob-web-pack/db:rw
   - ./ob:/ob-web-pack/ob:rw
   - ./pages:/ob-web-pack/pages:rw
-  - ./ob-web-pack:/ob-web-pack:rw
- command: /ob-web-pack/ob-web
+ command: npm run dev
  working_dir: /ob-web-pack

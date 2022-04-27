@@ -34,7 +34,7 @@ Obweb is a classic single page Web application:
   <img src="http://chenyukang.github.io/images/ob_pasted-image-20211127144951.png">
 </p>
 
-+ Backend: Rust + Warp for API
++ Backend: JavaScript/Koa for API
 + Frontend: JavaScript, Bootstrap, JQuery, svelte. I'm a novice in Frontend :)
 
 For a MVP, I want to keep it stupid and simple. Most of code is simple and easy to understand, there are some hard-coded parts.
@@ -56,26 +56,9 @@ cd ob
 git config user.email "you@example.com"
 git config user.name "Your Name"
 ```
+
+## 2. Run the server
 Obweb assume your Obsidian vault has `Daily` and `Unsort` directories to store daily memos and unsorted notes.
-
-### 2. Run with precompiled binary
-
-```bash
-wget https://github.com/chenyukang/obweb/releases/download/v0.2/ob-web-pack.zip
-unzip ob-web-pack.zip
-mkdir -p ob db pages
-cd ob-web-pack
-./ob-web
-
-#Or you may start with Docker:
-docker-compose up
-```
-Now you can access it on your browser [http://localhost:8006/obweb](http://localhost:8006/obweb/).
-
-
-**Option**: If you want to compile from scratch
-
-Make sure you have installed [Rust and Cargo](http://rust-lang.org) and [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm), and then run:
 
 ```bash
 ./bin/dev.sh
@@ -85,13 +68,12 @@ Make sure you have installed [Rust and Cargo](http://rust-lang.org) and [npm](ht
 
 If you have your own domain, you can deploy it to a custom domain. You may want to add some other security enhancement such as HTTPS, request frequency limit, etc.
 
-If you want to add authorization with an account and password, you may run:
+If you want to add authorization with an account and password, you may add username and password in `default.json`:
 
-```bash
-./target/debug/obweb -c
+```json
+"user": "xxxxx",
+"pass": "xxxxx",
 ```
-
-The encrepted account information will be stored in file `./db/accounts`.
 
 ----
 
