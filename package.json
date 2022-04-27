@@ -4,6 +4,7 @@
     "private": true,
     "scripts": {
         "test": "jest --watchAll",
+        "ci": "jest",
         "dev": "nodemon server.js"
     },
     "dependencies": {
