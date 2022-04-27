@@ -9,8 +9,16 @@ const AppDao = require('./dao.js');
 const Utils = require('./utils');
 var moment = require('moment');
 
-function get_rss_page(link) {
+function getRss(link) {
     return AppDao.db().get(`SELECT * FROM pages WHERE link = ?`, link);
+}
+
+function setRssReaded(link) {
+    return AppDao.db().run(`UPDATE pages set readed = 1, updated_datetime = \'${Utils.curTime()}\' where link = ?`, [link]);
+}
+
+function getRssPages(read, limit) {
+    return AppDao.db().get(`SELECT * FROM pages WHERE readed = ? ORDER BY publish_datetime DESC LIMIT ?`, [read, limit]);
 }
 
 function gen_image_name(image_uri) {
@@ -98,6 +106,7 @@ function rss_mark(limit) {
     (SELECT id FROM pages WHERE readed = 0 ORDER BY publish_datetime DESC LIMIT ?)`, [limit]);
 }
 
+
 function transform_html(html) {
     let body = extract_html(html, "article");
     if (body == "") {
@@ -137,13 +146,13 @@ async function fetchFeed(feed_url) {
     }
     for (let item of feed.items) {
         res.push(item);
-        let pre = get_rss_page(item.link)[0];
+        let pre = getRss(item.link)[0];
         if (pre == undefined) {
             let sql = "INSERT INTO pages (title, link, website, publish_datetime, updated_datetime, readed, source) values (?, ?, ?, ?, ?, ?, ?)";
             let pubDate = moment(item.pubDate).format("YYYY-MM-DD HH:mm:ss");
             AppDao.db().run(
                 sql, [item.title, item.link, item.link, pubDate, Utils.curTime(), 0, feed_url]);
-            let page = get_rss_page(item.link)[0];
+            let page = getRss(item.link)[0];
             try {
                 let html = await fetch_page_content(item.link);
                 //console.log(html);
@@ -193,5 +202,8 @@ async function updateRss(feed_conf) {
 module.exports = {
     fetchFeed,
     updateRss,
+    setRssReaded,
+    getRssPages,
+    getRss,
     rss_mark
 }

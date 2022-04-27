@@ -16,9 +16,7 @@ var moment = require('moment');
 const RSS = require('./rss');
 
 const config = require('config');
-const AppDao = require('./dao.js');
 const Utils = require('./utils.js');
-
 
 var crypto = require('crypto');
 
@@ -133,11 +131,10 @@ async function get_page(ctx) {
     let query_path = query['path'];
     let query_type = Utils.get_or(query['query_type'], "page");
     if (query_type === "rss") {
-        const data = AppDao.db()
-            .get(`SELECT * FROM pages WHERE link = ? ORDER BY publish_datetime DESC LIMIT 1`, query_path);
+        const data = RSS.getRss(query_path);
         console.log(data);
         if (data.length > 0) {
-            AppDao.db().run(`UPDATE pages set readed = 1, updated_datetime = \'${Utils.curTime()}\' where link = ?`, [query_path]);
+            RSS.setRssReaded(query_path);
             let title = data[0].title;
             let rss_path = path.join("./pages", `${data[0].id}.html`);
             let rss_page = Utils.safeRead(rss_path, 'utf-8');
@@ -201,8 +198,7 @@ function get_rss(ctx) {
     let query = ctx.request.query;
     let read = query['query_type'] === "unread" ? 0 : 1;
     let limit = 30;
-    const data =
-        AppDao.db().get(`SELECT * FROM pages WHERE readed = ? ORDER BY publish_datetime DESC LIMIT ?`, [read, limit]);
+    const data = RSS.getRssPages(read, limit);
     let res = "";
     for (let i = 0; i < data.length; i++) {
         let item = data[i];
