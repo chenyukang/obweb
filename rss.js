@@ -22,6 +22,9 @@ function getRssPages(read, limit) {
 }
 
 function gen_image_name(image_uri) {
+    if (!fs.existsSync("./pages")) {
+        fs.mkdirSync("./pages");
+    }
     let image_dir = "./pages/images";
     if (!fs.existsSync(image_dir)) {
         fs.mkdir(image_dir, { recursive: true }, (err) => {

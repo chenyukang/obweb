@@ -13,15 +13,6 @@ describe('basic route tests', () => {
         if (fs.existsSync(db_path)) {
             fs.unlinkSync(db_path);
         }
-
-        let image_dir = "./pages/images";
-        if (!fs.existsSync(image_dir)) {
-            fs.mkdir(image_dir, { recursive: true }, (err) => {
-                if (err) {
-                    throw err;
-                }
-            });
-        }
     });
 
     /* test('rss fetch and parse', async() => {
