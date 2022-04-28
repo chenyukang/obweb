@@ -15,12 +15,14 @@ const { readdir } = require('fs').promises;
 const RSS = require('./rss');
 const config = require('config');
 const Utils = require('./utils.js');
+const SQLDB = resolve(config.get("sql_db"));
+const session = require('koa-generic-session');
+const SQLite3Store = require('koa-sqlite3-session');
 
 var moment = require('moment');
 var crypto = require('crypto');
 
 const OBPATH = resolve(config.get("ob"));
-const DBPATH = resolve(config.get("db"));
 const PORT = config.get("server.port");
 
 
@@ -28,6 +30,13 @@ const PORT = config.get("server.port");
 app.use(json());
 app.use(logger());
 app.use(bodyParser());
+
+app.keys = ['hello'];
+app.use(session({
+    store: new SQLite3Store(SQLDB, {
+        ttl: 1000 * 60 * 60 * 24 * 14,
+    })
+}));
 
 //app.use(basicAuth({ name: 'tj', pass: 'xxx' }));
 function init() {
@@ -39,6 +48,7 @@ function init() {
         }));
     }
 }
+
 
 app.use(async(ctx, next) => {
     let white_list = ["/api/login", "/obweb"];
@@ -64,18 +74,14 @@ app.use(async(ctx, next) => {
 
 // response
 async function verify_login(ctx) {
-    let token = ctx.cookies.get('obweb');
     ctx.body = "unauthorized";
     ctx.status = 401;
-    if (token != null && token != undefined) {
-        const tokens = Utils.safeRead(DBPATH + "/tokens", 'utf-8');
-        tokens.split(/\r?\n/).forEach(line => {
-            if (line.trim() === token) {
-                ctx.body = "ok";
-                ctx.status = 200;
-                return;
-            }
-        });
+    const { session } = ctx
+    console.log(session);
+    if (session.user) {
+        ctx.body = "ok";
+        ctx.status = 200;
+        return;
     }
 }
 
@@ -86,22 +92,10 @@ async function user_login(ctx) {
     let user = config.get("user");
     let pass = config.get("pass");
     if (user && pass && user == username && pass == password) {
-        let token_path = DBPATH + "/tokens";
-        if (!fs.existsSync(token_path)) {
-            fs.writeFileSync(token_path, "");
-        }
         let token = crypto.randomBytes(12).toString('hex');
-        let content = Utils.safeRead(token_path, 'utf-8').split(/\r?\n/);
-        content.push(token);
-        while (content.length >= 7) {
-            content.shift();
-        }
-        fs.writeFileSync(token_path, content.join("\n"));
-        ctx.cookies.set('obweb', token, {
-            expires: new Date(Date.now() + 1209600 * 1000),
-            httpOnly: true,
-            path: '/'
-        });
+        const { session } = ctx
+        session.token = token
+        session.user = { username: username };
         ctx.body = "ok";
         ctx.status = 200;
     } else {

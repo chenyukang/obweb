@@ -4,7 +4,7 @@
         "port": "8006"
     },
     "ob": "./ob",
-    "rssdb": "./db/pages.db",
+    "sql_db": "./db/pages.db",
     "db": "./db",
     "user": "admin",
     "pass": "hello",

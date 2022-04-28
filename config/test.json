@@ -4,7 +4,7 @@
         "port": "3000"
     },
     "ob": "./__tests__/ob_test",
-    "rssdb": "./__tests__/rss.db",
+    "sql_db": "./__tests__/rss.db",
     "db": "./__tests__/db",
     "user": "admin",
     "pass": "hello"

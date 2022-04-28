@@ -2,7 +2,6 @@
 const request = require('supertest');
 const server = require('../server.js');
 const AppDao = require('../dao.js');
-var test_token;
 
 beforeAll(async() => {
     // do something before anything else runs
@@ -10,7 +9,9 @@ beforeAll(async() => {
         username: 'admin',
         password: 'hello'
     });
-    test_token = res['headers']['set-cookie'][0].split(';')[0].split("=")[1];
+    test_token = res['headers']['set-cookie'];
+    sid = test_token[0].split(';')[0].split("=")[1];
+    sid_sig = test_token[1].split(';')[0].split("=")[1];
     console.log('Jest starting!');
 });
 
@@ -23,7 +24,7 @@ afterAll(() => {
 describe('basic route tests', () => {
     test('get home route GET /', async() => {
         const response = await request(server).get('/')
-            .set('Cookie', [`obweb=${test_token}`]);
+            .set('Cookie', [`koa.sid=${sid}; koa.sid.sig=${sid_sig}`]);
         expect(response.status).toEqual(200);
         expect(response.text).toContain('Hello World!');
     });
@@ -44,7 +45,7 @@ describe('basic route tests', () => {
 
     test('get page GET /api/page', async() => {
         const response = await request(server).get('/api/page?path=Unsort/todo')
-            .set('Cookie', [`obweb=${test_token}`]);
+            .set('Cookie', [`koa.sid=${sid}; koa.sid.sig=${sid_sig}`]);
         expect(response.status).toEqual(200);
         let res = response.text;
         expect(res).toContain("Unsort/todo");
@@ -52,14 +53,14 @@ describe('basic route tests', () => {
 
     test('get page safe check GET /api/page', async() => {
         const response = await request(server).get('/api/page?path=Unsort/../../etc/passwd%00')
-            .set('Cookie', [`obweb=${test_token}`]);
+            .set('Cookie', [`koa.sid=${sid}; koa.sid.sig=${sid_sig}`]);
         expect(response.status).toEqual(200);
         expect(response.text).toContain("NoPage");
     });
 
     test('get page invalid GET /api/page', async() => {
         const response = await request(server).get('/api/page?path=Unsort/todo')
-            .set('Cookie', [`obweb=${test_token}_ee`]);
+            .set('Cookie', [`koa.sid=${sid}_err; koa.sid.sig=${sid_sig}_err`]);
         expect(response.status).toEqual(401);
         let res = response.text;
         expect(res).toEqual("unauthorized");
@@ -67,7 +68,7 @@ describe('basic route tests', () => {
 
     test('get page invalid GET /api/page', async() => {
         const response = await request(server).get('/api/page?path=Unsort/todo_error')
-            .set('Cookie', [`obweb=${test_token}`]);
+            .set('Cookie', [`koa.sid=${sid}; koa.sid.sig=${sid_sig}`]);
         expect(response.status).toEqual(200);
         let res = response.text;
         expect(res).toContain("NoPage");
@@ -75,7 +76,7 @@ describe('basic route tests', () => {
 
     test('search GET /api/search', async() => {
         const response = await request(server).get('/api/search?keyword=todo')
-            .set('Cookie', [`obweb=${test_token}`]);
+            .set('Cookie', [`koa.sid=${sid}; koa.sid.sig=${sid_sig}`]);
         expect(response.status).toEqual(200);
         expect(response.text).toContain("Unsort/todo");
     });
@@ -83,14 +84,14 @@ describe('basic route tests', () => {
 
     test('search failed GET /api/search', async() => {
         const response = await request(server).get('/api/search?keyword=undefxx')
-            .set('Cookie', [`obweb=${test_token}`]);
+            .set('Cookie', [`koa.sid=${sid}; koa.sid.sig=${sid_sig}`]);
         expect(response.status).toEqual(200);
         expect(response.text).toEqual("");
     });
 
     test('static image GET /static/images', async() => {
         const response = await request(server).get('/static/images/test.png')
-            .set('Cookie', [`obweb=${test_token}`]);
+            .set('Cookie', [`koa.sid=${sid}; koa.sid.sig=${sid_sig}`]);
         expect(response.status).toEqual(200);
         expect(response.text).toEqual("pig\n");
         expect(response.type).toEqual('text/plain');
@@ -99,28 +100,28 @@ describe('basic route tests', () => {
 
     test('static image right GET /static/images', async() => {
         const response = await request(server).get('/static/images/touxiang.png')
-            .set('Cookie', [`obweb=${test_token}`]);
+            .set('Cookie', [`koa.sid=${sid}; koa.sid.sig=${sid_sig}`]);
         expect(response.status).toEqual(200);
         expect(response.type).toEqual('text/plain');
     });
 
     test('login verify GET /api/verify', async() => {
         const response = await request(server).get('/api/verify')
-            .set('Cookie', [`obweb=${test_token}`]);
+            .set('Cookie', [`koa.sid=${sid}; koa.sid.sig=${sid_sig}`]);
         expect(response.status).toEqual(200);
         expect(response.text).toEqual("ok");
     });
 
     test('get rss GET /api/rss', async() => {
         let response = await request(server).get('/api/rss')
-            .set('Cookie', [`obweb=${test_token}`]);
+            .set('Cookie', [`koa.sid=${sid}; koa.sid.sig=${sid_sig}`]);
         expect(response.status).toEqual(200);
         expect(response.text).toContain("");
 
         AppDao.db().run(
             "INSERT INTO pages (title, link, website, publish_datetime, readed, source) values (?, ?, ?, ?, ?, ?)", ["title", "link", "link", Date.now(), 0, "http://google.com"]);
         response = await request(server).get('/api/rss')
-            .set('Cookie', [`obweb=${test_token}`]);
+            .set('Cookie', [`koa.sid=${sid}; koa.sid.sig=${sid_sig}`]);
         expect(response.status).toEqual(200);
         expect(response.text).toContain("");
 
@@ -128,12 +129,13 @@ describe('basic route tests', () => {
 
     test('post entry POST /api/entry', async() => {
         const response = await request(server).post('/api/entry').send({
-            "page": "new_post",
-            "links": "link1,link2",
-            "image": "data:image/png;base64,image.....",
-            "date": "2022-04-16T13:24:11.444Z",
-            "text": "test text"
-        }).set('Cookie', [`obweb=${test_token}`]);
+                "page": "new_post",
+                "links": "link1,link2",
+                "image": "data:image/png;base64,image.....",
+                "date": "2022-04-16T13:24:11.444Z",
+                "text": "test text"
+            })
+            .set('Cookie', [`koa.sid=${sid}; koa.sid.sig=${sid_sig}`]);
         expect(response.status).toEqual(200);
         expect(response.text).toEqual("ok");
     });

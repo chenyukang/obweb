@@ -1,13 +1,13 @@
 const sqlite = require('better-sqlite3');
 const { resolve } = require('path');
 const config = require('config');
-const RSSDBPATH = resolve(config.get("rssdb"));
+const SQLDB = resolve(config.get("sql_db"));
 
 let instance = null;
 
 class AppDAO {
     constructor(dbFilePath = "") {
-        this.db = new sqlite(dbFilePath || RSSDBPATH);
+        this.db = new sqlite(dbFilePath || SQLDB);
         //console.log("debug db: ", this.db);
         this.db.prepare(`CREATE TABLE IF NOT EXISTS pages(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
