@@ -4,7 +4,7 @@
     "private": true,
     "scripts": {
         "test": "jest --watchAll",
-        "ci": "jest",
+        "ci": "jest --runInBand --detectOpenHandles --forceExit",
         "dev": "nodemon server.js"
     },
     "dependencies": {

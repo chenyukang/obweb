@@ -5,6 +5,7 @@
     },
     "ob": "./ob",
     "sql_db": "./db/pages.db",
+    "session_secret": "session_secret",
     "db": "./db",
     "user": "admin",
     "pass": "hello",

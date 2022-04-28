@@ -16,8 +16,9 @@ beforeAll(async() => {
 });
 
 // close the server after each test
-afterAll(() => {
+afterAll(done => {
     server.close();
+    done();
     console.log('server closed!');
 });
 

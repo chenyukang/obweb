@@ -15,13 +15,19 @@ describe('basic route tests', () => {
         }
     });
 
-    /* test('rss fetch and parse', async() => {
+
+    // close the server after each test
+    afterAll(done => {
+        done();
+        console.log('server closed!');
+    });
+
+    test('rss fetch and parse', async() => {
         expect(fs.existsSync(db_path)).toBe(false);
         AppDao.db();
         expect(fs.existsSync(db_path)).toBe(true);
         await RSS.fetchFeed('https://www.quastor.org/feed');
-    }, 20000);
-    */
+    }, 60000);
 
     test('rss test html extract', () => {
         let extract = TestRSS.__get__("extract_html");

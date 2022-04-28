@@ -6,6 +6,7 @@
     "ob": "./__tests__/ob_test",
     "sql_db": "./__tests__/rss.db",
     "db": "./__tests__/db",
+    "session_secret": "session_secret_test",
     "user": "admin",
     "pass": "hello"
 }

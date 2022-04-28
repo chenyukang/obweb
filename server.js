@@ -31,7 +31,7 @@ app.use(json());
 app.use(logger());
 app.use(bodyParser());
 
-app.keys = ['hello'];
+app.keys = [config.get("session_secret")];
 app.use(session({
     store: new SQLite3Store(SQLDB, {
         ttl: 1000 * 60 * 60 * 24 * 14,
