@@ -9,6 +9,10 @@ const AppDao = require('./dao.js');
 const Utils = require('./utils');
 var moment = require('moment');
 
+const config = require('config');
+const SERV_PATH = resolve(config.get("serv_path"));
+const PAGESPATH = resolve(path.join(SERV_PATH, "pages"));
+
 function getRss(link) {
     return AppDao.db().get(`SELECT * FROM pages WHERE link = ?`, link);
 }
@@ -22,10 +26,10 @@ function getRssPages(read, limit) {
 }
 
 function gen_image_name(image_uri) {
-    if (!fs.existsSync("./pages")) {
-        fs.mkdirSync("./pages");
+    if (!fs.existsSync(PAGESPATH)) {
+        fs.mkdirSync(PAGESPATH);
     }
-    let image_dir = "./pages/images";
+    let image_dir = path.join(PAGESPATH, "images");
     if (!fs.existsSync(image_dir)) {
         fs.mkdir(image_dir, { recursive: true }, (err) => {
             if (err) {
@@ -163,10 +167,7 @@ async function fetchFeed(feed_url) {
                 }
                 //console.log(item);
                 content = await preprocess_image(content, feed_url);
-                if (!fs.existsSync(resolve("./pages"))) {
-                    fs.mkdirSync(resolve("./pages"));
-                }
-                fs.writeFileSync(path.resolve(`./pages/${page.id}.html`), content);
+                fs.writeFileSync(path.resolve(path.join(PAGESPATH, `${page.id}.html`)), content);
                 console.log("saved: %d for link %s", page.id, item.link);
             } catch (e) {
                 AppDao.db().run("DELETE FROM pages WHERE id = ?", [page.id]);

@@ -28,3 +28,5 @@ __tests__/ob_test/Unsort/new_post.md
 .config.yml
 __tests__/db/tokens
 __tests__/*.db
+backend/__tests__/pages/*.html
+backend/__tests__/pages

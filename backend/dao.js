@@ -7,6 +7,7 @@ let instance = null;
 
 class AppDAO {
     constructor(dbFilePath = "") {
+        console.log("db: ", SQLDB);
         this.db = new sqlite(dbFilePath || SQLDB);
         //console.log("debug db: ", this.db);
         this.db.prepare(`CREATE TABLE IF NOT EXISTS pages(

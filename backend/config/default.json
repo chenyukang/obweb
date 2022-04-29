@@ -3,11 +3,11 @@
         "host": "localhost",
         "port": "8006"
     },
-    "ob": "./ob",
-    "sql_db": "./db/pages.db",
+    "serv_path": "../",
+    "sql_db": "../db/store.db",
+    "feed_path": "../ob/Unsort/feeds.md",
     "session_secret": "session_secret",
-    "db": "./db",
+    "db": "../db",
     "user": "admin",
-    "pass": "hello",
-    "auth": "/.config.yml"
+    "pass": "hello"
 }

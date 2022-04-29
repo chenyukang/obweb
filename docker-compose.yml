@@ -4,8 +4,6 @@ ob-web:
   - "8006:8006"
  volumes:
   - ~/.ssh:/root/.ssh
-  - ./db:/ob-web-pack/db:rw
-  - ./ob:/ob-web-pack/ob:rw
-  - ./pages:/ob-web-pack/pages:rw
+  - ./pages:/ob-web/pages:rw
  command: npm run dev
- working_dir: /ob-web-pack
+ working_dir: /ob-web

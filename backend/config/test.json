@@ -3,9 +3,9 @@
         "host": "localhost",
         "port": "3000"
     },
-    "ob": "./__tests__/ob_test",
-    "sql_db": "./__tests__/rss.db",
-    "db": "./__tests__/db",
+    "serv_path": "./__tests__",
+    "front_path": "../front",
+    "sql_db": "../__tests__/store.db",
     "session_secret": "session_secret_test",
     "user": "admin",
     "pass": "hello"

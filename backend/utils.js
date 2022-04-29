@@ -6,9 +6,10 @@ const { resolve } = require('path');
 const execSync = require('child_process').execSync;
 var moment = require('moment');
 
-const ROOTPATH = path.dirname(require.main.filename);
-const OBPATH = resolve(config.get("ob"));
-const PAGESPATH = resolve("./pages");
+
+const SERV_PATH = resolve(config.get("serv_path"));
+const OBPATH = resolve(path.join(SERV_PATH, "ob"));
+const PAGESPATH = resolve(path.join(SERV_PATH, "pages"));
 
 function safeRead(file_path) {
     let msg = `Invalid file path: ${file_path}`;
@@ -21,7 +22,7 @@ function safeRead(file_path) {
     let safe_path = path.normalize(file_path).replace(/^(\.\.(\/|\\|$))+/, '');
     let p = resolve(safe_path);
     let parent = path.dirname(p);
-    if (!parent.startsWith(ROOTPATH)) {
+    if (!parent.startsWith(OBPATH) && !parent.startsWith(PAGESPATH)) {
         throw msg;
     }
     return fs.readFileSync(p, 'utf-8');

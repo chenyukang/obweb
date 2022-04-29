@@ -22,7 +22,11 @@ const SQLite3Store = require('koa-sqlite3-session');
 var moment = require('moment');
 var crypto = require('crypto');
 
-const OBPATH = resolve(config.get("ob"));
+const SERV_PATH = resolve(config.get("serv_path"));
+const OBPATH = resolve(path.join(SERV_PATH, "ob"));
+const PAGESPATH = resolve(config.get("serv_path"), "pages");
+const RSSIMAGES_PATH = resolve(path.join(SERV_PATH, "./pages/images"));
+const FRONTPATH = resolve(path.join(SERV_PATH, "front"));
 const PORT = config.get("server.port");
 
 
@@ -128,7 +132,7 @@ async function get_page(ctx) {
         if (data.length > 0) {
             RSS.setRssReaded(query_path);
             let title = data[0].title;
-            let rss_path = path.join("./pages", `${data[0].id}.html`);
+            let rss_path = resolve(path.join(PAGESPATH, `${data[0].id}.html`));
             let rss_page = Utils.safeRead(rss_path, 'utf-8');
             ctx.body = [title, rss_page, query_path, moment(data[0].publish_datetime).format("YYYY.MM.DD")];
         } else {
@@ -262,8 +266,8 @@ router.all('/obweb', ctx => {
     ctx.status = 301;
 });
 
-app.use(mount('/front', serve(path.join(__dirname, 'front/public'))));
-app.use(mount('/pages/images/', serve(path.join(__dirname, 'pages/images'))));
+app.use(mount('/front', serve(path.join(FRONTPATH, 'public'))));
+app.use(mount('/pages/images/', serve(RSSIMAGES_PATH)));
 app.use(mount('/static/images/', serve(`${OBPATH}/Pics`)));
 
 
