@@ -2,3 +2,6 @@ target
 ob
 ob-web
 pages
+db
+backend/node_modules
+front/node_modules

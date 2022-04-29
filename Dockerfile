@@ -1,9 +1,11 @@
-FROM ubuntu:latest
+FROM node:18
 
-RUN apt-get update
-RUN apt-get install -y wget
+WORKDIR /ob-web/
 
-# wget in Dockerfile is not working, need more investigation
-#RUN wget https://github.com/chenyukang/obweb/releases/download/v0.2/ob-web-pack.zip
-#RUN unzip ob-web-pack.zip
-#WORKDIR /ob-web-pack
+COPY ./front ./
+RUN cd front && npm install
+
+COPY ./backend ./
+RUN cd backend && npm install
+
+COPY ./bin/dev.sh ./
