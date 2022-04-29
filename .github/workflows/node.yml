@@ -26,4 +26,4 @@ jobs:
         run: cd backend && rm package-lock.json && npm install
 
       - name: Run Test
-        run: npm run ci
+        run: cd backend && npm run ci
