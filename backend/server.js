@@ -23,7 +23,7 @@ var moment = require('moment');
 var crypto = require('crypto');
 
 const SERV_PATH = resolve(config.get("serv_path"));
-const OBPATH = resolve(path.join(SERV_PATH, "ob"));
+const OBPATH = resolve(path.join(SERV_PATH, config.get("ob_name")));
 const PAGESPATH = resolve(config.get("serv_path"), "pages");
 const RSSIMAGES_PATH = resolve(path.join(SERV_PATH, "./pages/images"));
 const FRONTPATH = resolve(path.join(SERV_PATH, "front"));

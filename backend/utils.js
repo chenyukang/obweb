@@ -8,7 +8,7 @@ var moment = require('moment');
 
 
 const SERV_PATH = resolve(config.get("serv_path"));
-const OBPATH = resolve(path.join(SERV_PATH, "ob"));
+const OBPATH = resolve(path.join(SERV_PATH, config.get("ob_name")));
 const PAGESPATH = resolve(path.join(SERV_PATH, "pages"));
 
 function safeRead(file_path) {
