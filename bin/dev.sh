@@ -8,5 +8,7 @@ npm install
 npm run build
 popd
 
+pushd backend
 npm run dev
+
 
