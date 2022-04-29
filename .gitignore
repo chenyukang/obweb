@@ -30,3 +30,4 @@ __tests__/db/tokens
 __tests__/*.db
 backend/__tests__/pages/*.html
 backend/__tests__/pages
+backend/__tests__/db/

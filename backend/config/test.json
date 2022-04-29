@@ -5,7 +5,7 @@
     },
     "serv_path": "./__tests__",
     "front_path": "../front",
-    "sql_db": "../__tests__/store.db",
+    "sql_db": "./__tests__/store.db",
     "session_secret": "session_secret_test",
     "user": "admin",
     "pass": "hello"
