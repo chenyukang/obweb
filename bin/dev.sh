@@ -1,3 +1,4 @@
+#!/bin/env bash
 pushd ob
 git checkout main
 git pull
