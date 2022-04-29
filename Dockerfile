@@ -11,7 +11,6 @@ COPY ./backend ./
 RUN cd backend && npm install
 
 RUN cd front && npm run build
-RUN npm run dev
 
 EXPOSE 8006
 CMD [ "npm", "run", "dev" ]

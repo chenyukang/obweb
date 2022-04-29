@@ -5,4 +5,4 @@ ob-web:
  volumes:
   - ~/.ssh:/root/.ssh
   - ./:/ob-web:rw
- working_dir: /ob-web
+ working_dir: /ob-web/backend
