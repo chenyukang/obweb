@@ -88,7 +88,6 @@ async function verify_login(ctx) {
     ctx.body = "unauthorized";
     ctx.status = 401;
     const { session } = ctx
-    console.log(session);
     if (session.user) {
         ctx.body = "ok";
         ctx.status = 200;

@@ -6,17 +6,12 @@ const TestRSS = rewire('../rss.js');
 const RSS = rewire('../rss.js');
 const AppDao = require('../dao.js');
 const config = require('config');
-const db_path = resolve(config.get("sql_db"));
+
+const path = require('path')
+const DBPATH = resolve(config.get("db_path"));
+const SQLDB = resolve(path.join(DBPATH, "store.db"));
 
 describe('basic route tests', () => {
-
-    beforeEach(function() {
-        if (fs.existsSync(db_path)) {
-            fs.unlinkSync(db_path);
-        }
-    });
-
-
     // close the server after each test
     afterAll(done => {
         done();
@@ -24,9 +19,10 @@ describe('basic route tests', () => {
     });
 
     test('rss fetch and parse', async() => {
-        expect(fs.existsSync(db_path)).toBe(false);
+        fs.unlinkSync(SQLDB);
+        expect(fs.existsSync(SQLDB)).toBe(false);
         AppDao.db();
-        expect(fs.existsSync(db_path)).toBe(true);
+        expect(fs.existsSync(SQLDB)).toBe(true);
         await RSS.fetchFeed('https://www.quastor.org/feed');
     }, 60000);
 
