@@ -6,7 +6,8 @@
         "test": "jest --watchAll",
         "ci": "jest --runInBand --detectOpenHandles --forceExit",
         "dev": "nodemon server.js",
-        "update_feed": "node update.js"
+        "prod": "NODE_ENV=production node server.js",
+        "update": "NODE_ENV=production node update.js"
     },
     "dependencies": {
         "better-sqlite3": "^7.5.1",
