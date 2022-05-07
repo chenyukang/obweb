@@ -15,7 +15,6 @@ const { readdir } = require('fs').promises;
 const RSS = require('./rss');
 const config = require('config');
 const Utils = require('./utils.js');
-const SQLDB = resolve(config.get("sql_db"));
 const session = require('koa-generic-session');
 const SQLite3Store = require('koa-sqlite3-session');
 
@@ -26,9 +25,17 @@ const SERV_PATH = resolve(config.get("serv_path"));
 const OBPATH = resolve(path.join(SERV_PATH, config.get("ob_name")));
 const PAGESPATH = resolve(config.get("serv_path"), "pages");
 const RSSIMAGES_PATH = resolve(path.join(SERV_PATH, "./pages/images"));
+const DBPATH = resolve(config.get("db_path"));
+const SQLDB = resolve(path.join(DBPATH, "store.db"));
 const FRONTPATH = resolve(path.join(SERV_PATH, "front"));
 const PORT = config.get("server.port");
 
+
+[PAGESPATH, RSSIMAGES_PATH, DBPATH].forEach(function(path) {
+    if (!fs.existsSync(path)) {
+        fs.mkdirSync(path, { recursive: true });
+    }
+});
 
 // logger
 app.use(json());
@@ -81,7 +88,6 @@ async function verify_login(ctx) {
     ctx.body = "unauthorized";
     ctx.status = 401;
     const { session } = ctx
-    console.log(session);
     if (session.user) {
         ctx.body = "ok";
         ctx.status = 200;

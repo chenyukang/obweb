@@ -1,7 +1,9 @@
 const sqlite = require('better-sqlite3');
+const path = require('path')
+
 const { resolve } = require('path');
 const config = require('config');
-const SQLDB = resolve(config.get("sql_db"));
+const SQLDB = resolve(path.join(config.get("db_path"), "store.db"));
 
 let instance = null;
 

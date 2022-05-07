@@ -1,9 +1,8 @@
 ob-web:
  build: .
  ports:
-  - "8006:8006"
+  - "8007:8006"
  volumes:
   - ~/.ssh:/root/.ssh
   - ./:/ob-web:rw
- working_dir: /ob-web
- command: ./bin/dev.sh
+ working_dir: /ob-web/backend

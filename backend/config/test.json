@@ -4,9 +4,9 @@
         "port": "3000"
     },
     "serv_path": "./__tests__",
+    "db_path": "./__tests__/",
     "ob_name": "ob_test",
     "front_path": "../front",
-    "sql_db": "./__tests__/store.db",
     "session_secret": "session_secret_test",
     "user": "admin",
     "pass": "hello"

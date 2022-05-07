@@ -37,7 +37,8 @@ function gen_image_name(image_uri) {
             }
         });
     }
-    let extname = image_uri.split('.').pop().split(/\#|\?/)[0];
+    let last_part = image_uri.split("/").pop();
+    let extname = (last_part.indexOf(".") != -1) ? last_part.split('.').pop().split(/\#|\?/)[0] : "png";
     let digest = crypto.createHash('sha256').update(image_uri)
         .digest('hex').substr(0, 15);
     return `${image_dir}/${digest}.${extname}`;
@@ -64,7 +65,10 @@ async function preprocess_image(content, feed_url) {
     for (let img of imgs) {
         let attrs = img.attributes;
         let src = attrs['src'];
-        let image_uri = isValidHttpUrl(src) ? src : `${url.protocol}//${domain}${src}`;
+        if (src.indexOf("data:image/") != -1 && src.indexOf("base64") != -1)
+            continue;
+        let uri = new URL(isValidHttpUrl(src) ? src : `${url.protocol}//${domain}${src}`);
+        let image_uri = uri.origin + uri.pathname;
         let new_image_path = gen_image_name(image_uri);
         if (isValidHttpUrl(image_uri) && image_uri.length <= 200) {
             let fullpath = resolve(new_image_path);
@@ -76,7 +80,7 @@ async function preprocess_image(content, feed_url) {
                 Utils.downLoadImage(image_uri, fullpath);
             }
             if (fs.existsSync(fullpath)) {
-                let new_image = new_image_path.replace("./", "/");
+                let new_image = "/pages" + fullpath.replace(PAGESPATH, "");
                 res = res.replace("src=\"" + src + "\"", "src=\"" + new_image + "\"");
             }
         }

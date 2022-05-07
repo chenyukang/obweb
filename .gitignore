@@ -1,3 +1,7 @@
+update.log
+run.sh
+backend/config/production.json
+backup/
 target/
 ob/
 db/accounts.json
@@ -24,7 +28,7 @@ release.zip
 ob-web-pack
 ob-web-pack.zip
 __tests__/ob_test/Pics/obweb-*.png
-__tests__/ob_test/Unsort/new_post.md
+backend/__tests__/ob_test/Unsort/new_post.md
 .config.yml
 __tests__/db/tokens
 __tests__/*.db

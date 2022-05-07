@@ -4,11 +4,10 @@
         "port": "8006"
     },
     "serv_path": "../",
-    "sql_db": "../db/store.db",
     "ob_name": "ob",
     "feed_path": "../ob/Unsort/feeds.md",
     "session_secret": "session_secret",
-    "db": "../db",
+    "db_path": "../db",
     "user": "admin",
     "pass": "hello"
 }
