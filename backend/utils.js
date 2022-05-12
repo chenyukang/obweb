@@ -13,8 +13,8 @@ const PAGESPATH = resolve(path.join(SERV_PATH, "pages"));
 
 function safeRead(file_path) {
     let msg = `Invalid file path: ${file_path}`;
-    console.log("file_path: ", file_path)
-        /* poison Null Bytes Attack */
+    //console.log("file_path: ", file_path)
+    /* poison Null Bytes Attack */
     if (file_path.indexOf('\0') !== -1) {
         throw msg;
     }

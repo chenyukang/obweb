@@ -172,6 +172,7 @@ async function post_page(ctx) {
 }
 
 async function search(ctx) {
+    Utils.gitPull();
     let query = ctx.request.query;
     let keyword = Utils.get_or(query['keyword'], "");
     let result = await getFiles(OBPATH)
