@@ -24,6 +24,7 @@ db/test_pages.db
 front/public/build
 release
 bin/rss-reader
+db/
 release.zip
 ob-web-pack
 ob-web-pack.zip

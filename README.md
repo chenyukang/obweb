@@ -6,7 +6,7 @@
 
 ## Motivation
 
-Introduction in Chinese: [打造自己的工具](http://chenyukang.github.io/2021/11/28/intro-to-obweb.html)
+Introduction in Chinese: [打造自己的工具](https://catcoding.me/p/intro-to-obweb/)
 
 [Obsidian](https://obsidian.md/) and [Flomo](https://flomoapp.com/) are two of my favorite Applications.
 
