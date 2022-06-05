@@ -9,5 +9,6 @@
     "session_secret": "session_secret",
     "db_path": "../db",
     "user": "admin",
-    "pass": "hello"
+    "pass": "hello",
+    "bot_token": ""
 }

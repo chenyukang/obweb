@@ -49,32 +49,16 @@ function gen_path(page, date) {
 }
 
 function runShell(command, path = OBPATH) {
-    let backup = process.cwd();
-    try {
-        process.chdir(path);
-        let dir = exec(command, function(err, stdout, stderr) {
-            if (err) {
-                console.log(err);
-            }
-            console.log(stdout);
-        });
-
-        dir.on('exit', function(code) {
-            // exit code is code
-            if (code != 0) {
-                console.log("exit code is " + code);
-            }
-        });
-    } finally {
-        process.chdir(backup);
-    }
-}
-
-function gitPull() {
     if (process.env.NODE_ENV == "test") {
         return;
     }
-    runShell("git pull");
+    let backup = process.cwd();
+    try {
+        process.chdir(path);
+        execSync(command, { encoding: 'utf-8', timeout: 5 * 1000 });
+    } finally {
+        process.chdir(backup);
+    }
 }
 
 function downLoadImage(url, fileName) {
@@ -90,10 +74,11 @@ function downLoadImage(url, fileName) {
     }
 }
 
+function gitPull() {
+    runShell("git pull");
+}
+
 function gitSync() {
-    if (process.env.NODE_ENV == "test") {
-        return;
-    }
     runShell("git add . && git commit -m \"update\" && git push");
 }
 
