@@ -64,6 +64,8 @@ Obweb assume your Obsidian vault has `Daily` and `Unsort` directories to store d
 ./bin/dev.sh
 ```
 
+Access URL: [http://localhost:8006/front/index.html](http://localhost:8006/front/index.html)
+
 ### 3. Post configuration
 
 If you have your own domain, you can deploy it to a custom domain. You may want to add some other security enhancement such as HTTPS, request frequency limit, etc.
