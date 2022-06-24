@@ -78,7 +78,7 @@ bot.on('message', (msg) => {
             fs.renameSync(filePath, image_path);
             console.log(image_path);
             console.log(image_name);
-            content += `\n![[${image_name} | #x-small]]\n`;
+            content += `\n![[${image_name}]]\n`;
             content = page == "todo" ? `${content}\n\n---\n\n${data}` : `${data}\n${content}`;
             fs.writeFileSync(path, content, 'utf-8');
             Utils.gitSync();

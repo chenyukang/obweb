@@ -6,7 +6,7 @@
         "test": "jest --watchAll",
         "ci": "jest --runInBand --detectOpenHandles --forceExit",
         "dev": "nodemon server.js",
-        "prod": "NODE_ENV=production node server.js",
+        "prod": "NODE_ENV=production node server.js > run.log 2>&1 &",
         "bot": "NODE_ENV=production node bot.js",
         "update": "NODE_ENV=production node update.js"
     },
