@@ -48,14 +48,25 @@ function gen_path(page, date) {
     return path;
 }
 
-function runShell(command, path = OBPATH) {
+function runShell(command, async = true) {
     if (process.env.NODE_ENV == "test") {
         return;
     }
     let backup = process.cwd();
     try {
-        process.chdir(path);
-        execSync(command, { encoding: 'utf-8', timeout: 5 * 1000 });
+        process.chdir(OBPATH);
+        if (async) {
+            exec(command, (err, stdout, stderr) => {
+                if (err) {
+                    console.log(err);
+                }
+                console.log(stdout);
+                console.log(stderr);
+            });
+        } else {
+            //bot.js will call in sync mode
+            execSync(command, { encoding: 'utf-8', timeout: 5 * 1000 });
+        }
     } finally {
         process.chdir(backup);
     }
@@ -74,12 +85,12 @@ function downLoadImage(url, fileName) {
     }
 }
 
-function gitPull() {
-    runShell("git pull");
+function gitPull(async = false) {
+    runShell("git pull", async);
 }
 
-function gitSync() {
-    runShell("git add . && git commit -m \"update\" && git push");
+function gitSync(async = false) {
+    runShell("git add . && git commit -m \"update\" && git push", async);
 }
 
 module.exports = {

@@ -133,7 +133,7 @@ async function getFiles(dir) {
 }
 
 async function get_page(ctx) {
-    Utils.gitPull();
+    Utils.gitPull(true);
     const query = ctx.request.query;
     let query_path = query['path'];
     let query_type = Utils.get_or(query['query_type'], "page");
@@ -177,7 +177,7 @@ async function post_page(ctx) {
 }
 
 async function search(ctx) {
-    Utils.gitPull();
+    Utils.gitPull(true);
     let query = ctx.request.query;
     let keyword = Utils.get_or(query['keyword'], "");
     let result = await getFiles(OBPATH)
