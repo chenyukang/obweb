@@ -252,7 +252,7 @@ async function post_entry(ctx) {
         let image_name = `obweb-${chinaTime('YYYY-MM-DD-HH-mm-ss')}.${ext}`;
         let image_path = `${OBPATH}/Pics/${image_name}`;
         fs.writeFile(image_path, buf, { flag: 'w+' }, function(err) {});
-        content += `\n\n![[${image_name} | #x-small]]\n`;
+        content += `\n\n![[${image_name}|250]]\n`;
     }
     content = page == "todo" ? `${content}\n\n---\n\n${data}` : `${data}\n${content}`;
     fs.writeFileSync(path, content, 'utf-8');
