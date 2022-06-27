@@ -44,9 +44,14 @@ app.use(bodyParser());
 
 app.keys = [config.get("session_secret")];
 app.use(session({
-    store: new SQLite3Store(SQLDB, {
-        ttl: 1000 * 60 * 60 * 24 * 14,
-    })
+    store: new SQLite3Store(SQLDB, {}),
+    cookie: {
+        path: '/',
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000 * 21, //cookie valid for 21 days
+        overwrite: true,
+        signed: true
+    }
 }));
 
 //app.use(basicAuth({ name: 'tj', pass: 'xxx' }));

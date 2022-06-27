@@ -7,7 +7,7 @@
         "ci": "jest --runInBand --detectOpenHandles --forceExit",
         "dev": "nodemon server.js",
         "prod": "NODE_ENV=production node server.js > run.log 2>&1 &",
-        "bot": "NODE_ENV=production node bot.js",
+        "bot": "NODE_ENV=production node bot.js > bot.log 2>&1 &",
         "update": "NODE_ENV=production node update.js"
     },
     "dependencies": {
