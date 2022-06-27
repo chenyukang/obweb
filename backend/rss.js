@@ -148,6 +148,10 @@ async function fetchFeed(feed_url) {
         feed = await parser.parseURL(feed_url);
     }
     for (let item of feed.items) {
+        if (res.find(i => i.title == item.title) != undefined) {
+            //some weird rss feed has duplicate item, skip it
+            continue;
+        }
         res.push(item);
         let pre = getRss(item.link)[0];
         if (pre == undefined) {
