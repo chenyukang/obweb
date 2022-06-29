@@ -35,7 +35,6 @@ bot.on('message', (msg) => {
     let time_str = chinaTime('HH:mm');
     let body = {
         "text": msg.text || "",
-        "links": [],
         "images": msg.photo,
         "page": "",
     };
@@ -52,12 +51,8 @@ bot.on('message', (msg) => {
         Utils.gitPull();
         return;
     }
-    let links = body['links'];
+
     let content = page != "" ? `\n### ${date_str} ${time_str}` : `\n## ${time_str}`;
-    if (links.length > 0) {
-        let link_str = links.split(",").map(l => `[[${l}]]`).join(" ");
-        content += `\nLinks: ${link_str}`;
-    }
     let append = text;
     if (curCommand == "/todo")
         append = `- [ ] ${text}`;
@@ -78,7 +73,8 @@ bot.on('message', (msg) => {
             fs.renameSync(filePath, image_path);
             console.log(image_path);
             console.log(image_name);
-            content += `\n![[${image_name} | #x-small]]\n`;
+            // 250 is the maximize width show in Obsidian
+            content += `\n![[${image_name}|250]]\n`;
             content = page == "todo" ? `${content}\n\n---\n\n${data}` : `${data}\n${content}`;
             fs.writeFileSync(path, content, 'utf-8');
             Utils.gitSync();

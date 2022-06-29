@@ -44,9 +44,14 @@ app.use(bodyParser());
 
 app.keys = [config.get("session_secret")];
 app.use(session({
-    store: new SQLite3Store(SQLDB, {
-        ttl: 1000 * 60 * 60 * 24 * 14,
-    })
+    store: new SQLite3Store(SQLDB, {}),
+    cookie: {
+        path: '/',
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000 * 21, //cookie valid for 21 days
+        overwrite: true,
+        signed: true
+    }
 }));
 
 //app.use(basicAuth({ name: 'tj', pass: 'xxx' }));
@@ -128,7 +133,7 @@ async function getFiles(dir) {
 }
 
 async function get_page(ctx) {
-    Utils.gitPull();
+    Utils.gitPull(true);
     const query = ctx.request.query;
     let query_path = query['path'];
     let query_type = Utils.get_or(query['query_type'], "page");
@@ -172,7 +177,7 @@ async function post_page(ctx) {
 }
 
 async function search(ctx) {
-    Utils.gitPull();
+    Utils.gitPull(true);
     let query = ctx.request.query;
     let keyword = Utils.get_or(query['keyword'], "");
     let result = await getFiles(OBPATH)
@@ -247,7 +252,7 @@ async function post_entry(ctx) {
         let image_name = `obweb-${chinaTime('YYYY-MM-DD-HH-mm-ss')}.${ext}`;
         let image_path = `${OBPATH}/Pics/${image_name}`;
         fs.writeFile(image_path, buf, { flag: 'w+' }, function(err) {});
-        content += `\n\n![[${image_name} | #x-small]]\n`;
+        content += `\n\n![[${image_name}|250]]\n`;
     }
     content = page == "todo" ? `${content}\n\n---\n\n${data}` : `${data}\n${content}`;
     fs.writeFileSync(path, content, 'utf-8');

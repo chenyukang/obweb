@@ -23,7 +23,7 @@ describe('basic route tests', () => {
         expect(fs.existsSync(SQLDB)).toBe(false);
         AppDao.db();
         expect(fs.existsSync(SQLDB)).toBe(true);
-        await RSS.fetchFeed('https://www.quastor.org/feed');
+        await RSS.fetchFeed('https://catcoding.me/atom.xml');
     }, 60000);
 
     test('rss test html extract', () => {

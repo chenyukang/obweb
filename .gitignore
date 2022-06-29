@@ -1,4 +1,4 @@
-update.log
+*.log
 run.sh
 backend/config/production.json
 backup/
