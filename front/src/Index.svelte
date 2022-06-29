@@ -59,7 +59,7 @@
 
     function handleKeyup(event) {
         if (event.key == "[" || event.key == "]") {
-            content = content.replaceAll("【", "[").replaceAll("】", "]");
+            content = content.replace(/【/g, "[").replace(/】/g, "]");
         }
     }
 

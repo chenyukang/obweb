@@ -219,13 +219,12 @@
                 if (file != "NoPage") {
                     localStorage.setItem("page-content", content);
                     localStorage.setItem("file", file);
-                    jq("#fileName").text(file.replaceAll(".md", ""));
+                    jq("#fileName").text(file.replace(/.md/g, ""));
                     jq("#fileName").prop("hidden", false);
                     jq("#pageNavBar").prop("hidden", false);
                     let res = query_type == "rss" ? content : renderMdToHtml(content);
                     jq("#page-content").html(res);
                     jq("#page-content").prop("hidden", false);
-                    console.log(rsslink);
                     if (rsslink != undefined && rsslink != "") {
                         jq("#rsslink").prop("hidden", false);
                         show_rsslink = true;
