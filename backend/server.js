@@ -40,7 +40,11 @@ const PORT = config.get("server.port");
 // logger
 app.use(json());
 app.use(logger());
-app.use(bodyParser());
+app.use(bodyParser({
+    'formLimit': '10mb',
+    'jsonLimit': '10mb',
+    'textLimit': '10mb',
+}));
 
 app.keys = [config.get("session_secret")];
 app.use(session({

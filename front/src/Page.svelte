@@ -490,7 +490,7 @@
     {#if cur_page == "day"}
         <div class="row sticky-top" style="margin-top: 20px; border: 0;">
             <div class="col-md-2" />
-            <div class="col-md-8 text-right">
+            <div class="col-md-8 text-right" style="margin-top: 5px">
                 <button
                     type="button"
                     class="btn btn-info"
@@ -511,7 +511,7 @@
     {:else if cur_page == "rand" || cur_page == "todo"}
         <div class="row sticky-top" style="margin-top: 20px; border: 0;">
             <div class="col-md-2" />
-            <div class="col-md-8 text-right">
+            <div class="col-md-8 text-right" style="margin-top: 5px">
                 <button
                     type="button"
                     class="btn btn-warning"
@@ -523,7 +523,7 @@
     {:else if cur_page == "rss"}
         <div class="row sticky-top" style="margin-top: 20px; border: 0;">
             <div class="col-md-2" />
-            <div class="col-md-8 text-right" id="pageNavBarRss">
+            <div class="col-md-8 text-right" style="margin-top: 5px" id="pageNavBarRss">
                     <button
                     type="button"
                     class="btn btn-info"
@@ -574,7 +574,7 @@
 
         <div class="row sticky-top" style="margin-top: 20px; border: 0;">
             <div class="col-md-2" />
-            <div class="col-md-8 text-right" hidden="true" id="pageNavBar">
+            <div class="col-md-8 text-right" hidden="true" style="margin-top: 5px" id="pageNavBar">
                 <button
                     type="button"
                     class="btn btn-info"

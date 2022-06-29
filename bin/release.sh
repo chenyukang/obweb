@@ -10,5 +10,6 @@ npm run build
 popd
 
 pushd backend
+pkill -f "node server.js"
 npm run prod
 
