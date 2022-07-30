@@ -532,18 +532,21 @@
                     hidden="true"
                     on:click={fetchRss}>Back</button>
 
-                    <button
-                    type="button"
-                    class="btn btn-info"
-                    style="float: left"
-                    id="markBtn"
-                    hidden="true"
-                    on:click={markRead}>Mark</button>
+                    {#if !show_rsslink}
+                        <button
+                        type="button"
+                        class="btn btn-info"
+                        style="float: left"
+                        id="markBtn"
+                        hidden="true"
+                        on:click={markRead}>Mark</button>
 
-                    <label class="switch" style="float: right">
-                        <input id="rssread" type="checkbox" on:click={rssRead} >
-                        <span class="slider round"></span>
-                    </label>
+                        <label class="switch" style="float: right">
+                            <input id="rssread" type="checkbox" on:click={rssRead} >
+                            <span class="slider round"></span>
+                        </label>
+                    {/if}
+
             </div>
         </div>
 
