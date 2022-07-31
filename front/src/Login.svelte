@@ -12,7 +12,6 @@
     // Try to verify token in cookie,
     // if it's not valid we need to show up login modal
     function tryLogin(callback = null) {
-        console.log("tryLogin");
         jq.ajax({
             url: "/api/verify",
             type: "GET",
@@ -49,7 +48,6 @@
             username: username,
             password: password,
         });
-        console.log(data);
         jq.ajax({
             url: "/api/login",
             type: "POST",
@@ -58,7 +56,6 @@
             data: data,
             success: function (response) {
                 if (response != "failed") {
-                    let storage = window.localStorage;
                     jq("#loginModal").modal("hide");
                 }
             },

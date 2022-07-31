@@ -1,9 +1,8 @@
 <script>
     import Login from "./Login.svelte";
     import Nav from "./Nav.svelte";
-    import Index from "./Day.svelte";
+    import Day from "./Day.svelte";
     import Page from "./Page.svelte";
-    import Footer from "./Footer.svelte";
 
     let cur_page = "day";
     let cur_time = Date.now();
@@ -19,10 +18,9 @@
     <div class="container">
         <Login />
         {#if cur_page == "day"}
-            <Index />
+            <Day />
         {:else}
             <Page bind:cur_page={cur_page} cur_time={cur_time}/>
         {/if}
     </div>
-    <!-- <Footer on:message={refresh}/> -->
 </main>
