@@ -10,7 +10,7 @@
         let page = event.target.innerText.toLowerCase();
         cur_page = page;
         if (cur_page == "obweb") {
-            cur_page = "index";
+            cur_page = "day";
         }
         dispatch("message", cur_page);
         console.log("dispatched ....");
