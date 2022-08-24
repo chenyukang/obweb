@@ -7,10 +7,9 @@
     const dispatch = createEventDispatcher();
     function handleNav(event) {
         event.preventDefault();
-        let page = event.target.innerText.toLowerCase();
-        cur_page = page;
+        cur_page = event.target.innerText.toLowerCase();
         if (cur_page == "obweb") {
-            cur_page = "index";
+            cur_page = "day";
         }
         dispatch('message', cur_page);
         console.log("dispatched ....");

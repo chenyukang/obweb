@@ -103,7 +103,6 @@
             text: content,
             image: image,
         });
-        console.log(data);
         jq.ajax({
             url: "/api/entry",
             crossDomain: true,
@@ -195,7 +194,7 @@
 </script>
 
 <div class="tab-content">
-    <form name="entry" role="form">
+    <form name="entry">
         <div class="form-group row">
             <div class="col-md-2" />
             <div class="col-md-8">

@@ -1,13 +1,11 @@
 <script>
     import Login from "./Login.svelte";
     import Nav from "./Nav.svelte";
-    import Index from "./Index.svelte";
+    import Day from "./Day.svelte";
     import Page from "./Page.svelte";
-    import Footer from "./Footer.svelte";
 
-    let cur_page = "index";
+    let cur_page = "day";
     let cur_time = Date.now();
-    let page;
 
     const refresh = (event) => {
         cur_page = event.detail;
@@ -17,16 +15,12 @@
 
 <main>
     <Nav on:message={refresh}/>
-
     <div class="container">
         <Login />
-
-        {#if cur_page == "index"}
-            <Index />
+        {#if cur_page == "day"}
+            <Day />
         {:else}
-            <Page bind:this={page} bind:cur_page={cur_page} cur_time={cur_time}/>
+            <Page bind:cur_page={cur_page} cur_time={cur_time}/>
         {/if}
     </div>
-
-    <!-- <Footer on:message={refresh}/> -->
 </main>
