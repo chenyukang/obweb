@@ -64,9 +64,10 @@ async function preprocess_image(content, feed_url) {
     let imgs = html.querySelectorAll("img");
     for (let img of imgs) {
         let attrs = img.attributes;
-        let src = attrs['src'];
-        if (src.indexOf("data:image/") != -1 && src.indexOf("base64") != -1)
+        let src = attrs['src'] || attrs['data-src']
+        if (src == undefined || src.indexOf("data:image/") != -1 || src.indexOf("base64") != -1 || src.indexOf(".mp3") != -1) {
             continue;
+        }
         let uri = new URL(isValidHttpUrl(src) ? src : `${url.protocol}//${domain}${src}`);
         let image_uri = uri.origin + uri.pathname;
         let new_image_path = gen_image_name(image_uri);
@@ -127,7 +128,8 @@ function fetch_page_content(link) {
     if (isValidHttpUrl(link)) {
         return new Promise((resolve, reject) => {
             request(link, function(error, response, body) {
-                if (!error && response.statusCode == 200) {
+                //console.log("response type is: ", response.headers);
+                if (!error && response.statusCode == 200 && response.headers['content-type'].indexOf("text/html") != -1) {
                     resolve(transform_html(body));
                 } else {
                     reject(error);
