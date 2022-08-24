@@ -255,7 +255,7 @@ async function post_entry(ctx) {
         var buf = Buffer.from(image_data, 'base64');
         let image_name = `obweb-${chinaTime('YYYY-MM-DD-HH-mm-ss')}.${ext}`;
         let image_path = `${OBPATH}/Pics/${image_name}`;
-        fs.writeFile(image_path, buf, { flag: 'w+' }, function(err) {});
+        fs.writeFileSync(image_path, buf, { flag: 'w+' });
         content += `\n\n![[${image_name}|250]]\n`;
     }
     content = page == "todo" ? `${content}\n\n---\n\n${data}` : `${data}\n${content}`;
