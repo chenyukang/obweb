@@ -22,7 +22,8 @@ function setRssReaded(link) {
 }
 
 function getRssPages(read, limit) {
-    return AppDao.db().get(`SELECT * FROM pages WHERE readed = ? ORDER BY publish_datetime DESC LIMIT ?`, [read, limit]);
+    let sorted_by = read ? "updated_datetime" : "publish_datetime";
+    return AppDao.db().get(`SELECT * FROM pages WHERE readed = ? ORDER BY ${sorted_by} DESC LIMIT ?`, [read, limit]);
 }
 
 function gen_image_name(image_uri) {
@@ -192,17 +193,15 @@ async function updateRss(feed_conf) {
     let content = fs.readFileSync(feed_conf, 'utf-8');
     let feeds = content.split(/\r?\n/);
 
-    //feeds.forEach(async feed => {
     for (let feed of feeds) {
         try {
             console.log("fetching: ", feed);
             let res = await fetchFeed(feed);
             //console.log(res);
         } catch (e) {
-            console.log("error: ", e);
+            console.log("fetch error: ", feed);
         }
     }
-    //});
 }
 
 module.exports = {
