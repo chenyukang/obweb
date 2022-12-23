@@ -286,9 +286,10 @@ app.use(mount('/front', serve(path.join(FRONTPATH, 'public'))));
 app.use(mount('/pages/images/', serve(RSSIMAGES_PATH)));
 app.use(mount('/static/images/', serve(`${OBPATH}/Pics`)));
 
-
 app.use(router.routes())
     .use(router.allowedMethods());
 
 const server = app.listen(PORT);
+module.exports = server;
+n(PORT);
 module.exports = server;

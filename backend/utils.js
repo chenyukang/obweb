@@ -1,3 +1,6 @@
+import { createRequire } from "module";
+const require = createRequire(
+    import.meta.url);
 const config = require('config');
 const fs = require('fs');
 const path = require('path')
@@ -10,6 +13,7 @@ var moment = require('moment');
 const SERV_PATH = resolve(config.get("serv_path"));
 const OBPATH = resolve(path.join(SERV_PATH, config.get("ob_name")));
 const PAGESPATH = resolve(path.join(SERV_PATH, "pages"));
+
 
 function safeRead(file_path) {
     let msg = `Invalid file path: ${file_path}`;
@@ -93,7 +97,7 @@ function gitSync(async = false) {
     runShell("git add . && git commit -m \"update\" && git push", async);
 }
 
-module.exports = {
+export {
     get_or,
     safeRead,
     strip_ob,
@@ -102,4 +106,4 @@ module.exports = {
     gen_path,
     curTime,
     downLoadImage
-}
+};

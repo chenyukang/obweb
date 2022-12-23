@@ -2,6 +2,7 @@
     "name": "ob-web",
     "version": "1.0.0",
     "private": true,
+    "type": "module",
     "scripts": {
         "test": "jest --watchAll",
         "ci": "jest --runInBand --detectOpenHandles --forceExit",
@@ -11,6 +12,7 @@
         "update": "NODE_ENV=production node update.js"
     },
     "dependencies": {
+        "chatgpt": "^1.2.1",
         "better-sqlite3": "^7.5.1",
         "china-time": "^0.12.3",
         "config": "^3.3.7",
