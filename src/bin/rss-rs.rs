@@ -3,11 +3,20 @@ use base::*;
 use chrono::prelude::*;
 use chrono::DateTime;
 use clap::App;
+use colored::Colorize;
+use daemonize::Daemonize;
+use nix::sys::signal::kill;
+use nix::sys::signal::Signal;
+use nix::unistd::Pid;
 use serde::Deserialize;
 use std::error::Error;
 use std::fs;
+use std::fs::File;
 use std::net::Ipv4Addr;
+use std::path::PathBuf;
+use std::process::ExitCode;
 use warp::Filter;
+
 #[derive(Deserialize, Debug)]
 pub struct Request {
     pub date: String,
@@ -114,7 +123,7 @@ pub async fn run_server(port: u16) {
     pretty_env_logger::init();
 
     //let pages = warp::path("static").and(warp::fs::dir("./static/"));
-    let routes = warp::path!("obweb").and(warp::fs::file("./front/public/index.html"));
+    let routes = warp::path!("read").and(warp::fs::file("./front/public/index.html"));
     let front = warp::path("front").and(warp::fs::dir("./front/public/"));
     let routes = routes.or(front);
 
@@ -174,10 +183,45 @@ pub async fn run_server(port: u16) {
                 Ok(_) => eprintln!("RSS updated successfully"),
                 Err(e) => eprintln!("Background task panicked: {:?}", e),
             }
-            tokio::time::sleep(std::time::Duration::from_secs(60 * 5)).await;
+            tokio::time::sleep(std::time::Duration::from_secs(60 * 20)).await;
         }
     });
     warp::serve(routes).run((Ipv4Addr::UNSPECIFIED, port)).await
+}
+
+pub fn check_process(pid_file: &PathBuf) -> Result<i32, ExitCode> {
+    let pid_str = fs::read_to_string(pid_file).map_err(|_| ExitCode::FAILURE)?;
+    let pid = pid_str
+        .trim()
+        .parse::<i32>()
+        .map_err(|_| ExitCode::FAILURE)?;
+
+    // Check if the process is running
+    match kill(Pid::from_raw(pid), None) {
+        Ok(_) => Ok(pid),
+        Err(_) => Err(ExitCode::FAILURE),
+    }
+}
+
+fn kill_process(pid_file: &PathBuf, name: &str) -> Result<(), ExitCode> {
+    if check_process(pid_file).is_err() {
+        eprintln!("{} is not running", name);
+        return Ok(());
+    }
+    let pid_str = fs::read_to_string(pid_file).map_err(|_| ExitCode::FAILURE)?;
+    let pid = pid_str
+        .trim()
+        .parse::<i32>()
+        .map_err(|_| ExitCode::FAILURE)?;
+    eprintln!("kill {} process {} ...", name, pid.to_string().red());
+    // Send a SIGTERM signal to the process
+    let _ = kill(Pid::from_raw(pid), Some(Signal::SIGTERM)).map_err(|_| ExitCode::FAILURE);
+    // sleep 3 seconds and check if the process is still running
+    std::thread::sleep(std::time::Duration::from_secs(3));
+    match check_process(pid_file) {
+        Ok(_) => kill(Pid::from_raw(pid), Some(Signal::SIGKILL)).map_err(|_| ExitCode::FAILURE),
+        _ => Ok(()),
+    }
 }
 
 fn main() {
@@ -186,6 +230,8 @@ fn main() {
         .author("yukang <moorekang@gmail.com>")
         .about("Rss-Rss Reader in Rust")
         .arg(clap::Arg::new("port").short('p').help("Listen port"))
+        .arg(clap::Arg::new("daemon").short('d').help("Run as daemon"))
+        .arg(clap::Arg::new("stop").short('s').help("Stop daemon"))
         .get_matches();
 
     let port = match matches.value_of("port") {
@@ -193,5 +239,31 @@ fn main() {
         None => 8005,
     };
 
-    run_server(port);
+    let pid_file: PathBuf = format!("/tmp/rss-rs-{}.pid", port).into();
+
+    if matches.is_present("daemon") {
+        if check_process(&pid_file).is_ok() {
+            eprintln!("{}", "rss-rs is already running".red());
+            return;
+        }
+
+        let pwd = std::env::current_dir().unwrap();
+        let log_file = File::create("/tmp/rss-rs.log").unwrap();
+        let daemonize = Daemonize::new()
+            .pid_file(format!("/tmp/rss-rs-{}.pid", port))
+            .stdout(log_file)
+            .working_directory(pwd)
+            .privileged_action(|| "Executed before drop privileges");
+        match daemonize.start() {
+            Ok(_) => {
+                println!("Success, daemonized");
+                run_server(port);
+            }
+            Err(e) => eprintln!("Error, {}", e),
+        }
+    } else if matches.is_present("stop") {
+        kill_process(&pid_file, "rss-rs").unwrap();
+    } else {
+        run_server(port);
+    }
 }
