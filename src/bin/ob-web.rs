@@ -168,7 +168,7 @@ fn main() {
         .version("0.1")
         .author("yukang <moorekang@gmail.com>")
         .about("Rss-Rss Reader in Rust")
-        .arg("-p, --port=[PORT]       'Listen port'")
+        .arg(clap::Arg::new("port").short('p').help("Listen port"))
         .get_matches();
 
     let port = match matches.value_of("port") {

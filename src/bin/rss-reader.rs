@@ -1,6 +1,6 @@
 extern crate base;
 use base::rss;
-use clap::App;
+use clap::{App, Arg};
 use std::error::Error;
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -8,10 +8,15 @@ fn main() -> Result<(), Box<dyn Error>> {
         .version("0.1")
         .author("yukang <moorekang@gmail.com>")
         .about("Rss Reader in Rust")
-        .arg("-u, --update    'Update and fetch rss'")
-        .arg("-r, --remove=[FEED]    'Remove all the pages for a feed'")
-        .arg("-s, --single=[FEED]    'Force fetch a feed'")
-        .arg("-f, --force            'Force fetch rss'")
+        .arg(Arg::new("debug").short('d').help("turns on debugging mode"))
+        .arg(Arg::new("update").short('u').help("Update and fetch rss"))
+        .arg(
+            Arg::new("remove")
+                .short('r')
+                .help("Remove all the pages for a feed"),
+        )
+        .arg(Arg::new("single").short('s').help("Force fetch a feed"))
+        .arg(Arg::new("force").short('f').help("Force fetch rss"))
         .get_matches();
 
     if matches.is_present("update") {

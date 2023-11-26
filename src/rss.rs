@@ -86,7 +86,7 @@ fn gen_image_name(uri: &str) -> Result<String, Box<dyn Error>> {
 
 fn convert_image(uri: &str) -> Result<String, Box<dyn Error>> {
     println!("preprocess_image: {:?}", uri);
-    let image_path = gen_image_name(uri).unwrap();
+    let image_path = gen_image_name(uri)?;
     let relative_path = image_path.replace("./", "/");
     if !Path::new(&image_path).exists() {
         let resp = reqwest::blocking::get(uri)?;
@@ -125,8 +125,9 @@ fn preprocess_image(
                     full_uri = format!("{}/{}", prefix, url);
                 }
             }
-            let image = convert_image(&full_uri)?;
-            result = result.replace(url, &image);
+            if let Ok(image) = convert_image(&full_uri) {
+                result = result.replace(url, &image);
+            }
         }
     }
     Ok(result.clone())
