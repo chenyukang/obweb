@@ -4,6 +4,10 @@
   <img src="front/public/logo.png">
 </p>
 
+## Notice
+This project now is deprecated, I use Obsdian Andriod App.
+I may split the RSS reader part to a new project.
+
 ## Motivation
 
 Introduction in Chinese: [打造自己的工具](https://catcoding.me/p/intro-to-obweb/)
