@@ -17,7 +17,7 @@ static PAGES_DB: &'static str = "/tmp/pages.db";
 static PAGES_DB: &'static str = "./db/pages.db";
 
 static IMAGE_DIR: &'static str = "./pages/images";
-static ALL_FEEDS: &'static str = "./feeds.md";
+static ALL_FEEDS: &'static str = "./db/feeds.md";
 /// An item within a feed
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Page {
@@ -276,7 +276,6 @@ pub fn update_rss(feed: Option<&str>, force: bool) -> Result<(), Box<dyn Error>>
         let _ = fetch_feed(f, true)?;
     } else {
         for feed in feeds.iter() {
-            println!("force: {:?}", force);
             let res = fetch_feed(&feed, force);
             println!("feed: {:?} res: {:?}", feed, res);
         }
@@ -336,7 +335,6 @@ pub fn mark_pages_read(limit: usize) -> rusqlite::Result<usize> {
 pub fn remove_pages_from_link(link: &str) -> rusqlite::Result<usize> {
     let conn = Connection::open(PAGES_DB)?;
     let Some(page) = query_page_link(&link) else {
-        eprintln!("now found .........");
         return Ok(0);
     };
     let res = conn.execute("DELETE FROM pages where source = ?", [&page.source]);
@@ -514,7 +512,6 @@ mod tests {
         let content = fetch_page(url).unwrap();
         assert!(content.contains(".png"));
         let res = preprocess_image(&content, "https://flaviocopes.com", url);
-        println!("res: {:?}", res);
         assert!(res.is_ok());
     }
 

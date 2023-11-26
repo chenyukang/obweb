@@ -64,7 +64,7 @@ video {
     border: 1px outset green;
     text-align: left;
     word-wrap: break-word;
-    padding: 8px;
+    padding: 10px 40px 10px 40px;
 }
 
 body {
@@ -149,4 +149,3 @@ input:checked+.slider:before {
     border-radius: 50%;
 }
 
-x

@@ -26,48 +26,7 @@
         }
     }
 
-    function preprocessImage(response) {
-        let result = "";
-        let left = response;
-        let last = 0;
-        while (left.indexOf("![[") != -1) {
-            let prev = left.substring(0, left.indexOf("![["));
-            result += prev;
-            let start = left.indexOf("![[") + 3;
-            let end = left.indexOf("]]", start);
-            let image = left.substring(start, end);
-            let image_url = image.split("|")[0].trim();
-            result += "![img](/static/images/" + encodeURI(image_url) + ")";
-            left = left.substring(end + 2);
-            last = end + 2;
-        }
-        result += left;
-        return result;
-    }
-
-    function preprocessLink(response) {
-        let result = "";
-        let last = 0;
-        let left = response;
-        while (left.indexOf("[[") != -1) {
-            let prev = left.substring(0, left.indexOf("[["));
-            result += prev;
-            let start = left.indexOf("[[") + 2;
-            let end = left.indexOf("]]", start);
-            let link = left.substring(start, end);
-            left = left.substring(end + 2);
-            if (prev.indexOf("```") != -1 && left.indexOf("```") != -1)
-                result += "[[" + link + "]]";
-            else result += "[" + link.trim() + "](/##)";
-            last = end + 2;
-        }
-        result += left;
-        return result;
-    }
-
     function renderMdToHtml(response) {
-        let result = preprocessImage(response);
-        result = preprocessLink(result);
         let converter = new showdown.Converter({
             simpleLineBreaks: true,
             tasklists: true,
@@ -77,7 +36,7 @@
             emoji: true,
         });
         converter.setFlavor("github");
-        return converter.makeHtml(result);
+        return converter.makeHtml(response);
     }
 
     function fetchPage(url, query_type = "") {
@@ -101,7 +60,7 @@
             },
             statusCode: {
                 500: function () {
-                    window.location.href = "/obweb";
+                    window.location.href = "/read";
                 },
             },
             success: function (response) {
@@ -192,7 +151,7 @@
             contentType: "Application/json",
             statusCode: {
                 500: function () {
-                    window.location.href = "/obweb";
+                    window.location.href = "/read";
                 },
             },
             success: function (response) {
@@ -227,7 +186,7 @@
             contentType: "Application/json",
             statusCode: {
                 500: function () {
-                    window.location.href = "/obweb";
+                    window.location.href = "/read";
                 },
             },
             success: function (response) {
@@ -260,7 +219,7 @@
             contentType: "Application/json",
             statusCode: {
                 500: function () {
-                    window.location.href = "/obweb";
+                    window.location.href = "/read";
                 },
             },
             success: function (response) {
@@ -300,8 +259,14 @@
         fetchRss();
     }
 
+    function handleBackButton() {
+        console.log("back button pressed");
+    }
+
     onMount(async () => {
         setPageDefault();
+        window.addEventListener('popstate', handleBackButton);
+
     });
 </script>
 
@@ -383,9 +348,9 @@
     {#if show_rsslink}
         <div class="row">
             <div class="col-md-2" />
-            <div class="col-md-8">
+            <div class="col-md-8" style="text-align: center;">
                 <a href={rsslink} id="rsslink" target="_blank"
-                    >{publish_time.split(" ")[0]} 👻 {source}
+                    >{publish_time.split(" ")[0]} 👻 {new URL(rsslink)}
                 </a>
             </div>
         </div>

@@ -11,10 +11,6 @@
 
 <nav class="navbar navbar-light" style="background-color: #e3f2fd;">
     <div>
-        <a class="navbar-brand" href="/" on:click={handleNav}>Obweb</a>
-    </div>
-
-    <div style="float: right">
-        <button on:click={handleNav} class="btn btn-secondary btn-sm">Rss</button>
+        <a class="navbar-brand" href="/" on:click={handleNav}>Rss Reader</a>
     </div>
 </nav>

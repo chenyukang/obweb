@@ -37,16 +37,14 @@ struct MarkRemove {
 
 fn ensure_path(path: &String) -> Result<String, &'static str> {
     let cleaned_path = path_clean::clean(path);
-    if !((cleaned_path.starts_with("ob/") && cleaned_path.ends_with(".md"))
-        || (cleaned_path.starts_with("pages/")))
-    {
+    if !(cleaned_path.starts_with("pages/")) {
         return Err("Invalid path");
     }
     Ok(cleaned_path)
 }
 
 fn page_query(query: &PageQuery) -> Result<warp::reply::Json, &'static str> {
-    let page = rss::query_page_link(&query.path);
+    let page = db::query_page_link(&query.path);
     if page.is_none() {
         return Ok(warp::reply::json(&(String::from("NoPage"), String::new())));
     }
@@ -55,17 +53,15 @@ fn page_query(query: &PageQuery) -> Result<warp::reply::Json, &'static str> {
         page.as_ref().unwrap().title.clone()
     ))?;
     let data = fs::read_to_string(&path).unwrap();
-    let mut time = String::new();
-    let (title, source) = if let Some(p) = page {
-        time = p.publish_datetime.clone();
+    let p = page.unwrap();
+    let time = p.publish_datetime.clone();
+    let (title, source) = {
         if !p.readed {
-            let _ = rss::update_page_read(&p.link);
-            println!("set {} readed ...", p.link);
+            db::update_page_read(&p.link).map_err(|_op| "update error")?;
         }
         (p.title.clone(), p.source.clone())
-    } else {
-        ("".to_string(), "".to_string())
     };
+
     return Ok(warp::reply::json(&(
         title,
         data,
@@ -81,7 +77,7 @@ fn rss_query(query: &RssQuery) -> Result<String, Box<dyn Error>> {
     } else {
         vec![]
     };
-    let mut pages = rss::query_pages(&limits);
+    let mut pages = db::query_pages(&limits);
     pages.sort_by(|a, b| {
         b.publish_datetime
             .parse::<DateTime<Local>>()
@@ -100,9 +96,15 @@ fn rss_query(query: &RssQuery) -> Result<String, Box<dyn Error>> {
         .iter()
         .map(|page| {
             let class = if page.readed { "visited" } else { "" };
+            let max = 65;
+            let title = if page.title.chars().count() > max {
+                page.title.chars().take(max).collect::<String>() + "..."
+            } else {
+                page.title.clone()
+            };
             format!(
                 "<li><a class=\"{}\" id=\"{}\", href=\"#\">{}</a></li>",
-                class, page.link, page.title
+                class, page.link, title
             )
         })
         .collect();
@@ -110,14 +112,14 @@ fn rss_query(query: &RssQuery) -> Result<String, Box<dyn Error>> {
 }
 
 fn rss_mark(_query: &Mark) -> Result<(), Box<dyn Error>> {
-    rss::mark_pages_read(15)?;
+    db::mark_pages_read(15)?;
     Ok(())
 }
 
 fn rss_remove(query: &MarkRemove) -> Result<(), Box<dyn Error>> {
     let link = &query.link;
     eprintln!("remove page {}", link);
-    rss::remove_pages_from_link(link)?;
+    db::remove_pages_from_link(link)?;
     Ok(())
 }
 
@@ -176,7 +178,7 @@ pub async fn run_server(port: u16, deamon: bool) {
 
     let rss_remove = warp::path!("api" / "rss_remove")
         .and(warp::post())
-        .and(warp::query::<MarkRemove>())
+        .and(warp::body::json())
         .map(|query: MarkRemove| {
             let res = rss_remove(&query);
             if res.is_ok() {
@@ -196,7 +198,7 @@ pub async fn run_server(port: u16, deamon: bool) {
         tokio::spawn(async move {
             loop {
                 let res =
-                    tokio::task::spawn_blocking(|| rss::update_rss(None, false).unwrap()).await;
+                    tokio::task::spawn_blocking(|| db::update_rss(None, false).unwrap()).await;
                 match res {
                     Ok(_) => eprintln!("RSS updated successfully"),
                     Err(e) => eprintln!("Background task panicked: {:?}", e),
