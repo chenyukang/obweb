@@ -12,6 +12,7 @@ update.sh
 ob-web
 db/pages.db
 feeds.md
+server
 *.Identifier
 __sapper__
 db/test_pages.db

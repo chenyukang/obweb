@@ -4,7 +4,6 @@
 
     export let cur_page;
     export let cur_time;
-    let date = new Date();
     let file = "";
     let content = "";
     let show_status = false;
@@ -13,6 +12,7 @@
     let in_edit = false;
     let rsslink = "";
     let publish_time = "";
+    let source = "";
     let rss_query_type = "unread";
 
     export const refresh = (cur) => {
@@ -110,11 +110,13 @@
                 },
             },
             success: function (response) {
+                console.log(response);
                 show_status = false;
                 file = response[0];
                 content = response[1];
                 rsslink = response[2];
                 publish_time = response[3];
+                source = response[4];
                 if (file != "NoPage") {
                     localStorage.setItem("page-content", content);
                     localStorage.setItem("file", file);
@@ -150,7 +152,6 @@
             .off("click")
             .on("click", "a", function (e) {
                 e.preventDefault();
-                let text = e.target.innerText;
                 let url = e.target.href;
                 if (!url) { return false; }
                 //console.log(e.target);
@@ -366,7 +367,7 @@
         <div class="row">
             <div class="col-md-2" />
             <div class="col-md-8">
-                <a href={rsslink} id="rsslink" target="_blank">{publish_time.split(" ")[0]} 👻 {new URL(rsslink).origin} </a
+                <a href={rsslink} id="rsslink" target="_blank">{publish_time.split(" ")[0]} 👻 {source} </a
                 >
             </div>
         </div>
@@ -375,7 +376,10 @@
     <div class="row">
         <div class="col-md-2" />
         <div class="col-md-8">
+
             <div class="pageContent" hidden="true" id="page-content" />
+
         </div>
     </div>
+
 </div>

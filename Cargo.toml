@@ -14,7 +14,7 @@ http = "0.2.0"
 twoway = "0.2.1"
 tokio-util = { version = "0.6", optional = true, features= ["codec"] }
 warp = "0.3"
-tokio = { version = "1.0", features = ["rt-multi-thread", "macros"] }
+tokio = { version = "1.0", features = ["full"] }
 tokio-stream = { version = "0.1" }
 pretty_env_logger = "0.4"
 serde = { version = "1.0", features = ["derive"] }
@@ -40,7 +40,6 @@ name = "base"
 path = "src/lib.rs"
 
 [[bin]]
-name = "ob-web"
+name = "server"
 
-[[bin]]
-name = "rss-reader"
+

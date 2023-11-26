@@ -161,7 +161,6 @@ fn fetch_feed(feed: &str, force: bool) -> Result<i32, Box<dyn Error>> {
     let body = resp?.text();
     let feed_resp = parser::parse(body?.as_bytes())?;
     let website = first_link(&feed_resp.links);
-    println!("title: {:?}\n website: {:?}\n", feed_resp.title, website);
     let mut succ_count = 0;
     for entry in feed_resp.entries {
         if entry.title.is_none() {
@@ -260,29 +259,36 @@ fn init_db(db_name: Option<&str>) -> rusqlite::Result<()> {
     Ok(())
 }
 
-pub fn update_rss(feed: Option<&str>, force: bool) -> Result<(), Box<dyn Error>> {
-    init_db(None)?;
-    let rss_buf = fs::read_to_string(ALL_FEEDS)?;
+fn all_feeds() -> Vec<String> {
+    let rss_buf = fs::read_to_string(ALL_FEEDS).unwrap();
     let feeds = rss_buf
         .split("\n")
         .map(|l| l.trim())
         .filter(|&l| l.len() > 0)
+        .map(|l| l.to_string())
         .collect::<Vec<_>>();
+    feeds
+}
+
+pub fn update_rss(feed: Option<&str>, force: bool) -> Result<(), Box<dyn Error>> {
+    init_db(None)?;
+    let feeds = all_feeds();
     if let Some(f) = feed {
         let _ = fetch_feed(f, true)?;
     } else {
         for feed in feeds.iter() {
             println!("force: {:?}", force);
-            let res = fetch_feed(*feed, force);
+            let res = fetch_feed(&feed, force);
             println!("feed: {:?} res: {:?}", feed, res);
         }
     }
 
-    cleanup_pages(&feeds)?;
+    cleanup_pages()?;
     Ok(())
 }
 
-fn cleanup_pages(feeds: &Vec<&str>) -> rusqlite::Result<()> {
+fn cleanup_pages() -> rusqlite::Result<()> {
+    let feeds = all_feeds();
     let conn = Connection::open(PAGES_DB)?;
     let params = feeds
         .iter()
@@ -329,6 +335,7 @@ pub fn mark_pages_read(limit: usize) -> rusqlite::Result<usize> {
 }
 
 pub fn query_pages(limits: &Vec<(&str, &str)>) -> Vec<Page> {
+    cleanup_pages().unwrap();
     let conn = Connection::open(PAGES_DB).unwrap();
     let limit_str = if limits.len() > 0 {
         limits
@@ -343,7 +350,6 @@ pub fn query_pages(limits: &Vec<(&str, &str)>) -> Vec<Page> {
         "SELECT * FROM pages WHERE {} ORDER BY publish_datetime DESC",
         limit_str
     );
-    println!("sql: {:?}", sql);
     let mut statement = conn.prepare(&sql).unwrap();
     let pages = statement
         .query_map([], |row| {

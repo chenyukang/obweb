@@ -51,17 +51,23 @@ fn page_query(query: &PageQuery) -> Result<warp::reply::Json, &'static str> {
     ))?;
     let data = fs::read_to_string(&path).unwrap();
     let mut time = String::new();
-    let title = if let Some(p) = page {
+    let (title, source) = if let Some(p) = page {
         time = p.publish_datetime.clone();
         if !p.readed {
             let _ = rss::update_page_read(&p.link);
             println!("set {} readed ...", p.link);
         }
-        p.title.clone()
+        (p.title.clone(), p.source.clone())
     } else {
-        "".to_string()
+        ("".to_string(), "".to_string())
     };
-    return Ok(warp::reply::json(&(title, data, query.path.clone(), time)));
+    return Ok(warp::reply::json(&(
+        title,
+        data,
+        query.path.clone(),
+        time,
+        source,
+    )));
 }
 
 fn rss_query(query: &RssQuery) -> Result<String, Box<dyn Error>> {
@@ -80,7 +86,7 @@ fn rss_query(query: &RssQuery) -> Result<String, Box<dyn Error>> {
     });
 
     let page_limit = if query.query_type == "unread" {
-        15
+        30
     } else {
         100
     };
@@ -160,6 +166,17 @@ pub async fn run_server(port: u16) {
     let routes = routes.with(log);
     println!("listen to : {} ...", port);
 
+    // start a new thread to update rss priodically
+    tokio::spawn(async move {
+        loop {
+            let res = tokio::task::spawn_blocking(|| rss::update_rss(None, false).unwrap()).await;
+            match res {
+                Ok(_) => eprintln!("RSS updated successfully"),
+                Err(e) => eprintln!("Background task panicked: {:?}", e),
+            }
+            tokio::time::sleep(std::time::Duration::from_secs(60 * 5)).await;
+        }
+    });
     warp::serve(routes).run((Ipv4Addr::UNSPECIFIED, port)).await
 }
 
