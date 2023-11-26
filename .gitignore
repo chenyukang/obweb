@@ -11,6 +11,7 @@ nohup.out
 update.sh
 ob-web
 db/pages.db
+feeds.md
 *.Identifier
 __sapper__
 db/test_pages.db

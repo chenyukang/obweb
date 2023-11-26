@@ -10,7 +10,7 @@
         let page = event.target.innerText.toLowerCase();
         cur_page = page;
         if (cur_page == "obweb") {
-            cur_page = "index";
+            cur_page = "rss";
         }
         dispatch("message", cur_page);
         console.log("dispatched ....");
@@ -23,10 +23,6 @@
             <div class="col-md-10">
                 <div style="float: center">
                     <button on:click={handleFooter} class="btn btn-sm">Obweb</button>
-                    <button on:click={handleFooter} class="btn btn-primary btn-sm">Day</button>
-                    <button on:click={handleFooter} class="btn btn-success btn-sm">Find</button>
-                    <button on:click={handleFooter} class="btn btn-secondary btn-sm">Rand</button>
-                    <button on:click={handleFooter} class="btn btn-info btn-sm">Todo</button>
                     <button on:click={handleFooter} class="btn btn-info btn-sm">Rss</button>
                 </div>
             </div>

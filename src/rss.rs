@@ -17,7 +17,7 @@ static PAGES_DB: &'static str = "/tmp/pages.db";
 static PAGES_DB: &'static str = "./db/pages.db";
 
 static IMAGE_DIR: &'static str = "./pages/images";
-static ALL_FEEDS: &'static str = "./ob/Unsort/feeds.md";
+static ALL_FEEDS: &'static str = "./feeds.md";
 /// An item within a feed
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Page {
@@ -236,6 +236,7 @@ pub fn cur_pages() -> Vec<Page> {
 
 fn init_db(db_name: Option<&str>) -> rusqlite::Result<()> {
     let name = db_name.unwrap_or(PAGES_DB);
+    eprintln!("now in init db: {:?}", name);
     if !Path::new(name).exists() {
         let conn = Connection::open(name)?;
         conn.execute_batch(
@@ -253,6 +254,7 @@ fn init_db(db_name: Option<&str>) -> rusqlite::Result<()> {
             COMMIT;
             "#,
         )?;
+        eprintln!("db created: {:?}", name);
     }
     Ok(())
 }
@@ -367,25 +369,6 @@ pub fn query_page_link(link: &str) -> Option<Page> {
     } else {
         None
     }
-}
-
-pub fn migrate_from_json_to_sqli() -> Result<(), Box<dyn Error>> {
-    init_db(None)?;
-    let page_buf = fs::read_to_string("./db/pages.json").unwrap_or(String::from("[]"));
-    let mut pages: Vec<Page> = serde_json::from_str(&page_buf).unwrap();
-    pages.sort_by(|a, b| {
-        a.publish_datetime
-            .parse::<DateTime<Local>>()
-            .unwrap()
-            .partial_cmp(&b.publish_datetime.parse::<DateTime<Local>>().unwrap())
-            .unwrap()
-    });
-
-    for page in pages.iter() {
-        println!("dump: {:?}", &page.link);
-        dump_new_page(page)?;
-    }
-    Ok(())
 }
 
 #[cfg(test)]

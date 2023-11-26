@@ -16,16 +16,8 @@
     let rss_query_type = "unread";
 
     export const refresh = (cur) => {
-        if (cur_page == "day") {
-            getDaily(date);
-        } else if (cur_page == "rand") {
-            fetchPage("", "rand");
-        } else if (cur_page == "todo") {
-            fetchPage("Unsort/todo");
-        } else if (cur_page == "rss") {
+        if (cur_page == "rss") {
             fetchRss();
-        } else if (cur_page == "find") {
-            search();
         }
     };
 
@@ -38,31 +30,6 @@
 
     function padding(value, n) {
         return String(value).padStart(n, "0");
-    }
-
-    function dateStr(date) {
-        return (
-            date.getFullYear() +
-            "-" +
-            padding(date.getMonth() + 1, 2) +
-            "-" +
-            padding(date.getDate(), 2)
-        );
-    }
-
-    function nextDaily() {
-        date = new Date(date.setDate(date.getDate() + 1));
-        getDaily(date);
-    }
-
-    function prevDaily() {
-        date = new Date(date.setDate(date.getDate() - 1));
-        getDaily(date);
-    }
-
-    function getDaily(date) {
-        let date_str = dateStr(date);
-        fetchPage(`Daily/${date_str}`);
     }
 
     function preprocessImage(response) {
@@ -82,43 +49,6 @@
         }
         result += left;
         return result;
-    }
-
-    function markDone(index) {
-        show_status = true;
-        jq.ajax({
-            url: "/api/mark?index=" + index,
-            type: "POST",
-            success: function (response) {
-                if (response == "done") {
-                    fetchPage("Unsort/todo");
-                }
-            },
-            error: function (err) {
-                console.log("Error: ", err);
-            },
-        });
-    }
-
-    function adjustTodo() {
-        if (cur_page == "todo") {
-            jq("input:checkbox").each(function (index) {
-                jq(this).prop("id", index);
-            });
-
-            jq("input:checkbox:not(:checked)").each(function () {
-                let parent = jq(this).parent();
-                jq(this).prop("disabled", false);
-                parent.css("color", "red");
-                parent.css("font-weight", "bold");
-            });
-
-            jq("input:checkbox:not(:checked)").change(function () {
-                if (jq(this).is(":checked")) {
-                    markDone(jq(this).prop("id"));
-                }
-            });
-        }
     }
 
     function preprocessLink(response) {
@@ -283,12 +213,6 @@
                 }
             });
 
-        jq("#searchInput").on("keyup", function (event) {
-            if (event.keyCode == 13) {
-                search();
-            }
-        });
-
         window.onscroll = function () {
             localStorage.setItem("pos_" + file, window.pageYOffset);
         };
@@ -305,77 +229,11 @@
             jq("img").css("width", "70%");
             jq("img").css("height", "70%");
         }
-        adjustTodo();
         hookInit();
         in_edit = false;
         if (search_input != "" && cur_page == "find") {
             highlight(search_input);
         }
-    }
-
-    function savePage() {
-        let text = document
-            .getElementById("page-content")
-            .innerText.replace(/\u00a0/g, " ");
-        let prev_content = localStorage.getItem("page-content");
-        if (prev_content != text) {
-            updatePage(localStorage.getItem("file"), text);
-        } else {
-            jq("#page-content").html(renderMdToHtml(prev_content));
-            setPageDefault();
-        }
-    }
-
-    function editPage() {
-        if (in_edit) {
-            savePage();
-        } else {
-            let content = document.getElementById("page-content");
-            content.innerText = localStorage
-                .getItem("page-content")
-                .replace(/ /g, "\u00a0");
-            jq("#page-content").prop("contenteditable", true);
-            jq("#page-content").css("backgroundColor", "#fffcc0");
-            jq("#editBtn").text("Save");
-            in_edit = true;
-        }
-    }
-
-    function search() {
-        show_status = true;
-        show_rsslink = false;
-        jq.ajax({
-            url: "/api/search?keyword=" + search_input,
-            type: "GET",
-            datatype: "json",
-            contentType: "Application/json",
-            statusCode: {
-                400: function () {
-                    window.location.href = "/obweb";
-                },
-                500: function () {
-                    window.location.href = "/obweb";
-                },
-            },
-            success: function (response) {
-                show_status = false;
-                if (response != "no-page") {
-                    jq("#page-content").html(renderMdToHtml(response));
-                    jq("#page-content").prop("hidden", false);
-                    jq("#fileName").prop("hidden", true);
-                    jq("#pageNavBar").prop("hidden", true);
-                    setPageDefault();
-                } else {
-                    jq("#page-content").html(
-                        "<h3>No Page</h3>" + " " + local_date
-                    );
-                }
-            },
-            error: function (err) {
-                show_status = false;
-                return err;
-            },
-        });
     }
 
     function markRead() {
@@ -487,40 +345,7 @@
 </script>
 
 <div class="tab-content">
-    {#if cur_page == "day"}
-        <div class="row sticky-top" style="margin-top: 20px; border: 0;">
-            <div class="col-md-2" />
-            <div class="col-md-8 text-right">
-                <button
-                    type="button"
-                    class="btn btn-info"
-                    style="float: left"
-                    on:click={prevDaily}>Prev</button
-                >
-                <button
-                    type="button"
-                    class="btn btn-warning"
-                    style="float: center"
-                    id="editBtn"
-                    on:click={editPage}>Edit</button>
-                <button type="button" class="btn btn-info" on:click={nextDaily}
-                    >Next</button
-                >
-            </div>
-        </div>
-    {:else if cur_page == "rand" || cur_page == "todo"}
-        <div class="row sticky-top" style="margin-top: 20px; border: 0;">
-            <div class="col-md-2" />
-            <div class="col-md-8 text-right">
-                <button
-                    type="button"
-                    class="btn btn-warning"
-                    style="float: center"
-                    id="editBtn"
-                    on:click={editPage}>Edit</button>
-            </div>
-        </div>
-    {:else if cur_page == "rss"}
+    {#if cur_page == "rss"}
         <div class="row sticky-top" style="margin-top: 20px; border: 0;">
             <div class="col-md-2" />
             <div class="col-md-8 text-right" id="pageNavBarRss">
@@ -544,50 +369,6 @@
                         <input id="rssread" type="checkbox" on:click={rssRead} >
                         <span class="slider round"></span>
                     </label>
-            </div>
-        </div>
-
-    {:else if cur_page == "find"}
-        <div class="row">
-            <div class="col-md-2" />
-            <div class="col-md-8">
-                <div class="input-group" style="margin-top: 30px">
-                    <input
-                        type="text"
-                        bind:value={search_input}
-                        class="form-control"
-                        placeholder="search ..."
-                        id="searchInput"/>
-                    <div class="input-group-append">
-                        <button
-                            class="btn btn-secondary"
-                            type="button"
-                            id="searchBtn"
-                            style="margin-left: 5px"
-                            on:click={search}>
-                            <i class="fa fa-search" />
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row sticky-top" style="margin-top: 20px; border: 0;">
-            <div class="col-md-2" />
-            <div class="col-md-8 text-right" hidden="true" id="pageNavBar">
-                <button
-                    type="button"
-                    class="btn btn-info"
-                    style="float: left"
-                    id="backBtn"
-                    on:click={search}>Back</button
-                >
-                <button
-                    type="button"
-                    class="btn btn-warning"
-                    id="editBtn"
-                    on:click={editPage}>Edit</button
-                >
             </div>
         </div>
     {/if}

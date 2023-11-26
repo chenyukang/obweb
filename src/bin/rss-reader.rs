@@ -12,7 +12,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         .arg("-r, --remove=[FEED]    'Remove all the pages for a feed'")
         .arg("-s, --single=[FEED]    'Force fetch a feed'")
         .arg("-f, --force            'Force fetch rss'")
-        .arg("-m, --migrate          'Migrate from json to sqli'")
         .get_matches();
 
     if matches.is_present("update") {
@@ -21,8 +20,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         rss::remove_pages_from(feed)?;
     } else if let Some(feed) = matches.value_of("single") {
         rss::update_rss(Some(feed), true)?;
-    } else if matches.is_present("migrate") {
-        rss::migrate_from_json_to_sqli()?;
     }
     Ok(())
 }
