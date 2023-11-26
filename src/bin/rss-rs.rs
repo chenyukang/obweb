@@ -228,7 +228,7 @@ fn main() {
     let matches = App::new("Obweb")
         .version("0.1")
         .author("yukang <moorekang@gmail.com>")
-        .about("Rss-Rss Reader in Rust")
+        .about("Rss-Rs Reader in Rust")
         .arg(clap::Arg::new("port").short('p').help("Listen port"))
         .arg(clap::Arg::new("daemon").short('d').help("Run as daemon"))
         .arg(clap::Arg::new("stop").short('s').help("Stop daemon"))
