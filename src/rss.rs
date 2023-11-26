@@ -333,6 +333,25 @@ pub fn mark_pages_read(limit: usize) -> rusqlite::Result<usize> {
     res
 }
 
+pub fn remove_pages_from_link(link: &str) -> rusqlite::Result<usize> {
+    let conn = Connection::open(PAGES_DB)?;
+    let Some(page) = query_page_link(&link) else {
+        eprintln!("now found .........");
+        return Ok(0);
+    };
+    let res = conn.execute("DELETE FROM pages where source = ?", [&page.source]);
+    // remove feed from feeds.md
+    let feeds = all_feeds();
+    let feeds = feeds
+        .iter()
+        .filter(|&f| f != &page.source)
+        .map(|f| f.to_string())
+        .collect::<Vec<_>>();
+    fs::write(ALL_FEEDS, feeds.join("\n")).unwrap();
+    eprintln!("deleted {:#?}", res);
+    res
+}
+
 pub fn query_pages(limits: &Vec<(&str, &str)>) -> Vec<Page> {
     #[cfg(not(test))]
     cleanup_pages().unwrap();

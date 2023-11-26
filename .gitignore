@@ -17,3 +17,4 @@ server
 __sapper__
 db/test_pages.db
 front/public/build
+rss-rs

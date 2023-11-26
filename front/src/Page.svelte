@@ -8,8 +8,6 @@
     let content = "";
     let show_status = false;
     let show_rsslink = false;
-    let search_input = "";
-    let in_edit = false;
     let rsslink = "";
     let publish_time = "";
     let source = "";
@@ -102,9 +100,6 @@
                 "If-Modified-Since": begin_date.toISOString(),
             },
             statusCode: {
-                400: function () {
-                    window.location.href = "/obweb";
-                },
                 500: function () {
                     window.location.href = "/obweb";
                 },
@@ -123,7 +118,8 @@
                     jq("#fileName").text(file.replaceAll(".md", ""));
                     jq("#fileName").prop("hidden", false);
                     jq("#pageNavBar").prop("hidden", false);
-                    let res = query_type == "rss" ? content : renderMdToHtml(content);
+                    let res =
+                        query_type == "rss" ? content : renderMdToHtml(content);
                     jq("#page-content").html(res);
                     jq("#page-content").prop("hidden", false);
                     console.log(rsslink);
@@ -135,6 +131,7 @@
                         jq("html, body").animate({ scrollTop: pos }, "fast");
                     }
                     setPageDefault();
+                    console.log(show_status);
                 } else {
                     jq("#page-content").html("<h3>No Page</h3>");
                     jq("#fileName").text(url);
@@ -153,17 +150,15 @@
             .on("click", "a", function (e) {
                 e.preventDefault();
                 let url = e.target.href;
-                if (!url) { return false; }
+                if (!url) {
+                    return false;
+                }
                 //console.log(e.target);
                 console.log(e.target);
                 let internal_link = e.target.getAttribute("id");
                 console.log(internal_link);
                 if (internal_link != null) {
-                    if (url.indexOf("##") != -1) {
-                        search_input = internal_link;
-                        if (cur_page == "find") search();
-                        else cur_page = "find";
-                    } else if (url.indexOf("#") != -1) {
+                    if (url.indexOf("#") != -1) {
                         let type = cur_page == "rss" ? "rss" : "md";
                         fetchPage(internal_link, type);
                     }
@@ -184,16 +179,7 @@
         jq("#markBtn").prop("hidden", true);
         jq("#page-content").css("backgroundColor", "white");
         jq("#editBtn").text("Edit");
-        if (cur_page != "rss") hljs.highlightAll();
-        if (cur_page == "day") {
-            jq("img").css("width", "70%");
-            jq("img").css("height", "70%");
-        }
         hookInit();
-        in_edit = false;
-        if (search_input != "" && cur_page == "find") {
-            highlight(search_input);
-        }
     }
 
     function markRead() {
@@ -205,9 +191,6 @@
             datatype: "json",
             contentType: "Application/json",
             statusCode: {
-                400: function () {
-                    window.location.href = "/obweb";
-                },
                 500: function () {
                     window.location.href = "/obweb";
                 },
@@ -227,14 +210,48 @@
         });
     }
 
+    function markRemove() {
+        show_status = true;
+        // get the value of rsslink
+        let rsslink = jq("#rsslink").attr("href");
+        console.log(rsslink);
+        let data = {
+            link: rsslink,
+        };
+        let url = "/api/rss_remove";
+        jq.ajax({
+            url: url,
+            type: "POST",
+            data: JSON.stringify(data),
+            datatype: "json",
+            contentType: "Application/json",
+            statusCode: {
+                500: function () {
+                    window.location.href = "/obweb";
+                },
+            },
+            success: function (response) {
+                show_status = false;
+                if (response == "ok") {
+                    jq("#markRemove").prop("hidden", true);
+                }
+            },
+            error: function (err) {
+                show_status = false;
+                console.log(err);
+                return err;
+            },
+        });
+    }
+
     function fetchRss() {
         show_status = true;
         show_rsslink = false;
         rss_query_type = localStorage.getItem("rss_query_type") || "unread";
         let data = {
-            "query_type": rss_query_type,
-            "limit": 100,
-        }
+            query_type: rss_query_type,
+            limit: 100,
+        };
         jq.ajax({
             url: "/api/rss",
             type: "GET",
@@ -242,9 +259,6 @@
             datatype: "json",
             contentType: "Application/json",
             statusCode: {
-                400: function () {
-                    window.location.href = "/obweb";
-                },
                 500: function () {
                     window.location.href = "/obweb";
                 },
@@ -262,13 +276,12 @@
                     console.log("set setPageDefault....");
                     jq("#rssread").prop("checked", rss_query_type == "all");
                     console.log("set default: ", rss_query_type);
-
                     let pos = localStorage.getItem("pos_" + file);
                     pos = pos == null ? 0 : pos;
                     jq("html, body").animate({ scrollTop: pos }, "fast");
                 } else {
                     jq("#page-content").html(
-                        "<h3>No Page</h3>" + " " + local_date
+                        "<h3>No Page</h3>" + " " + local_date,
                     );
                 }
             },
@@ -280,23 +293,11 @@
     }
 
     function rssRead() {
-        rss_query_type = jq(this).prop('checked') === true ? "all" : "unread";
+        rss_query_type = jq(this).prop("checked") === true ? "all" : "unread";
         localStorage.setItem("rss_query_type", rss_query_type);
         cur_page = "rss";
         console.log("rss read:", rss_query_type);
         fetchRss();
-    }
-
-    function highlight(keyword) {
-        let markInstance = new Mark(jq("#page-content").get(0));
-        let options = {};
-        if (keyword != "" && keyword != undefined) {
-            markInstance.unmark({
-                done: function () {
-                    markInstance.mark(keyword, options);
-                },
-            });
-        }
     }
 
     onMount(async () => {
@@ -309,26 +310,42 @@
         <div class="row sticky-top" style="margin-top: 20px; border: 0;">
             <div class="col-md-2" />
             <div class="col-md-8 text-right" id="pageNavBarRss">
-                    <button
+                <button
                     type="button"
                     class="btn btn-info"
                     style="float: left"
                     id="backBtn"
                     hidden="true"
-                    on:click={fetchRss}>Back</button>
+                    on:click={fetchRss}>Back</button
+                >
 
-                    <button
+                <button
                     type="button"
                     class="btn btn-info"
                     style="float: left"
                     id="markBtn"
                     hidden="true"
-                    on:click={markRead}>Mark</button>
+                    on:click={markRead}>Mark</button
+                >
 
+                {#if !show_rsslink}
                     <label class="switch" style="float: right">
-                        <input id="rssread" type="checkbox" on:click={rssRead} >
+                        <input
+                            id="rssread"
+                            type="checkbox"
+                            on:click={rssRead}
+                        />
                         <span class="slider round"></span>
                     </label>
+                {:else}
+                    <button
+                        type="button"
+                        class="btn btn-info"
+                        style="float: right"
+                        id="markRemove"
+                        on:click={markRemove}>Unsubscribe</button
+                    >
+                {/if}
             </div>
         </div>
     {/if}
@@ -367,8 +384,9 @@
         <div class="row">
             <div class="col-md-2" />
             <div class="col-md-8">
-                <a href={rsslink} id="rsslink" target="_blank">{publish_time.split(" ")[0]} 👻 {source} </a
-                >
+                <a href={rsslink} id="rsslink" target="_blank"
+                    >{publish_time.split(" ")[0]} 👻 {source}
+                </a>
             </div>
         </div>
     {/if}
@@ -376,10 +394,7 @@
     <div class="row">
         <div class="col-md-2" />
         <div class="col-md-8">
-
             <div class="pageContent" hidden="true" id="page-content" />
-
         </div>
     </div>
-
 </div>

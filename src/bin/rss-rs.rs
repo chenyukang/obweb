@@ -17,15 +17,6 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 use warp::Filter;
 
-#[derive(Deserialize, Debug)]
-pub struct Request {
-    pub date: String,
-    pub links: String,
-    pub text: String,
-    pub image: String,
-    pub page: String,
-}
-
 #[derive(Debug, Deserialize)]
 struct RssQuery {
     query_type: String,
@@ -38,6 +29,11 @@ struct PageQuery {
 
 #[derive(Debug, Deserialize)]
 struct Mark {}
+
+#[derive(Debug, Deserialize)]
+struct MarkRemove {
+    link: String,
+}
 
 fn ensure_path(path: &String) -> Result<String, &'static str> {
     let cleaned_path = path_clean::clean(path);
@@ -118,8 +114,15 @@ fn rss_mark(_query: &Mark) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+fn rss_remove(query: &MarkRemove) -> Result<(), Box<dyn Error>> {
+    let link = &query.link;
+    eprintln!("remove page {}", link);
+    rss::remove_pages_from_link(link)?;
+    Ok(())
+}
+
 #[tokio::main]
-pub async fn run_server(port: u16) {
+pub async fn run_server(port: u16, deamon: bool) {
     pretty_env_logger::init();
 
     //let pages = warp::path("static").and(warp::fs::dir("./static/"));
@@ -171,21 +174,38 @@ pub async fn run_server(port: u16) {
         });
     let routes = routes.or(rss).or(rss_mark);
 
+    let rss_remove = warp::path!("api" / "rss_remove")
+        .and(warp::post())
+        .and(warp::query::<MarkRemove>())
+        .map(|query: MarkRemove| {
+            let res = rss_remove(&query);
+            if res.is_ok() {
+                format!("ok")
+            } else {
+                format!("")
+            }
+        });
+    let routes = routes.or(rss_remove);
+
     let log = warp::log("obweb::api");
     let routes = routes.with(log);
     println!("listen to : {} ...", port);
 
     // start a new thread to update rss priodically
-    tokio::spawn(async move {
-        loop {
-            let res = tokio::task::spawn_blocking(|| rss::update_rss(None, false).unwrap()).await;
-            match res {
-                Ok(_) => eprintln!("RSS updated successfully"),
-                Err(e) => eprintln!("Background task panicked: {:?}", e),
+    if deamon {
+        tokio::spawn(async move {
+            loop {
+                let res =
+                    tokio::task::spawn_blocking(|| rss::update_rss(None, false).unwrap()).await;
+                match res {
+                    Ok(_) => eprintln!("RSS updated successfully"),
+                    Err(e) => eprintln!("Background task panicked: {:?}", e),
+                }
+                tokio::time::sleep(std::time::Duration::from_secs(60 * 20)).await;
             }
-            tokio::time::sleep(std::time::Duration::from_secs(60 * 20)).await;
-        }
-    });
+        });
+    }
+
     warp::serve(routes).run((Ipv4Addr::UNSPECIFIED, port)).await
 }
 
@@ -257,13 +277,13 @@ fn main() {
         match daemonize.start() {
             Ok(_) => {
                 println!("Success, daemonized");
-                run_server(port);
+                run_server(port, true);
             }
             Err(e) => eprintln!("Error, {}", e),
         }
     } else if matches.is_present("stop") {
         kill_process(&pid_file, "rss-rs").unwrap();
     } else {
-        run_server(port);
+        run_server(port, false);
     }
 }
