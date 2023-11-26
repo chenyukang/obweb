@@ -1,19 +1,13 @@
 extern crate base;
 use base::*;
-use base64::decode;
 use chrono::prelude::*;
 use chrono::DateTime;
 use clap::App;
-use glob::glob;
-use path_clean;
-use rand::seq::SliceRandom;
 use serde::Deserialize;
 use std::error::Error;
 use std::fs;
-use std::fs::File;
 use std::net::Ipv4Addr;
-use std::path::Path;
-use warp::{reject, Filter, Rejection, Reply};
+use warp::Filter;
 #[derive(Deserialize, Debug)]
 pub struct Request {
     pub date: String,
@@ -24,17 +18,6 @@ pub struct Request {
 }
 
 #[derive(Debug, Deserialize)]
-struct Update {
-    file: String,
-    content: String,
-}
-
-#[derive(Debug, Deserialize)]
-struct SearchQuery {
-    keyword: String,
-}
-
-#[derive(Debug, Deserialize)]
 struct RssQuery {
     query_type: String,
 }
@@ -42,13 +25,10 @@ struct RssQuery {
 #[derive(Debug, Deserialize)]
 struct PageQuery {
     path: String,
-    query_type: String,
 }
 
 #[derive(Debug, Deserialize)]
-struct Mark {
-    index: usize,
-}
+struct Mark {}
 
 fn ensure_path(path: &String) -> Result<String, &'static str> {
     let cleaned_path = path_clean::clean(path);
@@ -58,26 +38,6 @@ fn ensure_path(path: &String) -> Result<String, &'static str> {
         return Err("Invalid path");
     }
     Ok(cleaned_path)
-}
-
-fn gen_path(date: &String, page: &String) -> String {
-    let path = if page.is_empty() {
-        format!("./ob/Daily/{}.md", date)
-    } else {
-        format!("./ob/Unsort/{}.md", page)
-    };
-    let path = ensure_path(&path).unwrap();
-    if !Path::new(&path).exists() {
-        File::create(&path).unwrap();
-    }
-    return path;
-}
-
-fn decode_image(data: &String) -> Vec<u8> {
-    let index = data.find(",").unwrap();
-    let mut image = data.chars().skip(index + 1).collect::<String>();
-    image = image.replace(" ", "+");
-    decode(image).unwrap()
 }
 
 fn page_query(query: &PageQuery) -> Result<warp::reply::Json, &'static str> {

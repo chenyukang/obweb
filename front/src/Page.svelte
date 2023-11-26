@@ -28,10 +28,6 @@
         }
     }
 
-    function padding(value, n) {
-        return String(value).padStart(n, "0");
-    }
-
     function preprocessImage(response) {
         let result = "";
         let left = response;
@@ -84,32 +80,6 @@
         });
         converter.setFlavor("github");
         return converter.makeHtml(result);
-    }
-
-    function updatePage(file, content) {
-        show_status = true;
-        jq.ajax({
-            url: "/api/page",
-            type: "POST",
-            datatype: "json",
-            contentType: "Application/json",
-            data: JSON.stringify({
-                file: file,
-                content: content,
-            }),
-            success: function (response) {
-                show_status = false;
-                localStorage.setItem("page-content", content);
-                localStorage.setItem("file", file);
-                jq("#page-content").html(renderMdToHtml(content));
-                setPageDefault();
-            },
-            error: function (err) {
-                show_status = false;
-                console.log(err);
-                return err;
-            },
-        });
     }
 
     function fetchPage(url, query_type = "") {
@@ -173,17 +143,6 @@
                 return err;
             },
         });
-    }
-
-    function isValidHttpUrl(string) {
-        let url;
-
-        try {
-            url = new URL(string);
-        } catch (_) {
-            return false;
-        }
-        return url.protocol === "http:" || url.protocol === "https:";
     }
 
     function hookInit() {

@@ -1,18 +1,11 @@
 <script>
     import { createEventDispatcher } from "svelte";
 
-    const jq = window.$;
-    let cur_page;
-
     const dispatch = createEventDispatcher();
     function handleFooter(event) {
         event.preventDefault();
         let page = event.target.innerText.toLowerCase();
-        cur_page = page;
-        if (cur_page == "obweb") {
-            cur_page = "rss";
-        }
-        dispatch("message", cur_page);
+        dispatch("message", "rss");
         console.log("dispatched ....");
     }
 </script>
