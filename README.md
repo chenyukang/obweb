@@ -1,12 +1,10 @@
 # Obweb : Obsidian + Web = Obsdian on Mobile + Flomo
 
-<p align="center">
-  <img src="front/public/logo.png">
-</p>
-
 ## Notice
-This project now is deprecated, I use Obsdian Andriod App.
-I may split the RSS reader part to a new project.
+
+This project now is deprecated, then I moved on to use Obsdian Andriod App for some time, and it is slow
+
+Now I have switched to use my new app [Obr](https://github.com/chenyukang/obr) with tailscale.
 
 ## Motivation
 
